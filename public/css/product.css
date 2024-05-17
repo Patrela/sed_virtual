@@ -1,0 +1,157 @@
+/* product.css */
+@font-face {
+    font-family: "DM Sans Condensed";
+    src: url("fonts/DMSans-Medium.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "DM Sans Condensed Italic";
+    src: url("fonts/DMSans-MediumItalic.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "DM Sans Bold";
+    src: url("fonts/DMSans-Bold.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "DM Sans Bold Italic";
+    src: url("fonts/DMSans-BoldItalic.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "DM Sans Regular Italic";
+    src: url("fonts/DMSans-Italic.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "DM Sans Regular";
+    src: url("fonts/DMSans-Regular.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Estilo para cada tarjeta */
+.card {
+    width: 300px;
+    margin: 0.5em;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo para el cuerpo de la tarjeta que contiene la imagen y el título */
+.card-body {
+    /* width: 300px; */
+    margin: 0.25em;
+    border: 1px solid black;
+    position: relative; /* Posicionamiento relativo para colocar quantity */
+}
+.card-body-text {
+    width: 282px;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo para la imagen en la tarjeta */
+.card-image {
+    height: 280px;
+    width: 280px;
+}
+.card-image img {
+    height: inherit !important;
+    width: inherit !important;
+}
+.card-text {
+    padding-left: 0.25em;
+    text-align: left;
+    font-family: "DM Sans Regular";
+    font-size: 0.75rem;
+    font-weight: normal;
+    /* height: 0.75rem; */
+    min-height: 0.75rem;
+}
+.card-title {
+    text-align: left;
+    font-size: small;
+    font-weight: bold;
+    height: 4.5em !important;
+    padding-left: 0.25em;
+    padding-right: 0.75em;
+}
+.product-list {
+    display: grid;
+    grid-template-columns: 2fr 2fr;
+    grid-auto-flow: row;
+    margin:  0.175rem 0.25rem;
+
+}
+.product-list-title {
+    background-color: var(--main-dark-color);
+    color: var(--main-container-color);
+    font-size: 1.175rem;
+    padding: 0.5rem;
+    height: 1.25rem !important;
+    border-radius: 0.375rem;
+    border-color: var(--main-dark-color);
+    border-radius: 0.25rem !important;
+
+}
+.product-title {
+    text-align: left;
+    /* font-size:large; */
+    font-weight: bold;
+    height: 2rem !important;
+    padding-left: 0.5em;
+    font-family: "DM Sans Bold";
+    font-size: 1.5rem;
+    color: var(--main-warning-color);
+}
+
+/* Estilo para el texto de cantidad en la esquina superior derecha de card-body */
+.quantity {
+    position: absolute;
+    right: -18px;
+    top: -14px;
+    height: 36px !important;
+    width: 36px !important;
+    border-radius: 50%;
+    background-color: var(--main-warning-color);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenedor para tres tarjetas */
+.table-row {
+    /* max-width: 960px;  */
+    max-width: 90%;
+    display: flex;
+    /* justify-content: space-between; */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en múltiples líneas */
+    flex-direction: row;
+}
+
+@media screen and (max-width: 768px) {
+    /* Para tablets */
+    .table-row {
+        max-width: 640px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    /* Para móviles */
+    .table-row {
+        max-width: 320px;
+    }
+}
+
