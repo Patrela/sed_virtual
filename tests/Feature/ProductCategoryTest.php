@@ -32,7 +32,7 @@ class ProductCategoryTest extends TestCase
 
         // Assertions
         $this->assertCount(0, $products); // No products yet, needs to be synced
-        $this->assertTrue(Cache::has('sync_products_last_run'));
+        $this->assertTrue(Cache::has('sync_products'));
         $this->assertTrue(Cache::has('group'));
         $this->assertEquals('group1', Cache::get('group'));
         $this->assertInstanceOf(Product::class, $products->first()); // Empty collection of Products
@@ -88,7 +88,7 @@ class ProductCategoryTest extends TestCase
 
         // Assertions
         $this->assertCount(5, $products);
-        $this->assertFalse(Cache::has('sync_products_last_run'));
+        $this->assertFalse(Cache::has('sync_products'));
         $this->assertFalse(Cache::has('group'));
         $this->assertInstanceOf(Product::class, $products->first()); // Collection of Products
         $this->assertNotEmpty($products->toArray()); // Array of product data

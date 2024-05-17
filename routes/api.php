@@ -69,5 +69,8 @@ Route::get('/sed/products', [SedController::class, 'syncProductsAPI'])->name('se
 Route::get('/sed/products/{department}', [SedController::class, 'syncDepartmentProducts'])->name('sed.DeparmentProducts');
 Route::get('/sed/clasifications', [SedController::class, 'syncProductGroups'])->name('sed.syncGroupsAPI');  // syncProductsClasification
 Route::post('/sed/cleared', [SedController::class, 'clearProductCache'])->name('sed.clearCache');
+Route::get('/sed/customers', [SedController::class, 'CustomersB2B'])->name('sed.Customers');
+Route::post('/sed/customers/auth', [SedController::class, 'validateCustomerUser'])->name('sed.CustomerUser');
+
 
 Route::get('/vtex', [VtexController::class, 'connect'])->name('vtex.conection');

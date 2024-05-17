@@ -20,7 +20,9 @@ class SedController extends Controller
      */
     public function syncProductGroups()
     {
-        if (!Cache::has('departments')) {
+        $imported= config('cache.enabled') && !Cache::has('clasifications');
+
+        if (!$imported || !Cache::has('clasifications')) {
             // 4 SED clasification groups
             $groups = [
                 'departments' => 'departamento',
@@ -57,7 +59,7 @@ class SedController extends Controller
                         ->orderBy('parent_id', 'asc')
                         ->orderBy('id', 'asc')
                         ->get();
-                    Cache::put($key, $groupdata, now()->addDays(7));
+                    //Cache::put($key, $groupdata, now()->addDays(7));
                 } catch (\Exception $e) {
                     return response()->json([
                         'error' => $e->getMessage(),
@@ -65,6 +67,9 @@ class SedController extends Controller
                     ], 403);
                 }
             }
+            if (config('cache.enabled'))
+                Cache::put("clasifications", "ok", now()->addDays(7));
+
             return response()->json([
                 'result' => "Successfully imported. ",
                 'code' => 200,
@@ -72,14 +77,14 @@ class SedController extends Controller
         } else
             return response()->json([
                 'state' => 'in cache',
-                'departments' => Cache::get('departments'),
+                'clasifications' => Cache::get('clasifications'),
             ], 200);
     }
 
     //clear cache flag for sync products
     public function clearProductCache()
     {
-        Cache::clear('sync_products_last_run');
+        Cache::clear('sync_products');
         return response()->json([
             'success' => true,
             'state' => 'cache cleared',
@@ -135,12 +140,71 @@ class SedController extends Controller
     }
 
     /**
+     * validate user profile from customers B2B
+     * @param trade Customer B2B
+     * @param email Customer contact email
+     * @return validated user data
+     */
+    public function validateCustomerUser(Request $request)
+    {
+        try {
+
+            $company = $request->header('x-api-company');
+            $useremail = $request->header('x-api-user');
+            //$token = $request->bearerToken();
+            $name = $request->query('name');
+            $response = Http::sedfunc()->post('/authentication/?name=' .$name, [
+                'nit' => $company,
+                'email' =>  $useremail,
+            ]);
+            if ($response->successful()) {
+                return $response->json();
+            } else {
+                return response()->json([
+                    'error' => 'Api SED Customer User',
+                    'code' => $response->status(),
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 403);
+        }
+    }
+    /**
+     * @return Response of Customer List
+     */
+
+    public function CustomersB2B()
+    {
+        try {
+            $response = Http::sedfunc()->post('/authentication/', [
+                'nit' => '',
+            ]);
+            if ($response->successful()) {
+                return $response->json();
+            } else {
+                return response()->json([
+                    'error' => 'Api SED Customer B2B',
+                    'code' => $response->status(),
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 403);
+        }
+    }
+    /**
      * Read SED Products abd update in the local database. Create some, update stock and price to others
      */
+
     public function syncProductsAPI()
     {
         // obtain ID_PROVIDER
-        if (!Cache::has('sync_products_last_run')) {
+        if (config('cache.enabled') && !Cache::has('sync_products')) {
             $Provider = Provider::where('nit', '8300361083')->first(); //SED_PROVIDER
             $idProvider = ($Provider) ? $Provider->id : 2;
             session(['lastUpdated' =>  date('d/m/Y H:i:s')]);
@@ -152,23 +216,6 @@ class SedController extends Controller
                     // 'brand' => 'LENOVO',
                     // 'segment' => 'Hogar'
                 ]);
-
-                // 'department' => 'Computadores',
-                // 'category' => 'Portátiles',
-                // 'brand' => 'LENOVO',
-
-                // 'department' => 'Accesorios',
-                // 'category' => 'Cables',
-
-                // 'department' => 'Electrodomésticos',
-                // 'category' => 'Lavado y Secado',
-                // 'brand' => 'LG',
-                // 'segment' => 'Hogar'
-
-                // 'department' => 'Servidores',
-                // 'category' => 'Discos',
-                // 'brand' => 'DELL',
-                // 'segment' => 'Oficina'
 
                 // Check if the response was successful (status code 2xx)
                 if ($response->successful()) {
@@ -186,6 +233,9 @@ class SedController extends Controller
                         ->update(['is_discontinued' => 1, 'stock_quantity' => 0]);
                     // reset review status
                     $this->updateSyncState($idProvider);
+
+                    Cache::put('sync_products', $response->status(), now()->addMinutes(30));
+
                     return response()->json([
                         'estado' => 'ok',
                         'message' => 'Imported Succcessfully',
@@ -200,10 +250,12 @@ class SedController extends Controller
                 // Handle the error as needed (e.g., store failed records)
                 return $this->errorPrint('API error', $e->getMessage());
             }
-
-            Cache::put('sync_products_last_run', $response->status(), now()->addMinutes(30));
         } else {
-            return Cache::get('sync_products_last_run');
+            // return Cache::get('sync_products');
+            return response()->json([
+                'estado' => 'ok',
+                'message' => Cache::get('sync_products'),
+            ], 200);
         }
     }
 

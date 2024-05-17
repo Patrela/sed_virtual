@@ -32,10 +32,6 @@ class CategoryController extends Controller
         $brands = $this->childGroups('marca-dpto',$maingroup);
        // $segments =  $this->segments(); //revoked
         $departments = CategoryController::departments(0);
-        // // Cache and retrieve total products
-        // $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
-        //   return Product::all();
-        // });
 
         // Get pagination data from ProductController
         // $perPage = app(ProductController::class)->PerPage();

@@ -42,30 +42,12 @@ class ProductController extends Controller
     ];
 
     /**
-     * @group string. main group clasification
-     * defines if there is an updated set of products in the database. Otherwise, imports products from API
-     */
-    private function syncProducts($group)
-    {
-        if (config('cache.enabled') && !Cache::has('sync_products') || !Cache::has('group')) {
-            $sedController = new SedController();
-            $response = $sedController->syncProductsAPI();
-            Cache::put('sync_products', $response, now()->addMinutes(30));
-            Cache::put('group', $group);
-            Cache::clear('products');
-            //Log::error("cache group  " . $group);
-        } elseif (config('cache.enabled') && Cache::get('group') !== $group) {
-            Cache::put('group', $group);
-            Cache::clear('products');
-            //Log::error("cache clear group  " . $group);
-        }
-    }
-    /**
      * Display a listing of the products by department
+     * @group string. main group clasification
      */
     public function getDepartmentProducts($group = "Computadores")
     {
-        $this->syncProducts($group);
+        app(SedController::class)->syncProductsAPI();
         $products = Product::where('department', "{$group}")
             ->select($this->selectFields)
             ->orderBy('name', 'ASC')
@@ -77,7 +59,7 @@ class ProductController extends Controller
 
     public function getBrandProducts($group, $brands)
     {
-        $this->syncProducts($group);
+        app(SedController::class)->syncProductsAPI();
         // Explode the comma-separated list of brands into an array
         $brandsArray = explode(',', $brands);
 
@@ -99,7 +81,7 @@ class ProductController extends Controller
 
     public function getCategoriesProducts($group, $categories)
     {
-        $this->syncProducts($group);
+        app(SedController::class)->syncProductsAPI();
         // Explode the comma-separated list of brands into an array
         $catsArray = explode(',', $categories);
 
@@ -123,7 +105,7 @@ class ProductController extends Controller
 
     public function getSegmentProducts($group)
     {
-        $this->syncProducts($group);
+        app(SedController::class)->syncProductsAPI();
         // Build the query for searching by multiple brands
         $query = Product::where('segment', $group);
 
@@ -140,7 +122,7 @@ class ProductController extends Controller
     public function getOrderProducts(string $group, string $order = "")
     {
         if ($order !== "") {
-            $this->syncProducts($group);
+            app(SedController::class)->syncProductsAPI();
             // Build the query for searching by multiple brands
             $query = Product::where('department', $group)
                 ->when($order == "price-plus", function ($query) {
@@ -169,7 +151,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $this->syncProducts('Computadores');
+        app(SedController::class)->syncProductsAPI();
         $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
             return Product::all();
         });

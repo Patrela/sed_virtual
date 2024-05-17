@@ -46,9 +46,17 @@ class VtexController extends Controller
                     'name' => $name,
                 ], 200);
             } else {
-                return response()->json([
-                    'error' => 'User not found',
-                ], 404);
+                $response = app(SedController::class)->validateCustomerUSer( $company,$useremail);
+                if ($response->successful()){
+                    $jsonResponse = $response->json();
+                    return $jsonResponse;
+                }
+                else {
+                    return response()->json([
+                        'error' => 'User not found',
+                    ], 404);
+                }
+
             }
 
         } catch (\Exception $e) {

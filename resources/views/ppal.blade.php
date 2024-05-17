@@ -271,10 +271,6 @@
                     <div class="modal-card-item" id="prod_sku"></div>
                 </div>
                 <div class="modal-card-item-division">
-                    <div class="modal-card-item-title">Stock</div>
-                    <div class="modal-card-item" id="prod_stock_1"></div>
-                </div>
-                <div class="modal-card-item-division">
                     <div class="modal-card-item-division">
                         <div class="modal-card-item-title">$</div>
                         <div class="modal-card-item" id="prod_price"></div>
@@ -284,6 +280,10 @@
                         <div class="modal-card-item-title">/</div>
                         <div class="modal-card-item" id="prod_unit"></div>
                     </div>
+                </div>
+                <div class="modal-card-item-division">
+                    <div class="modal-card-item-title">Stock</div>
+                    <div class="modal-card-item" id="prod_stock_1"></div>
                 </div>
             </div>
             <div class="modal-card-item-container">
@@ -314,7 +314,7 @@
             </div>
             <div class="modal-card-item-container">
                 <div class="modal-card-item-division">
-                    <div class="modal-card-item-title">Gerente Producto</div>
+                    <div class="modal-card-item-title">Gerente de Producto</div>
                     <div class="modal-card-item" id="prod_contact"></div>
                 </div>
                 <div class="modal-card-item-division">

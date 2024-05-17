@@ -88,7 +88,7 @@ Route::get('/ppal', function () {
 })->name('ppal');
 
 Route::post('/refresh', function () {
-    cache::clear('sync_products_last_run');
+    cache::clear('sync_products');
     // Check cache for products using ProductController
     $products = app(ProductController::class)->getDepartmentProducts();
     $data = app(CategoryController::class)->loadPageData($products);
