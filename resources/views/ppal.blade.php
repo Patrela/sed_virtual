@@ -9,37 +9,46 @@
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @php
+        $maingroupName = $maingroupName ?? '';
+    @endphp
+    <script type="text/javascript">
+        var products = @json($products);
+        let allProducts = products; // Global variable to store all products
+    </script>
 </head>
-
 <body>
     <x-mainmenu />
     <main> <!--class="mt-6" -->
         <aside>
             <div class="aside-container" name="main_group" id="main_group">
-                @php
-                    $maingroupName  = $maingroupName?? 'Computadores';
-                @endphp
                 <input type="hidden" name="current-group" id="current-group" value="{{ $maingroup }}" />
                 <input type="hidden" name="current-group-name" id="current-group-name" value="{{ $maingroupName }}" />
                 <input type="hidden" id="selected-brands" name="selected-brands" value="">
                 <input type="hidden" id="selected-brands-name" name="selected-brands-name" value="">
+                <input type="hidden" id="selected-categories" name="selected-categories" value="">
+                <input type="hidden" id="selected-categories-name" name="selected-categories-name" value="">
+
                 <h3 class="title">GRUPOS</h3>
                 <div class="button-container">
                     @foreach ($departments as $key => $department)
                         <button
                             class="department-button {{ $maingroup == $department['id'] ? 'aside-button-active' : '' }}"
                             value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}"
-                            onclick="departmentActions(this)"
+                            {{-- onclick="departmentActions(this)" --}}
+                            onclick="departmentFech('{{ $department['name'] }}')"
                             name="dep-{{ $department['id'] }}">{{ $department['name'] }}</button>
                         @if ($department['id'] == $maingroup)
+                            @php
+                                $maingroupName = $department['name'];
+                            @endphp
                             <script type="text/javascript">
                                 const GroupTitle = document.getElementById('current-group-name');
                                 GroupTitle.value = "<?php echo $department['name']; ?>";
                                 //alert(NameInput.value);
+                                //const currentButton = document.getElementById("dep-<?php echo $department['id']; ?>");
+                                //departmentActions(currentButton);
                             </script>
-                            @php
-                                $maingroupName = $department['name'];
-                            @endphp
                         @endif
                     @endforeach
                 </div>
@@ -53,8 +62,11 @@
                     @foreach ($categories as $key => $category)
                         <div class="filter-checkbox">
                             <div class="filter-checkbox-input">
-                                <input id="cat-{{ $category['id'] }}" name="category" value="{{ $category['name'] }}"
-                                    type="checkbox" onchange="handleCategoryChange('{{$maingroupName}}',this)">
+                                <input id="cat-{{ $category['id'] }}" name="cat-array" value="{{ $category['name'] }}"
+                                    type="checkbox"
+                                    {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}
+                                >
+
                             </div>
                             <div class="filter-checkbox-label">
                                 {{ $category['name'] }}
@@ -62,42 +74,18 @@
                         </div>
                     @endforeach
                 </div>
-
                 <button>Marca</button>
-                <select name="select-brand" id="select-brand">
-                        @foreach ($brands as $key => $brand)
-                            <option id="optbrand-{{ $brand['id'] }}" type="checkbox" name="optbrand"
-                                        value="{{ $brand['name'] }}" onclick="addBrandToList(this, '{{ $brand['name'] }}')">
-                                    {{ $brand['name'] }}</option>
-                        @endforeach
-                </select>
                 <div id="brand_detail" name="brand_detail" class="filter-container">
                     @foreach ($brands as $key => $brand)
                         <div class="filter-checkbox">
                             <div class="filter-checkbox-input">
-                                <input id="brand-{{ $brand['id'] }}" type="checkbox" name="brand[]"
-                                    value="{{ $brand['name'] }}" onclick="addBrandToList(this, '{{ $brand['name'] }}')">
+                                <input id="brand-{{ $brand['id'] }}" type="checkbox" name="brand-array"
+                                    value="{{ $brand['name'] }}"
+                                    {{-- onclick="addBrandToList(this, '{{ $brand['name'] }}','{{ $maingroupName}}')" --}}
+                                >
                             </div>
                             <div class="filter-checkbox-label">
                                 {{ $brand['name'] }}
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-                <button>Segmento<div class="filter-checkbox-label"></div>
-                    <div class="filter-checkbox-input">
-                        <input id="segment-0" type="radio" name="segment-radio" value="" checked />
-                    </div>
-                </button>
-                <div id="brand_detail" name="brand_detail" class="filter-container-two-column">
-                    @foreach ($segments as $key => $segment)
-                        <div class="filter-checkbox">
-                            <div class="filter-checkbox-input">
-                                <input id="segment-{{ $segment['id'] }}" type="radio" name="segment-radio"
-                                    value="{{ $segment['name'] }}" onclick="segmentCards('{{ $segment['name'] }}')" />
-                            </div>
-                            <div class="filter-checkbox-label">
-                                {{ $segment['name'] }}
                             </div>
                         </div>
                     @endforeach
@@ -123,27 +111,72 @@
                 </div>
                 <div>
                     <span class="product-list-title">Ordenar por</span>
-                    <select name="order-options" id="order-options" onchange="OrderSelection()">
+                    <select name="order-options" id="order-options" > {{-- onchange="OrderSelection()" --}}
                         <option value="">Seleccionar</option>
                         <option value="price-plus">Mayor a Menor Precio</option>
                         <option value="price-less">Menor a Mayor Precio</option>
+                        <option value="stock-plus">Mayor a Menor Stock</option>
+                        <option value="stock-less">Menor a Mayor Stock</option>
                         <option value="brands">Marca</option>
                     </select>
 
                 </div>
             </div>
+            @php
+                $counter = 0;
+                $perPage = request()->has('perPage') ? request()->perPage : 300; //18;
+                //$page = session()->has('numberPage') ? session('numberPage') : 1;
+                $page = request()->has('page') ? request()->page : 1;
+                $total = request()->has('total') ? request()->total : count($products); //
+                $start = ($page - 1) * $perPage;
+                $end = $start + $perPage > $total ? $total : $start + $perPage;
+                //dd($products);
+                //dd("pag. " .$page . "= " .$perPage );
+            @endphp
             <div class="table-row" id="products-container">
-                @php
-                    $counter = 0;
-                    $perPage = request()->has('perPage') ? request()->perPage : 300; //18;
-                    //$page = session()->has('numberPage') ? session('numberPage') : 1;
-                    $page = request()->has('page') ? request()->page : 1;
-                    $total = request()->has('total') ? request()->total : count($products); //
-                    $start = ($page - 1) * $perPage;
-                    $end = $start + $perPage > $total ? $total : $start + $perPage;
-                    //dd($products);
-                    //dd("pag. " .$page . "= " .$perPage );
-                @endphp
+                @forelse ($products as $key => $product) {{-- @foreach ($products as $key => $product) --}}
+                    @if ($key >= $start && $key < $end)
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="quantity">
+                                    {{ number_format($product['stock_quantity'], 0, ',', '.') }}
+                                </div>
+                                <h6 class="card-title">{{ $product['name'] }} </h6>
+                                <div class="card-image">
+                                    <img src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}">
+                                </div>
+                            </div>
+                            <div class="card-body-text">
+                                <div class="card-text">
+                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
+                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
+                                    '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
+                                    '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
+                                    '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
+                                    '{{ htmlentities(str_replace("\r\n", '<br>', $product['attributes'])) }}',
+                                    '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
+                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
+                                    )">
+                                        {{ $product['sku'] }} / {{ $product['brand'] }}
+                                        {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
+                                    </button>
+                                </div>
+                                <div class="card-text">
+                                    {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
+                                    {{ $product['currency'] }} / {{ $product['unit'] }}
+                                </div>
+                            </div>
+                        </div>
+                        @php
+                            $counter++;
+                        @endphp
+                    @endif
+                @empty
+                    <h1> No hay productos para la selección</h1>
+                @endforelse
+
+
+
                 @foreach ($products as $key => $product)
                     @if ($key >= $start && $key < $end)
                         <div class="card">
@@ -158,15 +191,14 @@
                             </div>
                             <div class="card-body-text">
                                 <div class="card-text">
-                                    <button
-                                        onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
+                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
                                     {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
                                     '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
                                     '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
                                     '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
                                     '{{ htmlentities(str_replace("\r\n", '<br>', $product['attributes'])) }}',
                                     '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }},
+                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
                                     )">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
                                         {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
@@ -183,6 +215,7 @@
                         @endphp
                     @endif
                 @endforeach
+
             </div>
         </section>
 
@@ -299,6 +332,81 @@
 
 
 <script type="text/javascript">
+function filterProducts(products, selectedCategories, selectedBrands) {
+    return products.filter(product => {
+        const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+        const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+        return categoryMatch && brandMatch;
+    });
+}
+function sortAndFilterProducts(products, criteria, selectedCategories, selectedBrands) {
+    // First filter the products
+    let filteredProducts = filterProducts(products, selectedCategories, selectedBrands);
+
+    // Then sort the filtered products
+    switch(criteria) {
+        case 'price-plus':
+            filteredProducts.sort((a, b) => b.regular_price - a.regular_price);
+            break;
+        case 'price-less':
+            filteredProducts.sort((a, b) => a.regular_price - b.regular_price);
+            break;
+        case 'stock-plus':
+            filteredProducts.sort((a, b) => b.stock_quantity - a.stock_quantity);
+            break;
+        case 'stock-less':
+            filteredProducts.sort((a, b) => a.stock_quantity - b.stock_quantity);
+            break;
+        case 'brands':
+            filteredProducts.sort((a, b) => a.brand.localeCompare(b.brand));
+            break;
+    }
+    return filteredProducts;
+}
+
+function getSelectedFilters() {
+    const selectedCategories = Array.from(document.querySelectorAll('input[name="cat-array"]:checked')).map(cb => cb.value);
+    const selectedBrands = Array.from(document.querySelectorAll('input[name="brand-array"]:checked')).map(cb => cb.value);
+    const orderCriteria = document.getElementById('order-options').value;
+
+    return { selectedCategories, selectedBrands, orderCriteria };
+}
+
+function updateProductsDisplay() {
+
+    const { selectedCategories, selectedBrands, orderCriteria } = getSelectedFilters();
+    // update the title of filters
+    const groupElement = document.getElementById('current-group-name');
+    const title = groupElement.value;
+    let categories = "";
+    let brands = "";
+    if (selectedCategories.length > 0) { categories = ` ${selectedCategories.join('-')}`; }
+    if (selectedBrands.length > 0) { brands = ` ${selectedBrands.join('-')}`; }
+    //alert('Update Products ' + title + ' '+ categories + ' ' + brands );
+    const titleElement = document.getElementById('product-title');
+    titleElement.textContent = `${title}${categories}${brands}`;
+
+    const filteredAndSortedProducts = sortAndFilterProducts(allProducts, orderCriteria, selectedCategories, selectedBrands);
+    generateCards(filteredAndSortedProducts);
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
+    const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
+    const orderSelect = document.getElementById('order-options');
+
+    categoryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => updateProductsDisplay());
+    });
+
+    brandCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => updateProductsDisplay());
+    });
+
+    orderSelect.addEventListener('change', () => updateProductsDisplay());
+});
+
+
     //clear cache and reload the page
     function clearCache() {
         //alert("Clear cache");
@@ -321,17 +429,6 @@
             });
     }
 
-    //fetch the order for products
-    function OrderSelection() {
-        // alert(document.getElementById('order-options').value); // Alert the selected order
-
-        // Construct the URL with string interpolation
-        const order = document.getElementById('order-options').value;
-        const productName = document.getElementById('current-group-name').value;
-        const url = `/products/order/${productName}/${order}`;
-
-        window.location.href = url; // Redirect to constructed URL
-    }
 
     // Si el usuario hace click en la x, la ventana se cierra
     function closeModal() {
@@ -419,8 +516,6 @@
         group.innerText = prod_brand;
         var group = document.getElementById("prod_segment");
         group.innerText = prod_segment;
-        var group = document.getElementById("prod_segment");
-        group.innerText = prod_segment;
         var contact = document.getElementById("prod_contact");
         contact.innerText = prod_contact;
         var contact = document.getElementById("prod_contact_unit");
@@ -443,6 +538,8 @@
         const productId = document.getElementById('current-group');
         const brands = document.getElementById('selected-brands');
         const brandsName = document.getElementById('selected-brands-name');
+        const categories = document.getElementById('selected-categories');
+        const categoriesName = document.getElementById('selected-categories-name');
         // console.log("group " + groupName);
         // console.log("hidden input");
         // console.log(hiddenInput.value);
@@ -450,17 +547,20 @@
         productName.value = groupName;
         brands.value = "";
         brandsName.value = "";
+        categories.value = "";
+        categoriesName.value = "";
         productId.value = groupId;
         // console.log("id " + groupId);
         // console.log("hidden id");
         // console.log(productId.value);
     }
 
-    function addBrandToList(checkbox, brandName) {
+    function addBrandToList(checkbox, brandName, groupName) {
         const brandListElement = document.getElementById('selected-brands');
         const brandNamesElement = document.getElementById('selected-brands-name');
-        let selectedBrands = brandListElement.value ? brandListElement.value.split(',') :[]; // Get existing or create empty array
-        let selectedBrandsName = brandNamesElement.value ? brandNamesElement.value.split(',') :[];
+        let selectedBrands = brandListElement.value ? brandListElement.value.split(',') :
+    []; // Get existing or create empty array
+        let selectedBrandsName = brandNamesElement.value ? brandNamesElement.value.split(',') : [];
         if (checkbox.checked) {
             selectedBrands.push(checkbox.value); // Add brand name if checkbox is checked
             selectedBrandsName.push(checkbox.value);
@@ -471,119 +571,61 @@
         brandListElement.value = selectedBrands.join(','); // Update comma-separated list
         if (selectedBrands.length > 0)
             temporalIndicator();
-            productBrandCards(); // Call fetchProductsByBrands function and create cards
-            brandNamesElement.value = selectedBrandsName.join('-');
-            const productTitle = document.getElementById('product-title');
-            productTitle.textContent = brandNamesElement.value;
+        productBrandCards(groupName); // Call fetchProductsByBrands function and create cards
+        brandNamesElement.value = selectedBrandsName.join('-');
+        const productTitle = document.getElementById('product-title');
+        productTitle.textContent = brandNamesElement.value;
 
     }
 
-    //action for departments: activate button, refresh tags, refresh title
-    function departmentActions(currentButton) {
-        //console.log(currentButton.innerHTML);
-        // Remove active class from all buttons
-        const buttons = document.querySelectorAll('.department-button');
-        buttons.forEach(button => button.classList.remove('aside-button-active'));
-
-        // Add active class only to the clicked button
-        currentButton.classList.add('aside-button-active');
-        //update hidden buttons
-        temporalIndicator();
-        hiddenButtons(currentButton.value, currentButton.innerHTML);
-        categoriesTags(currentButton.value, currentButton.innerHTML);
-        productCards(currentButton.innerHTML);
-    }
-    //load categories by department ID
-    function categoriesTags(groupId, groupName) {
-        const categoryDetail = document.getElementById('category_detail');
-        categoryDetail.innerHTML = '';
-        fetchChildGroups('categoria',groupId)
-            .then(categories => {
-                categories.forEach(category => {
-                    // Build category detail HTML based on category data
-                    const categoryHtml = `
-                    <div class="filter-checkbox">
-                        <div class="filter-checkbox-input">
-                            <input id="cat-${category['id']}" type="checkbox" name="cat-${category['id']}"
-                            value="${category['name']}" onclick="categoryFilter('${groupName}', '${category['name']}')" />
-                        </div>
-                        <div class="filter-checkbox-label">
-                            ${category['name']}
-                        </div>
-                    </div>
-                    `;
-                    categoryDetail.insertAdjacentHTML('beforeend', categoryHtml);
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching categories:', error);
-            });
-
-
-    }
-    // Function to handle checkbox change
-    function handleCategoryChange(groupName, checkbox) {
-        // Check if checkbox is checked
+    function addCategoryToList(checkbox, brandName, groupName) {
+        const catListElement = document.getElementById('selected-categories');
+        const catNamesElement = document.getElementById('selected-categories-name');
+        let selectedCategories = catListElement.value ? catListElement.value.split(',') :
+    []; // Get existing or create empty array
+        let selectedCatsName = catNamesElement.value ? catNamesElement.value.split(',') : [];
         if (checkbox.checked) {
-            // Uncheck all other checkboxes with the same name ("category")
-            const checkboxes = document.getElementsByName('category');
-            for (const otherCheckbox of checkboxes) {
-                if (otherCheckbox !== checkbox) {
-                    otherCheckbox.checked = false;
-                }
-            }
-
-            // Call categoryFilter with category name from checkbox value
-            categoryFilter(groupName, checkbox.value);
+            selectedCategories.push(checkbox.value); // Add brand name if checkbox is checked
+            selectedCatsName.push(checkbox.value);
+        } else {
+            selectedCategories = selectedCategories.filter(brand => brand !== checkbox
+            .value); // Remove brand name if unchecked
+            selectedCatsName = selectedBrands.filter(brand => brand !== brandName);
         }
-    }
-
-    // filter products by category
-    function categoryFilter(groupName, categoryName) {
-        if (categoryName) { // Check if categoryName is provided (checkbox is checked)
+        catListElement.value = selectedCategories.join(','); // Update comma-separated list
+        if (selectedCategories.length > 0)
             temporalIndicator();
-            fetchCategoryProducts(groupName, categoryName)
-                .then(products => generateCards(products, groupName))
-                .catch(error => console.error(error));
-        }
-        const categoryTitle = document.getElementById('product-title');
-        categoryTitle.textContent = groupName + " - " + categoryName;
-    }
+        productCategoriesCards(groupName); // Call fetchProductsByBrands function and create cards
+        catNamesElement.value = selectedCatsName.join('-');
+        const productTitle = document.getElementById('product-title');
+        productTitle.textContent = catNamesElement.value;
 
+    }
+/*
     // read department name
-    function DepartmentName(){
+    function DepartmentName() {
         const departmentName = document.getElementById('current-group-name');
         return departmentName.value;
     }
+*/
 
-    // read Products by Department and show in cards
-    function productCards(groupName) {
 
-        fetchDepartmentProducts(groupName)
-            .then(products => generateCards(products,DepartmentName()))
+    function productBrandCards(groupName) {
+        fetchProductsByBrands(groupName)
+            .then(products => generateCards(products))
             .catch(error => console.error(error));
     }
 
-    function productBrandCards() {
-        fetchProductsByBrands()
-            .then(products => generateCards(products,DepartmentName()))
+    function productCategoriesCards(groupName) {
+        fetchProductsByCategories(groupName)
+            .then(products => generateCards(products))
             .catch(error => console.error(error));
     }
 
-    // read segment Products order by department show in cards
-    function segmentCards(groupName) {
-        //console.log("segmentCards");
-        temporalIndicator();
-        fetchSegmentProducts(groupName)
-            .then(products => generateCards(products, DepartmentName()))
-            .catch(error => console.error(error));
-        const categoryTitle = document.getElementById('product-title');
-        categoryTitle.textContent = groupName;
-    }
-    function temporalIndicator(){
+    function temporalIndicator() {
         const cardsContainer = document.getElementById("products-container");
         cardsContainer.innerHTML = ""; // Clear existing content
-        const temporal =  document.createElement("div");
+        const temporal = document.createElement("div");
         temporal.id = "temporal";
         temporal.classList.add("temporal");
         const temporal_title = document.createElement("label");
@@ -597,7 +639,7 @@
     }
 
     // create visual cards
-    function generateCards(products, groupName) {
+    function generateCards(products) {
         const cardsContainer = document.getElementById("products-container");
         cardsContainer.innerHTML = ""; // Clear existing content
 
@@ -639,8 +681,9 @@
                         product.image_1, product.image_2, product.image_3, product.image_4,
                         product.currency, product.description, product.unit,
                         product.department, product.category, product.brand, product.segment,
-                        product.attributes, product.guarantee, product.contact_agent, product
-                        .contact_unit);
+                        product.attributes, product.guarantee, product.contact_agent, product.contact_unit,
+                        product.dimension_length, product.dimension_width, product.dimension_height, product.dimension_weight
+                    );
                 };
 
                 button.textContent = product.sku + ' / ' + product.brand;
@@ -668,29 +711,13 @@
             const card = document.createElement("h1");
             card.textContent = "No hay productos para la selección";
             cardsContainer.appendChild(card);
-            //productCards(groupName);
         }
-    }
-
-    //Function to fetch categories by department ID
-    function fetchChildGroups(groupname, parentid) {
-        return new Promise((resolve, reject) => { //categories/parent/{groupname}/{parentid}
-            fetch(`/categories/parent/${groupname}/${parentid}`) // Replace with your actual route
-                .then(response => response.json())
-                .then(categories => {
-                    resolve(categories);
-                })
-                .catch(error => {
-                    console.error('Error fetching categories:', error);
-                    reject(error); // Pass error to the calling function
-                });
-        });
     }
 
     //validate abilities permission for auth model sanctum
     function fetchAbilities() {
         return new Promise((resolve, reject) => {
-            fetch(`/profile/abilities`) // Replace with your actual route
+            fetch(`/profile/abilities`)
                 .then(response => response.json())
                 .then(data => {
                     resolve(data);
@@ -702,41 +729,12 @@
 
         });
     }
-    //Function to fetch products by department ID
-    function fetchDepartmentProducts(group) {
-        return new Promise((resolve, reject) => {
-            fetch(`/products/${group}`) // Replace with your actual route
-                .then(response => response.json())
-                .then(products => {
-                    resolve(products);
-                })
-                .catch(error => {
-                    console.error('Error fetching department products:', error);
-                    reject(error); // Pass error to the calling function
-                });
 
-        });
-    }
-    // fetch products by category
-    function fetchCategoryProducts(group, category) {
-        return new Promise((resolve, reject) => {
-            fetch(`/products/category/${group}/${category}`) // Replace with your actual route
-                .then(response => response.json())
-                .then(products => {
-                    resolve(products);
-                })
-                .catch(error => {
-                    console.error('Error fetching department products:', error);
-                    reject(error); // Pass error to the calling function
-                });
-
-        });
-    }
     // fetch products by brand
-    function fetchProductsByBrands() {
+    function fetchProductsByBrands(groupName) {
         const selectedBrands = document.getElementById('selected-brands').value;
         return new Promise((resolve, reject) => {
-            fetch(`/products/brands/${selectedBrands}`) // Replace with your actual route
+            fetch(`/products/brands/${groupName}/${selectedBrands}`)
                 .then(response => response.json())
                 .then(products => {
                     resolve(products);
@@ -749,21 +747,28 @@
         });
     }
 
-    // read segment Products component
-    function fetchSegmentProducts(group) {
-        console.log(group);
+    // fetch products by brand
+    function fetchProductsByCategories(groupName) {
+        const selectedCategories = document.getElementById('selected-categories').value;
         return new Promise((resolve, reject) => {
-            fetch(`/products/segment/${group}`) // Replace with your actual route
+            fetch(`/products/categories/${groupName}/${selectedCategories}`)
                 .then(response => response.json())
                 .then(products => {
                     resolve(products);
                 })
                 .catch(error => {
-                    console.error('Error fetching department products:', error);
+                    console.error('Error fetching products by brands:', error);
                     reject(error); // Pass error to the calling function
                 });
 
         });
+    }
+
+    function departmentFech(groupName) {
+        temporalIndicator();
+        const productTitle = document.getElementById('product-title');
+        productTitle.textContent = groupName;
+        window.location.href = '/products/' + groupName;
     }
 
     // pvr willcards start example  for id property. coul by class, etc: const startsAbc = document.querySelectorAll("[id^='abc']");

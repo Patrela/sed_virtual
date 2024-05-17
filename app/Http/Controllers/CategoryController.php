@@ -18,28 +18,20 @@ class CategoryController extends Controller
         return Category::all();
     }
 
-    public function loadPageData($products)
+    public function loadPageData($products, $maingroupName="Computadores", $searchText = "")
     {
-
         // Get common data from CategoryController
-        //$maingroup = $this->MainDepartment();
-        if (count($products) > 0) {
-            $maingroupName = $products->first()->department;
-            $department = $this->MainDepartment($maingroupName);
+        if($maingroupName != ""){
+            $department = $this->mainDepartment($maingroupName);
             $maingroup = $department->id;
-        } else {
-            $department = $this->MainDepartment();
-            $maingroup = $department->id;
-            $maingroupName = $department->name;
+        }
+        else {
+            $maingroup = 0;
         }
 
-        $brands = $this->brands();
-        $segments =  $this->segments();
+        $brands = $this->childGroups('marca-dpto',$maingroup);
+       // $segments =  $this->segments(); //revoked
         $departments = CategoryController::departments(0);
-        // foreach ($departments as &$department) {
-        //     $department['categories'] = CategoryController::childGroups($department['id']);
-        // }
-
         // // Cache and retrieve total products
         // $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
         //   return Product::all();
@@ -55,14 +47,15 @@ class CategoryController extends Controller
             'maingroupName' => $maingroupName,
             'departments' => $departments,
             'brands' => $brands,
-            'segments' => $segments,
             'categories' => CategoryController::childGroups('categoria',$maingroup),
+            'searchText' => $searchText,
+            //'segments' => $segments, //revoked
             //   'perPage' => $perPage,
             //   'page' => $page,
             //   'total' => count($totalproducts),
         ];
     }
-    private function MainDepartment(string $name = 'Computadores')
+    private function mainDepartment(string $name = 'Computadores')
     {
         //return 6; //$department = Computadores
         $department = Category::select('id', 'name')
@@ -71,7 +64,7 @@ class CategoryController extends Controller
                 $query->where('name', "{$name}");
             })
             ->first();
-        Log::error("category dep. " . $department);
+        //Log::error("category dep. " . $department);
         return $department;
     }
 
@@ -106,6 +99,7 @@ class CategoryController extends Controller
             ->get();
         return $brands;
     }
+
 
     /**
      * @return the category = segments

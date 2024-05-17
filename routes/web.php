@@ -19,7 +19,6 @@ Route::get('/', function () {
     }
 })->name('home');
 
-
 // Route::get('/products/search/{searchText}', [ProductController::class, 'getSearchProducts'])->name('product.search');
 
 Route::get('/welcome', function () {
@@ -41,12 +40,31 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth:sanctum', 'abilities:product-list,product-show'])->group(function () {
     Route::get('/products', [ProductController::class, 'index'])->name('product.index');
     //Query for button of department
-    Route::get('/products/{group}', [ProductController::class, 'getDepartmentProducts'])->name('product.show');
-    Route::get('/products/brands/{group}', [ProductController::class, 'getBrandProducts'])->name('product.brand');
-    Route::get('/products/segment/{group}', [ProductController::class, 'getSegmentProducts'])->name('product.segment');
-    Route::get('/products/category/{group}/{category}', [ProductController::class, 'getCategoryProducts'])->name('product.category');
+    //Route::get('/products/{group}', [ProductController::class, 'getDepartmentProducts'])->name('product.show');
+    Route::get('/products/brands/{group}/{brands}', [ProductController::class, 'getBrandProducts'])->name('product.brand');
+    Route::get('/products/{group}', function ($group) {
+        $products = app(ProductController::class)->getDepartmentProducts($group);
+        $data = app(CategoryController::class)->loadPageData($products,$group);
+        return view('ppal', $data);
+    })->name('product.show');
+    Route::get('/products/search/{searchText}', function ($searchText) {
+        $products = app(ProductController::class)->getSearchProducts($searchText);
+        $data = app(CategoryController::class)->loadPageData($products, "", $searchText);
+        return view('product.search', $data);
+       // return $products;
+    })->name('search');
+    Route::get('/products/order/{group}/{order}', function ($group, $order) {
+        $products = app(ProductController::class)->getOrderProducts($group, $order);
+        $data = app(CategoryController::class)->loadPageData($products, $group);
+        return view('ppal', $data);
+    })->name('order');
+
+    Route::get('/products/categories/{group}/{categories}', [ProductController::class, 'getCategoriesProducts'])->name('product.categories');
+   // Route::get('/products/brands/{group}', [ProductController::class, 'getBrandProducts'])->name('product.brand');
+    //Route::get('/products/segment/{group}', [ProductController::class, 'getSegmentProducts'])->name('product.segment');
     // Route::get('/products/search/{searchText}', [ProductController::class, 'getSearchProducts'])->name('product.search');
 });
+
 
 // Route::get('/products/order/{group}/{order}', [ProductController::class, 'getOrderProducts'])->name('product.order');
 
@@ -63,45 +81,20 @@ Route::post('/external', function () {
 
 
 Route::get('/ppal', function () {
-    // Check cache for products using ProductController's loadPageProducts
-    $products = app(ProductController::class)->loadPageProducts();
+    // Check cache for products using ProductController
+    $products = app(ProductController::class)->getDepartmentProducts();
     $data = app(CategoryController::class)->loadPageData($products);
     return view('ppal', $data);
 })->name('ppal');
 
 Route::post('/refresh', function () {
     cache::clear('sync_products_last_run');
-    // Check cache for products using ProductController's loadPageProducts
-    $products = app(ProductController::class)->loadPageProducts();
+    // Check cache for products using ProductController
+    $products = app(ProductController::class)->getDepartmentProducts();
     $data = app(CategoryController::class)->loadPageData($products);
     return view('ppal', $data);
 })->name('refresh');
 
 
-Route::get('/products/search/{searchText}', function ($searchText) {
-    $products = app(ProductController::class)->getSearchProducts($searchText);
-    $data = app(CategoryController::class)->loadPageData($products);
-    return view('ppal', $data);
-})->name('search');
-
-Route::get('/products/order/{group}/{order}', function ($group, $order) {
-    $products = app(ProductController::class)->getOrderProducts($group, $order);
-    $data = app(CategoryController::class)->loadPageData($products);
-    return view('ppal', $data);
-})->name('order');
 
 
-Route::post('/products/filter/', function (Request $request) {
-    // Resolve the controller instance using dependency injection
-    $productController = app(ProductController::class);
-    // Retrieve department and optional filters from the request body
-    $department = $request->get('department');
-    $category = $request->get('category');
-    $brand = $request->get('brand');
-    $segment = $request->get('segment');
-
-    // Call the loadPageProducts method with the retrieved parameters
-    $products = $productController->loadPageProducts($department, $category, $brand, $segment);
-    $data = app(CategoryController::class)->loadPageData($products);
-    return view('ppal', $data);
-})->name('product.filter');
