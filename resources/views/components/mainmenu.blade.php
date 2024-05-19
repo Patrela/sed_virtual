@@ -50,6 +50,7 @@
                     class="fas fa-search  navitem-icon"></i></a>
             <a href="{{ route('home') }}"><i class="fas fa-home navitem-icon"></i></a> --}}
             <form id="homeForm" method="get" action="{{ route('ppal') }}" class="mainmenu-icons-text">
+                @csrf
                 <button onclick="searchWilcardProduct()" class="navitem" type="button"><i
                         class="fas fa-search  navitem-icon"></i></button>
                 <button class="navitem" type="submit"><i class="fas fa-home navitem-icon"></i></button>

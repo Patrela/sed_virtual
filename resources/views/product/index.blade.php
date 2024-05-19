@@ -52,6 +52,7 @@
 
     <x-modal id="skuDetail" name="skuDetail" :show focusable>
         <form id="skuDetailForm" method="post" action="#" class="p-6">
+            @csrf
             <h2 id='product_modal_name' class="text-lg font-medium text-gray-900">
             </h2>
 

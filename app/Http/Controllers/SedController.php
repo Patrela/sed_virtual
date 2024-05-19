@@ -84,11 +84,19 @@ class SedController extends Controller
     //clear cache flag for sync products
     public function clearProductCache()
     {
-        Cache::clear('sync_products');
+        if(config('cache.enabled'))
+        {
+            Cache::clear('sync_products');
+            return response()->json([
+                'success' => true,
+                'state' => 'cache cleared',
+            ], 200);
+        }
         return response()->json([
             'success' => true,
-            'state' => 'cache cleared',
+            'state' => 'cache is disabled',
         ], 200);
+
     }
     /**
      * Read ordered clasification, if is higger than current, then insert new clasificacion

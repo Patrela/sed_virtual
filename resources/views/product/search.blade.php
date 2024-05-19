@@ -36,7 +36,7 @@
                             class="department-button {{ $maingroup == $department['id'] ? 'aside-button-active' : '' }}"
                             value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}"
                             {{-- onclick="departmentActions(this)" --}}
-                            onclick="departmentFech('{{ $department['name'] }}')"
+                            onclick="departmentRoute('{{ $department['name'] }}')"
                             name="dep-{{ $department['id'] }}">{{ $department['name'] }}</button>
                         @if ($department['id'] == $maingroup)
                             @php
@@ -207,6 +207,7 @@
     <div id="productWindow" class="modal" onclick="closeModal()">
         {{-- <div class="modal-container"> --}}
         <form id="skuDetailForm" class="modal-container" method="get" action="#" class="p-6">
+            @csrf
             <div class="modal-card-title" id="prod_name"></div>
             <div class="filter-container-two-column">
                 <div class="modal-card-body">
@@ -237,10 +238,6 @@
                     <div class="modal-card-item" id="prod_sku"></div>
                 </div>
                 <div class="modal-card-item-division">
-                    <div class="modal-card-item-title">Stock</div>
-                    <div class="modal-card-item" id="prod_stock_1"></div>
-                </div>
-                <div class="modal-card-item-division">
                     <div class="modal-card-item-division">
                         <div class="modal-card-item-title">$</div>
                         <div class="modal-card-item" id="prod_price"></div>
@@ -250,6 +247,10 @@
                         <div class="modal-card-item-title">/</div>
                         <div class="modal-card-item" id="prod_unit"></div>
                     </div>
+                </div>
+                <div class="modal-card-item-division">
+                    <div class="modal-card-item-title">Stock</div>
+                    <div class="modal-card-item" id="prod_stock_1"></div>
                 </div>
             </div>
             <div class="modal-card-item-container">
@@ -280,7 +281,7 @@
             </div>
             <div class="modal-card-item-container">
                 <div class="modal-card-item-division">
-                    <div class="modal-card-item-title">Gerente Producto</div>
+                    <div class="modal-card-item-title">Gerente de Producto</div>
                     <div class="modal-card-item" id="prod_contact"></div>
                 </div>
                 <div class="modal-card-item-division">
@@ -339,7 +340,19 @@ function getSelectedFilters() {
 }
 
 function updateProductsDisplay() {
+
     const { selectedCategories, selectedBrands, orderCriteria } = getSelectedFilters();
+    // update the title of filters
+    const groupElement = document.getElementById('current-group-name');
+    const title = groupElement.value;
+    let categories = "";
+    let brands = "";
+    if (selectedCategories.length > 0) { categories = ` ${selectedCategories.join('-')}`; }
+    if (selectedBrands.length > 0) { brands = ` ${selectedBrands.join('-')}`; }
+    //alert('Update Products ' + title + ' '+ categories + ' ' + brands );
+    const titleElement = document.getElementById('product-title');
+    titleElement.textContent = `${title}${categories}${brands}`;
+
     const filteredAndSortedProducts = sortAndFilterProducts(allProducts, orderCriteria, selectedCategories, selectedBrands);
     generateCards(filteredAndSortedProducts);
 }
@@ -562,13 +575,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         return departmentName.value;
     }
 */
-    // read Products by Department and show in cards
-    function productCards(groupName) {
 
-        fetchDepartmentProducts(groupName)
-            .then(products => generateCards(products))
-            .catch(error => console.error(error));
-    }
 
     function productBrandCards(groupName) {
         fetchProductsByBrands(groupName)
@@ -671,23 +678,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const card = document.createElement("h1");
             card.textContent = "No hay productos para la selección";
             cardsContainer.appendChild(card);
-            //productCards(groupName);
         }
-    }
-
-    //Function to fetch categories by department ID
-    function fetchChildGroups(groupname, parentid) {
-        return new Promise((resolve, reject) => { //categories/parent/{groupname}/{parentid}
-            fetch(`/categories/parent/${groupname}/${parentid}`)
-                .then(response => response.json())
-                .then(categories => {
-                    resolve(categories);
-                })
-                .catch(error => {
-                    console.error('Error fetching categories:', error);
-                    reject(error); // Pass error to the calling function
-                });
-        });
     }
 
     //validate abilities permission for auth model sanctum
@@ -701,22 +692,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 .catch(error => {
                     console.error('Error fetching sanctum abilities:', error);
                     reject(error); // Pass error to the calling function
-                });
-
-        });
-    }
-    //fetch products by department Name
-    function fetchDepartmentProducts(group) {
-        return new Promise((resolve, reject) => {
-            fetch(`/products/${group}`)
-                .then(response => response.json())
-                .then(products => {
-                    allProducts = products;
-                    resolve(products);
-                })
-                .catch(error => {
-                    console.error('Error fetching department products:', error);
-                    reject(error);
                 });
 
         });
@@ -756,25 +731,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    function departmentFech(groupName) {
+    function departmentRoute(groupName) {
         temporalIndicator();
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = groupName;
-        window.location.href = '/products/' + groupName;
+       //window.location.href = '/products/' + groupName;
+        window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
     }
-    /*
-    //fetch the order for products
-    function OrderSelection() {
-        // alert(document.getElementById('order-options').value); // Alert the selected order
-
-        // Construct the URL with string interpolation
-        const order = document.getElementById('order-options').value;
-        const productName = document.getElementById('current-group-name').value;
-        const url = `/products/order/${productName}/${order}`;
-
-        window.location.href = url; // Redirect to constructed URL
-    }
-    */
 
     // pvr willcards start example  for id property. coul by class, etc: const startsAbc = document.querySelectorAll("[id^='abc']");
     // const buttons = document.querySelectorAll('.department-button');

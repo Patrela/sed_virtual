@@ -36,7 +36,7 @@
                             class="department-button {{ $maingroup == $department['id'] ? 'aside-button-active' : '' }}"
                             value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}"
                             {{-- onclick="departmentActions(this)" --}}
-                            onclick="departmentFech('{{ $department['name'] }}')"
+                            onclick="departmentRoute('{{ $department['name'] }}')"
                             name="dep-{{ $department['id'] }}">{{ $department['name'] }}</button>
                         @if ($department['id'] == $maingroup)
                             @php
@@ -241,6 +241,7 @@
     <div id="productWindow" class="modal" onclick="closeModal()">
         {{-- <div class="modal-container"> --}}
         <form id="skuDetailForm" class="modal-container" method="get" action="#" class="p-6">
+            @csrf
             <div class="modal-card-title" id="prod_name"></div>
             <div class="filter-container-two-column">
                 <div class="modal-card-body">
@@ -764,11 +765,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    function departmentFech(groupName) {
+    function departmentRoute(groupName) {
         temporalIndicator();
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = groupName;
-        window.location.href = '/products/' + groupName;
+       //window.location.href = '/products/' + groupName;
+        window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
     }
 
     // pvr willcards start example  for id property. coul by class, etc: const startsAbc = document.querySelectorAll("[id^='abc']");
