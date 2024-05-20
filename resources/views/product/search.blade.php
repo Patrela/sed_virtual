@@ -29,7 +29,7 @@
                 <input type="hidden" id="selected-categories" name="selected-categories" value="">
                 <input type="hidden" id="selected-categories-name" name="selected-categories-name" value="">
 
-                <h3 class="title">GRUPOS</h3>
+                <div class="title">GRUPOS</div>
                 <div class="button-container">
                     @foreach ($departments as $key => $department)
                         <button
@@ -55,7 +55,7 @@
                 {{-- <button>Más &nbsp;&nbsp;<i class="mx-3 fas fa-caret-down"></i></a></button> --}}
             </div>
             <p></p>
-            <div class="aside-container">
+            <div class="aside-container filter">
                 <h3 class="title">LIMPIAR</h3>
                 <div class="filter-container-one-column">
                     <div class="centered">Última actualización</div>
@@ -63,7 +63,7 @@
                         <strong>{{ session()->has('lastUpdated') ? session('lastUpdated') : date('d/m/Y H:i:s') }}</strong>
                     </div>
                     <div class="centered">
-                        <button type="button" onclick="clearCache()">Cargar Ahora </button>
+                        <button type="button" onclick="{{ route('refresh') }}">Cargar Ahora</button>
                     </div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                     <h2 class="product-title" id="product-title" name="product-title">{{ $searchText }}
                     </h2>
                 </div>
-                <div>
+                <div class="product-order">
                     <span class="product-list-title">Ordenar por</span>
                     <select name="order-options" id="order-options" > {{-- onchange="OrderSelection()" --}}
                         <option value="">Seleccionar</option>
@@ -85,7 +85,6 @@
                         <option value="stock-less">Menor a Mayor Stock</option>
                         <option value="brands">Marca</option>
                     </select>
-
                 </div>
             </div>
             @php
@@ -141,9 +140,7 @@
                     <h1> No hay productos para la selección</h1>
                 @endforelse
 
-
-
-                @foreach ($products as $key => $product)
+                {{-- @foreach ($products as $key => $product)
                     @if ($key >= $start && $key < $end)
                         <div class="card">
                             <div class="card-body">
@@ -167,7 +164,6 @@
                                     {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
                                     )">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
-                                        {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
                                     </button>
                                 </div>
                                 <div class="card-text">
@@ -180,8 +176,7 @@
                             $counter++;
                         @endphp
                     @endif
-                @endforeach
-
+                @endforeach --}}
             </div>
         </section>
 
@@ -221,12 +216,12 @@
                         <img id="prod_img_2" src="" alt="">
                     </div>
                 </div>
-                <div class="modal-card-body">
+                <div class="modal-card-body modal-card-hide">
                     <div class="modal-card-image">
                         <img id="prod_img_3" src="" alt="">
                     </div>
                 </div>
-                <div class="modal-card-body">
+                <div class="modal-card-body modal-card-hide">
                     <div class="modal-card-image">
                         <img id="prod_img_4" src="" alt="">
                     </div>
@@ -258,20 +253,24 @@
                     <div class="modal-card-item-title">Marca</div>
                     <div class="modal-card-item" id="prod_brand"></div>
                 </div>
-                <div class="modal-card-item-title"> Clasificación </div>
-                <div class="modal-card-item" id="prod_department"></div> *
-                <div class="modal-card-item" id="prod_category"></div> *
-                <div class="modal-card-item" id="prod_segment"></div>
+                <div class="modal-card-item-division">
+                    <div class="modal-card-item-title"> Clasificación </div>
+                    <div class="modal-card-item" id="prod_department"></div> *
+                    <div class="modal-card-item" id="prod_category"></div> *
+                    <div class="modal-card-item" id="prod_segment"></div>
+                </div>
             </div>
             <div class="modal-card-item-container">
                 <div class="modal-card-item-division">
                     <div class="modal-card-item-title">Peso</div>
                     <div class="modal-card-item" id="dimension_weight"></div>
                 </div>
-                <div class="modal-card-item-title"> Dimensiones Largo*Alto*Ancho </div>
-                <div class="modal-card-item" id="dimension_length"></div> *
-                <div class="modal-card-item" id="dimension_width"></div> *
-                <div class="modal-card-item" id="dimension_height"></div>
+                <div class="modal-card-item-division">
+                    <div class="modal-card-item-title"> Dimensiones Largo*Alto*Ancho </div>
+                    <div class="modal-card-item" id="dimension_length"></div> *
+                    <div class="modal-card-item" id="dimension_width"></div> *
+                    <div class="modal-card-item" id="dimension_height"></div>
+                </div>
             </div>
             <div class="modal-card-text" id="prod_description">
             </div>
@@ -372,30 +371,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     orderSelect.addEventListener('change', () => updateProductsDisplay());
 });
-
-
-    //clear cache and reload the page
-    function clearCache() {
-        //alert("Clear cache");
-        fetch('/api/sed/cleared', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) { // Check for success message in response
-                    window.location.href = '/ppal'; // Redirect to /PPAL on success
-                } else {
-                    console.error('Error clearing cache:', data.message || 'Unknown error'); // Handle error message
-                }
-            })
-            .catch(error => {
-                console.error('Error clearing cache:', error);
-            });
-    }
-
 
     // Si el usuario hace click en la x, la ventana se cierra
     function closeModal() {

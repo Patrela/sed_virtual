@@ -3,7 +3,7 @@
     <div class="logo">
         <x-application-logo />
     </div>
-
+    {{--
     @if (Route::has('login'))
         <nav class="-mx-3 flex flex-1 justify-end">
             @auth
@@ -41,6 +41,7 @@
             @endauth
         </nav>
     @endif
+    --}}
     <div class="mainmenu-icons">
         <div class="mainmenu-icons-text">
             <x-text-input id="search" type="text" name="search" required autofocus autocomplete="search" />
