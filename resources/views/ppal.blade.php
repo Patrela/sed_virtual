@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
     const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
     const orderSelect = document.getElementById('order-options');
-
+    const searchText = document.getElementById('search');
     categoryCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => updateProductsDisplay());
     });
@@ -404,7 +404,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 
     orderSelect.addEventListener('change', () => updateProductsDisplay());
+    searchText.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            // Tu código aquí
+            searchWilcardProduct();
+        }
+    });
 });
+
+
 
     // Si el usuario hace click en la x, la ventana se cierra
     function closeModal() {

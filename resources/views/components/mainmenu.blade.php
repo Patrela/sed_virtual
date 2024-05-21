@@ -44,7 +44,7 @@
     --}}
     <div class="mainmenu-icons">
         <div class="mainmenu-icons-text">
-            <x-text-input id="search" type="text" name="search" required autofocus autocomplete="search" />
+            <x-text-input id="search" type="text" name="search" required autofocus autocomplete="search"/>
         </div>
         <div class="mainmenu-icons-button">
             {{-- <a href="{{ route('product.search') }}" onclick="searchProduct()"><i
@@ -60,6 +60,9 @@
     </div>
 
     <script type="text/javascript">
+        /**
+         * activates the search route with the search text
+         */
         function searchWilcardProduct() {
             const searchText = document.getElementById('search').value;
             window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(':searchText', searchText);

@@ -319,7 +319,7 @@ margin-right: 0.175rem;
     background-color: white;
     margin: auto; /* Centrada */
     padding: 1rem;
-    width: 40%;
+    width: 70%;
     height: 60rem;
     -webkit-animation-name: animarsuperior;
     -webkit-animation-duration: 0.5s;
@@ -575,6 +575,10 @@ margin-right: 0.175rem;
         margin-bottom:  0.175rem;
         margin-right:  0.25rem;
       }
+    .footer-medium-right button {
+        height: auto !important;
+        margin: 0.25rem;
+    }
     .mainmenu {
         display: flex;
         justify-content: space-between;
