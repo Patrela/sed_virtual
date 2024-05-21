@@ -177,6 +177,25 @@ class ProductController extends Controller
         });
 
         $results = collect();
+        //read PART_NUM
+        if(count($words) ==1 && strlen($words[0]) > 4) {
+            $word = $words[0];
+            $productQuery = Product::select($this->selectFields)
+                ->when($word !== "", function ($query) use ($word) {
+                    $query->where("part_num",  "{$word}");
+                   // $query->whereRaw("LOWER(part_num) LIKE ?", ["%{$word}%"]);
+                })
+                ->get();
+            // PART_NUM with special characters
+            if($productQuery->isEmpty($productQuery)) {
+                $productQuery = Product::select($this->selectFields)
+                ->when($word !== "", function ($query) use ($word) {
+                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$word}%"]);
+                })
+                ->get();
+            }
+            if(!$productQuery->isEmpty($productQuery)) return $productQuery;
+        }
 
         foreach ($words as $word) {
             // Build LIKE query with case-insensitive search using `LOWER` function
