@@ -175,6 +175,9 @@
 
 /* Para móviles */
 @media screen and (max-width: 575px) {
+    .card {
+        width: 350px;
+    }
     .card-body {
         /* width: 300px; */
         margin: 0.125em;

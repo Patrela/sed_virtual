@@ -11,14 +11,12 @@ class VtexController extends Controller
     public function connect(Request $request)
     {
         try {
-
-            $company = $request->header('x-api-company');
             $useremail = $request->header('x-api-user');
             $token = $request->bearerToken();
             $name = $request->query('name');
 
             // Validate required headers
-            if (!$company || !$useremail || !$token) {
+            if (!$useremail || !$token) {
                 return response()->json([
                     'error' => 'Missing required Authorization Data',
                 ], 401);
@@ -32,31 +30,21 @@ class VtexController extends Controller
             }
 
             // Find user using company and email (consider using model relationships for better structure)
-            $user = User::where([['trade_id', $company], ['email', $useremail]])->first();
+            $user = User::where( ['email', $useremail])->first();
 
             // Handle user existence and return appropriate response
             if ($user) {
-                session(['current_trade' =>  $company]);
+                session(['current_trade' => $user->trade_id]);
                 session(['current_user' =>  $user->id]);
                 //return redirect('/products');
                 return response()->json([
                     'id' => $user->id,
-                    'company' => $company,
-                    'email' => $useremail,
                     'name' => $name,
                 ], 200);
             } else {
-                $response = app(SedController::class)->validateCustomerUSer( $company,$useremail);
-                if ($response->successful()){
-                    $jsonResponse = $response->json();
-                    return $jsonResponse;
-                }
-                else {
                     return response()->json([
                         'error' => 'User not found',
                     ], 404);
-                }
-
             }
 
         } catch (\Exception $e) {

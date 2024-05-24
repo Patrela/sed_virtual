@@ -50,22 +50,20 @@
             {{-- <a href="{{ route('product.search') }}" onclick="searchProduct()"><i
                     class="fas fa-search  navitem-icon"></i></a>
             <a href="{{ route('home') }}"><i class="fas fa-home navitem-icon"></i></a> --}}
-            <form id="homeForm" method="get" action="{{ route('ppal') }}" class="mainmenu-icons-text">
+            {{-- <form id="homeForm" method="get" action="{{ route('ppal') }}" class="mainmenu-icons-text"> --}}
+            <form method="GET" action="{{ route('logout') }}" class="mainmenu-icons-text">
+                    @csrf
                 @csrf
-                <button onclick="searchWilcardProduct()" class="navitem" type="button"><i
-                        class="fas fa-search  navitem-icon"></i></button>
-                <button class="navitem" type="submit"><i class="fas fa-home navitem-icon"></i></button>
+                <button class="navitem" type="button" onclick="searchWilcardProduct()">
+                    <i class="fas fa-search  navitem-icon"></i>
+                </button>
+                <button class="navitem" type="button"  onclick="window.location.href = '{{ route('ppal') }}'">
+                    <i class="fas fa-home navitem-icon"></i>
+                </button>
+                <button class="navitem" type="submit">
+                    <i class="fas fa-sign-out-alt navitem-icon"></i>
+                </button>
             </form>
         </div>
     </div>
-
-    <script type="text/javascript">
-        /**
-         * activates the search route with the search text
-         */
-        function searchWilcardProduct() {
-            const searchText = document.getElementById('search').value;
-            window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(':searchText', searchText);
-        }
-    </script>
 </header>

@@ -63,7 +63,10 @@
                         <strong>{{ session()->has('lastUpdated') ? session('lastUpdated') : date('d/m/Y H:i:s') }}</strong>
                     </div>
                     <div class="centered">
-                        <button type="button" onclick="{{ route('refresh') }}">Cargar Ahora</button>
+                        <form action="{{ route('refresh') }}" method="POST">
+                            @csrf
+                        <button type="submit">Cargar Ahora</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -113,7 +116,7 @@
                             </div>
                             <div class="card-body-text">
                                 <div class="card-text">
-                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
+                                    {{-- <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
                                     {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
                                     '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
                                     '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
@@ -123,8 +126,27 @@
                                     {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
                                     )">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
+                                    </button> --}}
+
+                                    <button
+                                    onclick="ModalDetail(cleanQuotation('{{ $product['name'] }}'),
+                                        cleanQuotation('{{ $product['sku'] }}'),
+                                        {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
+                                        '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
+                                        '{{ $product['currency'] }}',
+                                        cleanQuotation('{{ $product['description'] }}'),
+                                        '{{ $product['unit'] }}',
+                                        '{{ $product['department'] }}',
+                                        cleanQuotation('{{ $product['category'] }}'),
+                                        '{{ $product['brand'] }}', '{{ $product['segment'] }}',
+                                        cleanQuotation('{{ htmlentities(str_replace("\r\n", ' | ', $product['attributes'])) }}'),
+                                        '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
+                                        {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
+                                    )">
+                                        {{ $product['sku'] }} / {{ $product['brand'] }}
                                         {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
                                     </button>
+
                                 </div>
                                 <div class="card-text">
                                     {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
@@ -360,7 +382,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
     const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
     const orderSelect = document.getElementById('order-options');
-
+    const searchText = document.getElementById('search');
     categoryCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => updateProductsDisplay());
     });
@@ -370,7 +392,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 
     orderSelect.addEventListener('change', () => updateProductsDisplay());
+    searchText.addEventListener('keyup', function(event) {
+        //alert(event.key);
+        if (event.key === 'Enter') { // || event.key === 'Tab'
+            searchWilcardProduct();
+        }
+    });
+    searchText.addEventListener('change', function(event) {
+        //alert(event.key);
+        searchWilcardProduct();
+    });
 });
+
+    /**
+     * activates the search route with the search text
+     */
+     function searchWilcardProduct() {
+        const searchText = document.getElementById('search').value;
+        if (searchText !== '') window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(
+            ':searchText', searchText);
+    }
 
     // Si el usuario hace click en la x, la ventana se cierra
     function closeModal() {
@@ -714,6 +755,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
     }
 
+    //replace ' for avoid arguments warnings
+    function cleanQuotation(text) {
+        text.replace(/'/g, '"');
+        //alert(`${text}`);
+        console.log(text);
+        return text;
+    }
     // pvr willcards start example  for id property. coul by class, etc: const startsAbc = document.querySelectorAll("[id^='abc']");
     // const buttons = document.querySelectorAll('.department-button');
     // buttons.forEach(button => button

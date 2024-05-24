@@ -20,9 +20,7 @@ class SedController extends Controller
      */
     public function syncProductGroups()
     {
-        $imported= config('cache.enabled') && !Cache::has('clasifications');
-
-        if (!$imported || !Cache::has('clasifications')) {
+        if (!app(LogController::class)->keyInCache('clasifications')) {
             // 4 SED clasification groups
             $groups = [
                 'departments' => 'departamento',
@@ -81,23 +79,7 @@ class SedController extends Controller
             ], 200);
     }
 
-    //clear cache flag for sync products
-    public function clearProductCache()
-    {
-        if(config('cache.enabled'))
-        {
-            Cache::clear('sync_products');
-            return response()->json([
-                'success' => true,
-                'state' => 'cache cleared',
-            ], 200);
-        }
-        return response()->json([
-            'success' => true,
-            'state' => 'cache is disabled',
-        ], 200);
 
-    }
     /**
      * Read ordered clasification, if is higger than current, then insert new clasificacion
      */
@@ -212,11 +194,13 @@ class SedController extends Controller
     public function syncProductsAPI()
     {
         // obtain ID_PROVIDER
-        if (config('cache.enabled') && !Cache::has('sync_products')) {
+        if (!app(LogController::class)->keyInCache('sync_products') ){
             $Provider = Provider::where('nit', '8300361083')->first(); //SED_PROVIDER
             $idProvider = ($Provider) ? $Provider->id : 2;
             session(['lastUpdated' =>  date('d/m/Y H:i:s')]);
+
             try {
+
                 $response = Http::sedfunc()->post('/products/', [
                     'department' => '',
                     // 'department' => 'Computadores',
@@ -304,6 +288,8 @@ class SedController extends Controller
             } else {
                 // update states from rules
                 $existingProduct->is_reviewed = 1;
+                //update tax condition
+                $existingProduct->price_tax_status = $product['price_tax_status']; ;
                 if ($product['regular_price'] < $existingProduct->regular_price) {
                     $existingProduct->is_insale = 1;
                     $existingProduct->sale_price = $product['regular_price'];

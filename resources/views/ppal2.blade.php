@@ -310,7 +310,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) { // Check for success message in response
-                    window.location.href = '/ppal'; // Redirect to /PPAL on success
+                    window.location.href = "{{ route('ppal') }}"; // Redirect to /PPAL on success //window.location.href = '/ppal';
                 } else {
                     console.error('Error clearing cache:', data.message || 'Unknown error'); // Handle error message
                 }

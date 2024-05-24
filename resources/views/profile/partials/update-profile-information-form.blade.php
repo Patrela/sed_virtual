@@ -68,7 +68,7 @@
                 5 => 'Support ',]"
                 :selected="old('role_type', $user->role_type)">
             </x-select>
-
+        </div>
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

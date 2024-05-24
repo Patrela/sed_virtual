@@ -97,7 +97,10 @@
                         <strong>{{ session()->has('lastUpdated') ? session('lastUpdated') : date('d/m/Y H:i:s') }}</strong>
                     </div>
                     <div class="centered">
-                        <button type="button" onclick="{{ route('refresh') }}">Cargar Ahora</button>
+                        <form action="{{ route('refresh') }}" method="GET">
+                            @csrf
+                        <button type="submit">Cargar Ahora</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -147,7 +150,7 @@
                             </div>
                             <div class="card-body-text">
                                 <div class="card-text">
-                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
+                                    {{-- <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
                                     {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
                                     '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
                                     '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
@@ -157,12 +160,31 @@
                                     {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
                                     )">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
+                                    </button> --}}
+
+                                    <button
+                                    onclick="ModalDetail(cleanQuotation('{{ $product['name'] }}'),
+                                        cleanQuotation('{{ $product['sku'] }}'),
+                                        {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, '{{ $product['price_tax_status'] }}',
+                                        '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
+                                        '{{ $product['currency'] }}',
+                                        cleanQuotation('{{ $product['description'] }}'),
+                                        '{{ $product['unit'] }}',
+                                        '{{ $product['department'] }}',
+                                        cleanQuotation('{{ $product['category'] }}'),
+                                        '{{ $product['brand'] }}', '{{ $product['segment'] }}',
+                                        cleanQuotation('{{ htmlentities(str_replace("\r\n", ' | ', $product['attributes'])) }}'),
+                                        '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
+                                        {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
+                                    )">
+                                        {{ $product['sku'] }} / {{ $product['brand'] }}
                                         {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
                                     </button>
+
                                 </div>
                                 <div class="card-text">
                                     {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }} / {{ $product['unit'] }}
+                                    {{ $product['currency'] }} / {{ $product['unit'] }} {{ $product['price_tax_status'] }}
                                 </div>
                             </div>
                         </div>
@@ -189,7 +211,7 @@
                             <div class="card-body-text">
                                 <div class="card-text">
                                     <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
-                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
+                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, {{ $product['price_tax_status'] }}
                                     '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
                                     '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
                                     '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
@@ -202,7 +224,7 @@
                                 </div>
                                 <div class="card-text">
                                     {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }} / {{ $product['unit'] }}
+                                    {{ $product['currency'] }}  / {{ $product['unit'] }} {{ $product['price_tax_status'] }}
                                 </div>
                             </div>
                         </div>
@@ -275,6 +297,7 @@
                     <div class="modal-card-item-division">
                         <div class="modal-card-item-title">/</div>
                         <div class="modal-card-item" id="prod_unit"></div>
+                        <div class="modal-card-item" id="prod_tax_status"></div>
                     </div>
                 </div>
                 <div class="modal-card-item-division">
@@ -405,14 +428,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     orderSelect.addEventListener('change', () => updateProductsDisplay());
     searchText.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            // Tu código aquí
+        //alert(event.key);
+        if (event.key === 'Enter') { // || event.key === 'Tab'
             searchWilcardProduct();
         }
     });
+    searchText.addEventListener('change', function(event) {
+        //alert(event.key);
+        searchWilcardProduct();
+    });
 });
 
-
+    /**
+     * activates the search route with the search text
+     */
+     function searchWilcardProduct() {
+        const searchText = document.getElementById('search').value;
+        if (searchText !== '') window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(
+            ':searchText', searchText);
+    }
 
     // Si el usuario hace click en la x, la ventana se cierra
     function closeModal() {
@@ -448,7 +482,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         return output;
     }
 
-    function ModalDetail(prod_name, prod_sku, prod_stock, prod_price, prod_img_1, prod_img_2, prod_img_3, prod_img_4,
+    function ModalDetail(prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4,
         prod_currency, prod_description, prod_unit,
         prod_department, prod_category, prod_brand, prod_segment, prod_attributes,
         prod_guarantee, prod_contact, prod_contact_unit,
@@ -469,6 +503,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         stock.innerText = intlRound(prod_stock, 0);
         var price = document.getElementById("prod_price");
         price.innerText = intlRound(prod_price, 2);
+        var price = document.getElementById("prod_tax_status");
+        price.innerText = prod_tax_status;
         var prod_img = document.getElementById("prod_img_1");
         prod_img.src = prod_img_1;
         prod_img.alt = prod_name;
@@ -661,7 +697,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const button = document.createElement("button");
                 // ModalDetail function call with product data
                 button.onclick = function() {
-                    ModalDetail(product.name, product.sku, product.stock_quantity, product.regular_price,
+                    ModalDetail(product.name, product.sku, product.stock_quantity, product.regular_price, product.price_tax_status,
                         product.image_1, product.image_2, product.image_3, product.image_4,
                         product.currency, product.description, product.unit,
                         product.department, product.category, product.brand, product.segment,
@@ -675,7 +711,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const priceText = document.createElement("div");
                 priceText.classList.add("card-text");
                 priceText.textContent = '$ ' + intlRound(product.regular_price, 2) + ' ' + product.currency +
-                    ' / ' + product.unit;
+                    ' / ' + product.unit + ' ' + product.price_tax_status;
 
                 cardText.appendChild(button);
                 cardText.appendChild(priceText);
@@ -755,6 +791,52 @@ document.addEventListener('DOMContentLoaded', (event) => {
        //window.location.href = '/products/' + groupName;
         window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
     }
+
+    //replace ' for avoid arguments warnings
+    function cleanQuotation(text) {
+        text.replace(/'/g, '"');
+        //alert(`${text}`);
+        console.log(text);
+        return text;
+    }
+
+    //convert Json to Csv format
+    function jsonToCsv(data) {
+    return (
+        Object.keys(data[0]).join(",") +
+        "\n" +
+        data.map((d) => Object.values(d).join(",")).join("\n")
+    );
+    }
+
+    //convert array to CSV format
+    function arrayToCSV(data) {
+        var csv = data.map(function(row) {
+        return row.join(',');
+        }).join('\n');
+    }
+
+    function fetchSample() {
+        //alert("Clear cache");
+        fetch('/api/sed/cleared', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) { // Check for success message in response
+                    window.location.href = '/ppal'; // Redirect to /PPAL on success
+                } else {
+                    console.error('Error clearing cache:', data.message || 'Unknown error'); // Handle error message
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing cache:', error);
+            });
+    }
+
 
     // pvr willcards start example  for id property. coul by class, etc: const startsAbc = document.querySelectorAll("[id^='abc']");
     // const buttons = document.querySelectorAll('.department-button');

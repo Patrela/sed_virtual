@@ -20,7 +20,7 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request. Goto main Route
+     * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
     {

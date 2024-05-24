@@ -5,7 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+//use App\Exports\ProductsExport;
+//use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
 {
@@ -17,6 +23,7 @@ class ProductController extends Controller
         'name',
         'stock_quantity',
         'regular_price',
+        'price_tax_status',
         'currency',
         'image_1',
         'sku',
@@ -46,6 +53,7 @@ class ProductController extends Controller
     public function getDepartmentProducts($group = "Computadores")
     {
         app(SedController::class)->syncProductsAPI();
+        Log::info("products GET  " . $group);
         $products = Product::where('department', "{$group}")
             ->select($this->selectFields)
             ->orderBy('name', 'ASC')
@@ -54,7 +62,15 @@ class ProductController extends Controller
             ->get();
         return $products;
     }
+    public function getDepartmentClearCache()
+    {
+        //$products =app(LogController::class)->keyInCache('sync_products');
+        app(LogController::class)->clearCacheKey('sync_products');
 
+        //$products = app(SedController::class)->syncProductsAPI();
+        $products = $this->getDepartmentProducts();
+        return $products;
+    }
     public function getBrandProducts($group, $brands)
     {
         app(SedController::class)->syncProductsAPI();
@@ -122,7 +138,7 @@ class ProductController extends Controller
         if ($order !== "") {
             app(SedController::class)->syncProductsAPI();
             // Build the query for searching by multiple brands
-            $query = Product::where('department', $group)
+            $query = Product::where("department", "{$group}")
                 ->when($order == "price-plus", function ($query) {
                     $query->orderBy('regular_price', "DESC");
                 })
@@ -178,23 +194,23 @@ class ProductController extends Controller
 
         $results = collect();
         //read PART_NUM
-        if(count($words) ==1 && strlen($words[0]) > 4) {
+        if (count($words) == 1 && strlen($words[0]) > 4) {
             $word = $words[0];
             $productQuery = Product::select($this->selectFields)
                 ->when($word !== "", function ($query) use ($word) {
                     $query->where("part_num",  "{$word}");
-                   // $query->whereRaw("LOWER(part_num) LIKE ?", ["%{$word}%"]);
+                    // $query->whereRaw("LOWER(part_num) LIKE ?", ["%{$word}%"]);
                 })
                 ->get();
             // PART_NUM with special characters
-            if($productQuery->isEmpty($productQuery)) {
+            if ($productQuery->isEmpty($productQuery)) {
                 $productQuery = Product::select($this->selectFields)
-                ->when($word !== "", function ($query) use ($word) {
-                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$word}%"]);
-                })
-                ->get();
+                    ->when($word !== "", function ($query) use ($word) {
+                        $query->whereRaw("LOWER(part_num) LIKE ?", ["{$word}%"]);
+                    })
+                    ->get();
             }
-            if(!$productQuery->isEmpty($productQuery)) return $productQuery;
+            if (!$productQuery->isEmpty($productQuery)) return $productQuery;
         }
 
         foreach ($words as $word) {
@@ -214,7 +230,7 @@ class ProductController extends Controller
         $products =  $results->unique(); // $products =  $results;
         $products =  $products->values();
 
-       // Log::error(" Total unique " . count($results) );
+        // Log::error(" Total unique " . count($results) );
         return $products;
     }
 
@@ -261,4 +277,122 @@ class ProductController extends Controller
     {
         return 30;
     }
+    /*
+    public function toExcel($sku)
+    {
+        return Excel::download(new ProductsExport($sku), 'product_' . $sku . '.xlsx');
+    }
+    */
+
+    public function toCsvOrig(Request $request)
+    {
+        $sku = $request->input('sku');
+        $folder_path = $request->input('filepath');
+        Log::error("CSV.  " . $sku . " path = " . $folder_path);
+        $product = Product::where('part_num', "{$sku}")->get();
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        $file_name = 'product_' . $sku . '.csv';
+        //$full_path = storage_path('app/public/' . $folder_path . '/' . $file_name);
+        $full_path = storage_path($folder_path . '/' . $file_name);
+        Log::error("CSV.  final file = " . $full_path);
+        // $handle = fopen($full_path, 'w');
+        // // Add BOM to fix UTF-8 in Excel
+        // fputs($handle, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+
+        // // Add CSV headers
+        // fputcsv($handle, ['PartNum', 'Name', 'Price']); // Adjust headers as needed
+
+        // // Add product data
+        // fputcsv($handle, [$product->part_num, $product->name, $product->regular_price]); // Adjust fields as needed
+
+        // fclose($handle);
+
+        return response()->json(['message' => 'CSV file has been saved to ' . $full_path]);
+    }
+
+    public function toCsv5(Request $request)
+    {
+        $sku = ($request->input('sku')) ?? "";
+        $folder_path = ($request->input('filepath')) ?? "";
+        Log::error("CSV.  " . $sku . " path = " . $folder_path);
+        $product = Product::where('part_num', "{$sku}")->get();
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        $file_name = 'product_' . $sku . '.csv';
+        //$full_path = storage_path('app/public/' . $folder_path . '/' . $file_name);
+        $full_path = storage_path($folder_path . '/' . $file_name);
+        Log::error("CSV.  final file = " . $full_path);
+
+        return response()->json(['message' => 'Salvado el archivo'], 200);
+    }
+
+    public function exportCsv(Request $request)
+    {
+        try {
+
+            $company = $request->header('x-api-company');
+            $useremail = $request->header('x-api-user');
+            //$token = $request->bearerToken();
+            $name = $request->query('name');
+            $response = Http::sedfunc()->post('/authentication/?name=' .$name, [
+                'nit' => $company,
+                'email' =>  $useremail,
+            ]);
+            if ($response->successful()) {
+                return $response->json();
+            } else {
+                return response()->json([
+                    'error' => 'Api SED Customer User',
+                    'code' => $response->status(),
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 403);
+        }
+
+    }
+
+    public function toCsv(Request $request)
+    {
+        try {
+            $sku = ($request->has('sku')) ? $request->input('sku') : '';
+            $full_path = ($request->has('filepath')) ? $request->input('filepath') : '';
+            //$token = $request->bearerToken();
+            Log::error("CSV.  final file = " . $full_path . " sku: " . $sku);
+            return response()->json([
+                'result' => 'It works!',
+                'code' => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 403);
+        }
+    }
+
+    public function mailProducts(Request $request)
+    {
+        $sender= $request->get('sender');
+        $receiver= $request->get('receiver');
+        $products = $request->input('products');
+
+        $output = array('sender' => $sender,
+             'receiver' => $receiver,
+             'products' => $products,
+        );
+    return $output;
+
+    }
+
 }
