@@ -11,16 +11,27 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @php
         $maingroupName = $maingroupName ?? '';
+        function WithoutQuotation($text)
+        {
+            $text = str_replace("'", '´', $text);
+            return str_replace('"', '´', $text);
+        }
     @endphp
     <script type="text/javascript">
         var products = @json($products);
         let allProducts = products; // Global variable to store all products
     </script>
 </head>
+
 <body>
     <x-mainmenu />
     <main> <!--class="mt-6" -->
         <aside>
+
+            {{-- <button id="btn-1" name="btn-test" type="button" onclick="fetchAbilities('Saly')">abilities</button>
+            <button id="btn-2" name="btn-2" type="button" onclick="productMail('30FN0031LM')">30FN0031LM</button> --}}
+
+
             <div class="aside-container" name="main_group" id="main_group">
                 <input type="hidden" name="current-group" id="current-group" value="{{ $maingroup }}" />
                 <input type="hidden" name="current-group-name" id="current-group-name" value="{{ $maingroupName }}" />
@@ -34,8 +45,7 @@
                     @foreach ($departments as $key => $department)
                         <button
                             class="department-button {{ $maingroup == $department['id'] ? 'aside-button-active' : '' }}"
-                            value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}"
-                            {{-- onclick="departmentActions(this)" --}}
+                            value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}" {{-- onclick="departmentActions(this)" --}}
                             onclick="departmentRoute('{{ $department['name'] }}')"
                             name="dep-{{ $department['id'] }}">{{ $department['name'] }}</button>
                         @if ($department['id'] == $maingroup)
@@ -63,9 +73,7 @@
                         <div class="filter-checkbox">
                             <div class="filter-checkbox-input">
                                 <input id="cat-{{ $category['id'] }}" name="cat-array" value="{{ $category['name'] }}"
-                                    type="checkbox"
-                                    {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}
-                                >
+                                    type="checkbox" {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}>
 
                             </div>
                             <div class="filter-checkbox-label">
@@ -80,9 +88,7 @@
                         <div class="filter-checkbox">
                             <div class="filter-checkbox-input">
                                 <input id="brand-{{ $brand['id'] }}" type="checkbox" name="brand-array"
-                                    value="{{ $brand['name'] }}"
-                                    {{-- onclick="addBrandToList(this, '{{ $brand['name'] }}','{{ $maingroupName}}')" --}}
-                                >
+                                    value="{{ $brand['name'] }}" {{-- onclick="addBrandToList(this, '{{ $brand['name'] }}','{{ $maingroupName}}')" --}}>
                             </div>
                             <div class="filter-checkbox-label">
                                 {{ $brand['name'] }}
@@ -99,7 +105,7 @@
                     <div class="centered">
                         <form action="{{ route('refresh') }}" method="GET">
                             @csrf
-                        <button type="submit">Cargar Ahora</button>
+                            <button type="submit">Cargar Ahora</button>
                         </form>
                     </div>
                 </div>
@@ -114,7 +120,7 @@
                 </div>
                 <div class="product-order">
                     <span class="product-list-title">Ordenar por</span>
-                    <select name="order-options" id="order-options" > {{-- onchange="OrderSelection()" --}}
+                    <select name="order-options" id="order-options"> {{-- onchange="OrderSelection()" --}}
                         <option value="">Seleccionar</option>
                         <option value="price-plus">Mayor a Menor Precio</option>
                         <option value="price-less">Menor a Mayor Precio</option>
@@ -136,7 +142,8 @@
                 //dd("pag. " .$page . "= " .$perPage );
             @endphp
             <div class="table-row" id="products-container">
-                @forelse ($products as $key => $product) {{-- @foreach ($products as $key => $product) --}}
+                @forelse ($products as $key => $product)
+                    {{-- @foreach ($products as $key => $product) --}}
                     @if ($key >= $start && $key < $end)
                         <div class="card">
                             <div class="card-body">
@@ -163,28 +170,49 @@
                                     </button> --}}
 
                                     <button
-                                    onclick="ModalDetail(cleanQuotation('{{ $product['name'] }}'),
-                                        cleanQuotation('{{ $product['sku'] }}'),
+                                        onclick="ModalDetail('{{ WithoutQuotation($product['name']) }}',
+                                        '{{ WithoutQuotation($product['sku']) }}',
                                         {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, '{{ $product['price_tax_status'] }}',
                                         '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
                                         '{{ $product['currency'] }}',
-                                        cleanQuotation('{{ $product['description'] }}'),
+                                        '{{ WithoutQuotation($product['description']) }}',
                                         '{{ $product['unit'] }}',
                                         '{{ $product['department'] }}',
-                                        cleanQuotation('{{ $product['category'] }}'),
+                                        '{{ WithoutQuotation($product['category']) }}',
                                         '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                        cleanQuotation('{{ htmlentities(str_replace("\r\n", ' | ', $product['attributes'])) }}'),
+                                        '{{ htmlentities(str_replace("\r\n", ' | ', WithoutQuotation($product['attributes']))) }}',
                                         '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
                                         {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
                                     )">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
                                         {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
                                     </button>
-
+                                    <button class="navitem" type="button"
+                                        onclick="productMail('{{ $product['sku'] }}')">
+                                        <i class="fas fa-envelope navitem-icon"></i>
+                                    </button>
+                                    <button class="navitem" type="button"
+                                        onclick="productFormCSV('{{ WithoutQuotation($product['name']) }}',
+                                        '{{ WithoutQuotation($product['sku']) }}',
+                                        {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, '{{ $product['price_tax_status'] }}',
+                                        '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
+                                        '{{ $product['currency'] }}',
+                                        '{{ WithoutQuotation($product['description']) }}',
+                                        '{{ $product['unit'] }}',
+                                        '{{ $product['department'] }}',
+                                        '{{ WithoutQuotation($product['category']) }}',
+                                        '{{ $product['brand'] }}', '{{ $product['segment'] }}',
+                                        '{{ htmlentities(str_replace("\r\n", ' | ', WithoutQuotation($product['attributes']))) }}',
+                                        '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
+                                        {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
+                                    )">
+                                        <i class="fas fa-file-csv navitem-icon"></i>
+                                    </button>
                                 </div>
                                 <div class="card-text">
                                     {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }} / {{ $product['unit'] }} {{ $product['price_tax_status'] }}
+                                    {{ $product['currency'] }} / {{ $product['unit'] }}
+                                    {{ $product['price_tax_status'] }}
                                 </div>
                             </div>
                         </div>
@@ -197,41 +225,6 @@
                 @endforelse
 
                 {{-- @foreach ($products as $key => $product)
-                    @if ($key >= $start && $key < $end)
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="quantity">
-                                    {{ number_format($product['stock_quantity'], 0, ',', '.') }}
-                                </div>
-                                <h6 class="card-title">{{ $product['name'] }} </h6>
-                                <div class="card-image">
-                                    <img src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}">
-                                </div>
-                            </div>
-                            <div class="card-body-text">
-                                <div class="card-text">
-                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
-                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, {{ $product['price_tax_status'] }}
-                                    '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
-                                    '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
-                                    '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                    '{{ htmlentities(str_replace("\r\n", '<br>', $product['attributes'])) }}',
-                                    '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
-                                    )">
-                                        {{ $product['sku'] }} / {{ $product['brand'] }}
-                                    </button>
-                                </div>
-                                <div class="card-text">
-                                    {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }}  / {{ $product['unit'] }} {{ $product['price_tax_status'] }}
-                                </div>
-                            </div>
-                        </div>
-                        @php
-                            $counter++;
-                        @endphp
-                    @endif
                 @endforeach --}}
             </div>
         </section>
@@ -255,12 +248,37 @@
             INTERNATIONAL DE COLOMBIA S.A.S., y está protegido por las leyes internacionales de derecho de autor.</p>
     </footer>
 
-    <div id="productWindow" class="modal" onclick="closeModal()">
-        {{-- <div class="modal-container"> --}}
+    <div id="productWindowCSV" class="modal">
+
+        <form id="productCSVForm" class="modal-container" method="get" action="#" class="p-6">
+            @csrf
+            <h1 class="footer-title">CSV - Copiar a Excel TEXTO EN COLUMNA: Delimitado (,) Texto(")</h1>
+            <div id="product_csv" name="product_csv" class="modal-card-item-container">
+                {{-- <textarea class="modal-card-item" id="prod_csv" cols="30" rows="10"> --}}
+                <div class="modal-card-item" id="prod_csv"></div>
+            </div>
+            <div class="modal-card-item-division">
+                <button onclick="closeModal('productWindowCSV')">Cerrar</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="productWindow" class="modal">
         <form id="skuDetailForm" class="modal-container" method="get" action="#" class="p-6">
             @csrf
             <div class="modal-card-title" id="prod_name"></div>
-            <div class="filter-container-two-column">
+            <div class="modal-box-img">
+                <div class="modal-full-img">
+                    <img class="modal-full-img" id="prod_full_img" src="" alt="">
+                </div>
+                <div class="modal-thumb-bar">
+                    <img id="prod_img_1" src="" alt="" onclick="changeFullImage(this)">
+                    <img id="prod_img_2" src="" alt="" onclick="changeFullImage(this)">
+                    <img id="prod_img_3" src="" alt="" onclick="changeFullImage(this)">
+                    <img id="prod_img_4" src="" alt="" onclick="changeFullImage(this)">
+                </div>
+            </div>
+            {{-- <div class="filter-container-two-column">
                 <div class="modal-card-body">
                     <div class="quantity" id="prod_stock"></div>
                     <div class="modal-card-image">
@@ -282,7 +300,7 @@
                         <img id="prod_img_4" src="" alt="">
                     </div>
                 </div>
-            </div>
+            </div> --}}
             <div class="modal-card-item-container">
                 <div class="modal-card-item-division">
                     <div class="modal-card-item-title">Sku</div>
@@ -345,114 +363,141 @@
                     <div class="modal-card-item" id="prod_contact_unit"></div>
                 </div>
             </div>
+            {{-- <div id="product_csv" name="product_csv"  class="modal-card-item-container invisible">
+                    <div class="modal-card-item-title">CSV</div>
+                    <div class="modal-card-item" id="prod_csv"></div>
+            </div> --}}
             <div class="filter-container-one-column centered distance-top">
-                <button id="cerrar" onclick="closeModal()">Cerrar</button>
+                <div class="modal-card-item-division">
+                    {{-- <button id="prod_email" name="prod_email" onclick="productMail('')">email</button> --}}
+                    {{-- <button id="btn_prod_csv" name="btn_prod_csv" onclick="productCSV()">CSV</button> --}}
+                    <button onclick="closeModal('productWindow')">Cerrar</button>
+                </div>
             </div>
 
         </form>
     </div>
+
 </body>
 
 
 <script type="text/javascript">
-function filterProducts(products, selectedCategories, selectedBrands) {
-    return products.filter(product => {
-        const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-        const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-        return categoryMatch && brandMatch;
-    });
-}
-function sortAndFilterProducts(products, criteria, selectedCategories, selectedBrands) {
-    // First filter the products
-    let filteredProducts = filterProducts(products, selectedCategories, selectedBrands);
-
-    // Then sort the filtered products
-    switch(criteria) {
-        case 'price-plus':
-            filteredProducts.sort((a, b) => b.regular_price - a.regular_price);
-            break;
-        case 'price-less':
-            filteredProducts.sort((a, b) => a.regular_price - b.regular_price);
-            break;
-        case 'stock-plus':
-            filteredProducts.sort((a, b) => b.stock_quantity - a.stock_quantity);
-            break;
-        case 'stock-less':
-            filteredProducts.sort((a, b) => a.stock_quantity - b.stock_quantity);
-            break;
-        case 'brands':
-            filteredProducts.sort((a, b) => a.brand.localeCompare(b.brand));
-            break;
+    function filterProducts(products, selectedCategories, selectedBrands) {
+        return products.filter(product => {
+            const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(product
+                .category);
+            const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+            return categoryMatch && brandMatch;
+        });
     }
-    return filteredProducts;
-}
 
-function getSelectedFilters() {
-    const selectedCategories = Array.from(document.querySelectorAll('input[name="cat-array"]:checked')).map(cb => cb.value);
-    const selectedBrands = Array.from(document.querySelectorAll('input[name="brand-array"]:checked')).map(cb => cb.value);
-    const orderCriteria = document.getElementById('order-options').value;
+    function sortAndFilterProducts(products, criteria, selectedCategories, selectedBrands) {
+        // First filter the products
+        let filteredProducts = filterProducts(products, selectedCategories, selectedBrands);
 
-    return { selectedCategories, selectedBrands, orderCriteria };
-}
-
-function updateProductsDisplay() {
-
-    const { selectedCategories, selectedBrands, orderCriteria } = getSelectedFilters();
-    // update the title of filters
-    const groupElement = document.getElementById('current-group-name');
-    const title = groupElement.value;
-    let categories = "";
-    let brands = "";
-    if (selectedCategories.length > 0) { categories = ` ${selectedCategories.join('-')}`; }
-    if (selectedBrands.length > 0) { brands = ` ${selectedBrands.join('-')}`; }
-    //alert('Update Products ' + title + ' '+ categories + ' ' + brands );
-    const titleElement = document.getElementById('product-title');
-    titleElement.textContent = `${title}${categories}${brands}`;
-
-    const filteredAndSortedProducts = sortAndFilterProducts(allProducts, orderCriteria, selectedCategories, selectedBrands);
-    generateCards(filteredAndSortedProducts);
-}
-
-document.addEventListener('DOMContentLoaded', (event) => {
-    const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
-    const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
-    const orderSelect = document.getElementById('order-options');
-    const searchText = document.getElementById('search');
-    categoryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => updateProductsDisplay());
-    });
-
-    brandCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => updateProductsDisplay());
-    });
-
-    orderSelect.addEventListener('change', () => updateProductsDisplay());
-    searchText.addEventListener('keyup', function(event) {
-        //alert(event.key);
-        if (event.key === 'Enter') { // || event.key === 'Tab'
-            searchWilcardProduct();
+        // Then sort the filtered products
+        switch (criteria) {
+            case 'price-plus':
+                filteredProducts.sort((a, b) => b.regular_price - a.regular_price);
+                break;
+            case 'price-less':
+                filteredProducts.sort((a, b) => a.regular_price - b.regular_price);
+                break;
+            case 'stock-plus':
+                filteredProducts.sort((a, b) => b.stock_quantity - a.stock_quantity);
+                break;
+            case 'stock-less':
+                filteredProducts.sort((a, b) => a.stock_quantity - b.stock_quantity);
+                break;
+            case 'brands':
+                filteredProducts.sort((a, b) => a.brand.localeCompare(b.brand));
+                break;
         }
+        return filteredProducts;
+    }
+
+    function getSelectedFilters() {
+        const selectedCategories = Array.from(document.querySelectorAll('input[name="cat-array"]:checked')).map(cb => cb
+            .value);
+        const selectedBrands = Array.from(document.querySelectorAll('input[name="brand-array"]:checked')).map(cb => cb
+            .value);
+        const orderCriteria = document.getElementById('order-options').value;
+
+        return {
+            selectedCategories,
+            selectedBrands,
+            orderCriteria
+        };
+    }
+
+    function updateProductsDisplay() {
+
+        const {
+            selectedCategories,
+            selectedBrands,
+            orderCriteria
+        } = getSelectedFilters();
+        // update the title of filters
+        const groupElement = document.getElementById('current-group-name');
+        const title = groupElement.value;
+        let categories = "";
+        let brands = "";
+        if (selectedCategories.length > 0) {
+            categories = ` ${selectedCategories.join('-')}`;
+        }
+        if (selectedBrands.length > 0) {
+            brands = ` ${selectedBrands.join('-')}`;
+        }
+        //alert('Update Products ' + title + ' '+ categories + ' ' + brands );
+        const titleElement = document.getElementById('product-title');
+        titleElement.textContent = `${title}${categories}${brands}`;
+
+        const filteredAndSortedProducts = sortAndFilterProducts(allProducts, orderCriteria, selectedCategories,
+            selectedBrands);
+        generateCards(filteredAndSortedProducts);
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
+        const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
+        const orderSelect = document.getElementById('order-options');
+        const searchText = document.getElementById('search');
+        categoryCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => updateProductsDisplay());
+        });
+
+        brandCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => updateProductsDisplay());
+        });
+
+        orderSelect.addEventListener('change', () => updateProductsDisplay());
+        searchText.addEventListener('keyup', function(event) {
+            //alert(event.key);
+            if (event.key === 'Enter') { // || event.key === 'Tab'
+                searchWilcardProduct();
+            }
+        });
+        searchText.addEventListener('change', function(event) {
+            //alert(event.key);
+            searchWilcardProduct();
+        });
     });
-    searchText.addEventListener('change', function(event) {
-        //alert(event.key);
-        searchWilcardProduct();
-    });
-});
 
     /**
      * activates the search route with the search text
      */
-     function searchWilcardProduct() {
+    function searchWilcardProduct() {
         const searchText = document.getElementById('search').value;
         if (searchText !== '') window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(
             ':searchText', searchText);
     }
 
     // Si el usuario hace click en la x, la ventana se cierra
-    function closeModal() {
-        var modal = document.getElementById("productWindow");
+    function closeModal(windowForm) {
+        var modal = document.getElementById(`${windowForm}`);
         modal.style.display = "none";
     };
+
     //formating numbers
     function intlRound(number, decimals = 2) {
         if (number === null || number === undefined || number === '') {
@@ -482,7 +527,42 @@ document.addEventListener('DOMContentLoaded', (event) => {
         return output;
     }
 
-    function ModalDetail(prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4,
+
+    function productFormCSV(prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2,
+        prod_img_3, prod_img_4,
+        prod_currency, prod_description, prod_unit,
+        prod_department, prod_category, prod_brand, prod_segment, prod_attributes,
+        prod_guarantee, prod_contact, prod_contact_unit,
+        dimension_length, dimension_width, dimension_height, dimension_weight
+    ) {
+
+        var modal = document.getElementById("productWindowCSV");
+        const description = document.createElement("div");
+        // Replace `<br>` tags
+        description.innerText = replaceModelString(decodeURIComponent(prod_attributes), "&lt;br&gt;", " | ");;
+
+        var csvFormat = document.getElementById("prod_csv");
+        csvFormat.innerText =
+            "prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4," +
+            " prod_currency, prod_description, prod_unit, prod_department, prod_category, prod_brand, prod_segment, prod_attributes, prod_guarantee," +
+            " prod_contact, prod_contact_unit, dimension_length, dimension_width, dimension_height, dimension_weight" +
+            '\r\n' +
+            '"' + prod_name + '"' + ',' + '"' + prod_sku + '"' + ',' + prod_stock + ',' + prod_price + ',' + '"' +
+            prod_tax_status + '"' + ',' +
+            '"' + prod_img_1 + '"' + ',' + '"' + prod_img_2 + '"' + ',' + '"' + prod_img_3 + '"' + ',' + '"' +
+            prod_img_4 + '"' + ',' +
+            prod_currency + ',' +
+            '"' + prod_description + '"' + ',' + '"' + prod_unit + '"' + ',' + '"' + prod_department + '"' + ',' + '"' +
+            prod_category + '"' + ',' + '"' + prod_brand + '"' + ',' + '"' + prod_segment + '"' + ',' +
+            '"' + description.innerHTML + '"' + ',' + '"' + prod_guarantee + '"' + ',' + '"' + prod_contact + '"' +
+            ',' + '"' + prod_contact_unit + '"' + ',' +
+            dimension_length + ',' + dimension_width + ',' + dimension_height + ',' + dimension_weight;
+
+        modal.style.display = "block";
+    }
+
+    function ModalDetail(prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2,
+        prod_img_3, prod_img_4,
         prod_currency, prod_description, prod_unit,
         prod_department, prod_category, prod_brand, prod_segment, prod_attributes,
         prod_guarantee, prod_contact, prod_contact_unit,
@@ -497,14 +577,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
         name.innerText = prod_name;
         var sku = document.getElementById("prod_sku");
         sku.innerText = prod_sku;
-        var stock = document.getElementById("prod_stock");
-        stock.innerText = intlRound(prod_stock, 0);
+        //var stock = document.getElementById("prod_stock");
+        //stock.innerText = intlRound(prod_stock, 0);
         var stock = document.getElementById("prod_stock_1");
         stock.innerText = intlRound(prod_stock, 0);
         var price = document.getElementById("prod_price");
         price.innerText = intlRound(prod_price, 2);
         var price = document.getElementById("prod_tax_status");
         price.innerText = prod_tax_status;
+
+        var prod_img = document.getElementById("prod_full_img");
+        prod_img.src = prod_img_1;
         var prod_img = document.getElementById("prod_img_1");
         prod_img.src = prod_img_1;
         prod_img.alt = prod_name;
@@ -517,17 +600,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
         var prod_img = document.getElementById("prod_img_4");
         prod_img.src = prod_img_4;
         prod_img.alt = replaceModelString(prod_img_4, "https://sedcolombia.com.co/Imagenes_Vtex/", " ");
+
         var currency = document.getElementById("prod_currency");
         currency.innerText = prod_currency;
+
         var description = document.getElementById("prod_description");
         description.innerText = prod_description;
-        var description = document.getElementById("prod_attributes");
-        // description.innerHTML = `<pre>${processedAttributes}</pre>`;
-        description.innerHTML = processedAttributes;
         var description = document.getElementById("prod_guarantee");
         description.innerText = prod_guarantee;
+        var description = document.getElementById("prod_attributes");
+        description.innerHTML = processedAttributes;
+
         var unit = document.getElementById("prod_unit");
         unit.innerText = prod_unit;
+
         var group = document.getElementById("prod_department");
         group.innerText = prod_department;
         var group = document.getElementById("prod_category");
@@ -536,10 +622,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
         group.innerText = prod_brand;
         var group = document.getElementById("prod_segment");
         group.innerText = prod_segment;
+
         var contact = document.getElementById("prod_contact");
         contact.innerText = prod_contact;
         var contact = document.getElementById("prod_contact_unit");
         contact.innerText = prod_contact_unit;
+
         var dimension = document.getElementById("dimension_length");
         dimension.innerText = intlRound(dimension_length, 0);
         var dimension = document.getElementById("dimension_width");
@@ -548,6 +636,27 @@ document.addEventListener('DOMContentLoaded', (event) => {
         dimension.innerText = intlRound(dimension_height, 0);
         var dimension = document.getElementById("dimension_weight");
         dimension.innerText = intlRound(dimension_weight, 0);
+
+        var csvFormat = document.getElementById("prod_csv");
+        csvFormat.innerText =
+            "prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4," +
+            " prod_currency, prod_description, prod_unit, prod_department, prod_category, prod_brand, prod_segment, prod_attributes, prod_guarantee," +
+            " prod_contact, prod_contact_unit, dimension_length, dimension_width, dimension_height, dimension_weight" +
+            '\r\n' +
+            '"' + prod_name + '"' + ',' + '"' + prod_sku + '"' + ',' + prod_stock + ',' + prod_price + ',' + '"' +
+            prod_tax_status + '"' + ',' +
+            '"' + prod_img_1 + '"' + ',' + '"' + prod_img_2 + '"' + ',' + '"' + prod_img_3 + '"' + ',' + '"' +
+            prod_img_4 + '"' + ',' +
+            prod_currency + ',' +
+            '"' + prod_description + '"' + ',' + '"' + prod_unit + '"' + ',' + '"' + prod_department + '"' + ',' + '"' +
+            prod_category + '"' + ',' + '"' + prod_brand + '"' + ',' + '"' + prod_segment + '"' + ',' +
+            '"' + description.innerHTML + '"' + ',' + '"' + prod_guarantee + '"' + ',' + '"' + prod_contact + '"' +
+            ',' + '"' + prod_contact_unit + '"' + ',' +
+            dimension_length + ',' + dimension_width + ',' + dimension_height + ',' + dimension_weight;
+
+
+        // var csvFormat = document.getElementById("product_csv");
+        // csvFormat.style.display = "none";
 
         modal.style.display = "block";
     }
@@ -609,7 +718,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             selectedCatsName.push(checkbox.value);
         } else {
             selectedCategories = selectedCategories.filter(brand => brand !== checkbox
-            .value); // Remove brand name if unchecked
+                .value); // Remove brand name if unchecked
             selectedCatsName = selectedBrands.filter(brand => brand !== brandName);
         }
         catListElement.value = selectedCategories.join(','); // Update comma-separated list
@@ -621,13 +730,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         productTitle.textContent = catNamesElement.value;
 
     }
-/*
-    // read department name
-    function DepartmentName() {
-        const departmentName = document.getElementById('current-group-name');
-        return departmentName.value;
-    }
-*/
+    /*
+        // read department name
+        function DepartmentName() {
+            const departmentName = document.getElementById('current-group-name');
+            return departmentName.value;
+        }
+    */
 
 
     function productBrandCards(groupName) {
@@ -697,16 +806,28 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const button = document.createElement("button");
                 // ModalDetail function call with product data
                 button.onclick = function() {
-                    ModalDetail(product.name, product.sku, product.stock_quantity, product.regular_price, product.price_tax_status,
+                    ModalDetail(`${product.name}`, `${product.sku}`, product.stock_quantity, product
+                        .regular_price, product.price_tax_status,
                         product.image_1, product.image_2, product.image_3, product.image_4,
-                        product.currency, product.description, product.unit,
-                        product.department, product.category, product.brand, product.segment,
-                        product.attributes, product.guarantee, product.contact_agent, product.contact_unit,
-                        product.dimension_length, product.dimension_width, product.dimension_height, product.dimension_weight
+                        product.currency, `${product.description}`, product.unit,
+                        product.department, `${product.category}`, product.brand, product.segment,
+                        `${product.attributes}`, product.guarantee, product.contact_agent, product
+                        .contact_unit,
+                        product.dimension_length, product.dimension_width, product.dimension_height,
+                        product.dimension_weight
                     );
                 };
 
                 button.textContent = product.sku + ' / ' + product.brand;
+
+                const button2 = document.createElement("button");
+                // email product data
+                button2.onclick = function() {
+                    productMail(product.sku);
+                };
+                const icon = document.createElement("i");
+                icon.classList.add("fas fa-envelope navitem-icon");
+                button2.appendChild(icon);
 
                 const priceText = document.createElement("div");
                 priceText.classList.add("card-text");
@@ -714,6 +835,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     ' / ' + product.unit + ' ' + product.price_tax_status;
 
                 cardText.appendChild(button);
+                cardText.appendChild(button2);
                 cardText.appendChild(priceText);
 
                 cardBodyText.appendChild(cardText);
@@ -734,21 +856,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
-    //validate abilities permission for auth model sanctum
-    function fetchAbilities() {
-        return new Promise((resolve, reject) => {
-            fetch(`/profile/abilities`)
-                .then(response => response.json())
-                .then(data => {
-                    resolve(data);
-                })
-                .catch(error => {
-                    console.error('Error fetching sanctum abilities:', error);
-                    reject(error); // Pass error to the calling function
-                });
 
-        });
-    }
 
     // fetch products by brand
     function fetchProductsByBrands(groupName) {
@@ -788,7 +896,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         temporalIndicator();
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = groupName;
-       //window.location.href = '/products/' + groupName;
+        //window.location.href = '/products/' + groupName;
         window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
     }
 
@@ -796,52 +904,105 @@ document.addEventListener('DOMContentLoaded', (event) => {
     function cleanQuotation(text) {
         text.replace(/'/g, '"');
         //alert(`${text}`);
-        console.log(text);
+        //console.log(text);
         return text;
     }
 
     //convert Json to Csv format
     function jsonToCsv(data) {
-    return (
-        Object.keys(data[0]).join(",") +
-        "\n" +
-        data.map((d) => Object.values(d).join(",")).join("\n")
-    );
+        return (
+            Object.keys(data[0]).join(",") +
+            "\n" +
+            data.map((d) => Object.values(d).join(",")).join("\n")
+        );
     }
 
     //convert array to CSV format
     function arrayToCSV(data) {
         var csv = data.map(function(row) {
-        return row.join(',');
+            return row.join(',');
         }).join('\n');
+        return csv;
     }
 
-    function fetchSample() {
-        //alert("Clear cache");
-        fetch('/api/sed/cleared', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) { // Check for success message in response
-                    window.location.href = '/ppal'; // Redirect to /PPAL on success
-                } else {
-                    console.error('Error clearing cache:', data.message || 'Unknown error'); // Handle error message
-                }
-            })
-            .catch(error => {
-                console.error('Error clearing cache:', error);
-            });
+    function fetchAbilities(username) {
+        //window.location.href = "{{ route('profile.abilities', ['username' => ':username']) }}".replace(':username', username);
+        urlpath = "{{ route('profile.abilities', ['username' => ':username']) }}".replace(':username', username);
+        alert(urlpath);
+        new Promise((resolve, reject) => {
+            fetch(urlpath, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    //body: JSON.stringify(inputs), //body only with POST method and body format = Header Content-Type format
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resolve(data);
+                    document.getElementById("products-container").innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching sanctum abilities:', error);
+                    reject(error); // Pass error to the calling function
+                });
+        });
     }
+
 
 
     // pvr willcards start example  for id property. coul by class, etc: const startsAbc = document.querySelectorAll("[id^='abc']");
     // const buttons = document.querySelectorAll('.department-button');
     // buttons.forEach(button => button
     //     .addEventListener('click', () => departmentActions(button)));
+
+
+    function productMail(sku) {
+        if (sku === '') {
+            sku = document.getElementById("prod_sku").textContent;
+        }
+
+        let receiver = prompt("Correo del destinatario:");
+        if (receiver.indexOf('@') !== -1) {
+            const urlpath = "{{route('product.email', ['sku' => ':sku'])}}".replace(':sku', sku);
+            console.log(urlpath);
+
+            fetch(urlpath, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-receiver': receiver,
+            }
+            })
+            .then(response => response.json())
+            .then(data => {
+                //resolve(data);
+                if (data['code'] === 200) alert("correo enviado");
+                if (data['code'] === 404) alert(data['result']);
+                console.log(data);
+            })
+            .catch(error => {
+                // Check for 404 response specifically
+                if (error.response && error.response.status === 404) {
+                alert("Product not found! Could not send email.");
+                console.error('Product not found:', error.response.data); // Log error details for debugging
+                } else {
+                console.error('Error fetching mail:', error); // Log other errors
+                }
+            });
+        }
+    }
+
+
+    function changeFullImage(image) {
+        const mainImage = document.getElementById("prod_full_img");
+        mainImage.src = image.src;
+        mainImage.alt = image.alt;
+    }
+
+    function productCSV() {
+        document.getElementById('productWindowCSV').display = 'block';
+    }
 </script>
 
 </html>

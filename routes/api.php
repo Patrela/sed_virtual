@@ -21,11 +21,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/post/create', function (Request $request) { //sanctum with ability
-    return [
+    return response()->json([
         'id' => 1,
         'title' => $request->title,
         'content' => $request->content,
-    ];
+    ]);
 })->name('sanctum.post')->middleware(['auth:sanctum', 'ability:post-create']);
 
 Route::post('/tokens/create', function (Request $request) {

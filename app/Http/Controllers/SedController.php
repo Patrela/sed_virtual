@@ -65,8 +65,7 @@ class SedController extends Controller
                     ], 403);
                 }
             }
-            if (config('cache.enabled'))
-                Cache::put("clasifications", "ok", now()->addDays(7));
+            if (app(LogController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
 
             return response()->json([
                 'result' => "Successfully imported. ",
@@ -226,7 +225,7 @@ class SedController extends Controller
                     // reset review status
                     $this->updateSyncState($idProvider);
 
-                    Cache::put('sync_products', $response->status(), now()->addMinutes(30));
+                    if (app(LogController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
                     return response()->json([
                         'estado' => 'ok',

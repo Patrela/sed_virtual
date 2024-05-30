@@ -58,19 +58,26 @@ class LogController extends Controller
     }
     //validate cache key
     public function keyInCache($keycache)
-    {   $keyInCache = false;
-        $cachestore= config('cache.default');
-        if($cachestore){
-            $cachestore=config("cache.stores.{$cachestore}");
-        }
-        if($cachestore) // Cache::store()->getStore() !== null //config('cache.enabled')
+    {
+        if($this->isCache())
         {
-            //Cache::put('sync_products', 'test data', now()->addMinutes(30));
-            if(Cache::has($keycache)) $keyInCache = true;
+            if(Cache::has($keycache)) return true;
         }
-        return  $keyInCache;// $cachestore; //  $keyInCache; // Cache::get('sync_products');
-
+        return  false;
     }
 
+        //validate cache active status
+        public function isCache()
+        {
+            $cachestore = config('cache.default');
+            if($cachestore){
+                $cachestore = config("cache.stores.{$cachestore}");
+            }
+            if($cachestore)
+            {
+                 return true;
+            }
+            return  false;
+        }
 
 }

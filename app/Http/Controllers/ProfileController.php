@@ -95,4 +95,17 @@ class ProfileController extends Controller
 
         return Redirect::to('home'); // '/'
     }
+    /*PVR sanctum read user sanctum abilities */
+    public function userAbilities(string $username)
+    {
+        $user = User::where('name',"{$username}")->first();
+        if(!$user){
+            return response()->json([
+                'error' => 'user not found',
+                'code' => 404,
+            ], 404);
+        }
+        $abilities = $user->tokens()->pluck('abilities'); // Get ability names ; abilities
+        return response()->json($abilities, 200); // Return abilities as JSON
+    }
 }

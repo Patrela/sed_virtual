@@ -30,12 +30,12 @@ class VtexController extends Controller
             }
 
             // Find user using company and email (consider using model relationships for better structure)
-            $user = User::where( ['email', $useremail])->first();
+            $user = User::where( 'email', "{$useremail}")->first();
 
             // Handle user existence and return appropriate response
             if ($user) {
                 session(['current_trade' => $user->trade_id]);
-                session(['current_user' =>  $user->id]);
+                session(['current_user' =>  $user->email]);
                 //return redirect('/products');
                 return response()->json([
                     'id' => $user->id,

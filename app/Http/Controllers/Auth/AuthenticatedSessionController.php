@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,7 +28,9 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-
+        session(['current_trade' => Auth::user()->trade_id]);
+        session(['current_user' =>  Auth::user()->email]);
+        Log::info("session user email.  " .session('current_user'));
         return redirect()->intended(route('ppal', absolute: false));
     }
 

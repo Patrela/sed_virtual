@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use App\Mail\ProductMailable;
 //use App\Exports\ProductsExport;
 //use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-use Illuminate\Support\Facades\Http;
+
 
 class ProductController extends Controller
 {
@@ -53,7 +58,7 @@ class ProductController extends Controller
     public function getDepartmentProducts($group = "Computadores")
     {
         app(SedController::class)->syncProductsAPI();
-        Log::info("products GET  " . $group);
+        //Log::info("products GET  " . $group);
         $products = Product::where('department', "{$group}")
             ->select($this->selectFields)
             ->orderBy('name', 'ASC')
@@ -133,6 +138,7 @@ class ProductController extends Controller
         return $products;
     }
 
+    /*
     public function getOrderProducts(string $group, string $order = "")
     {
         if ($order !== "") {
@@ -162,21 +168,23 @@ class ProductController extends Controller
             return [];
         }
     }
-
+    */
     public function index()
     {
         app(SedController::class)->syncProductsAPI();
         $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
             return Product::all();
         });
-        $page =  $this->CurrentPage();
-        $perPage = $this->PerPage();
+        /*
+        $page =  $this->CurrentPage(); */
+        $perPage = 12;
 
 
         // Mostrar los primeros productos
         $products = $totalproducts->select($this->selectFields)->take($perPage);
         //dd($products->select('part_num','name','stock_quantity','regular_price','image_1','sku'));
-        return view('product.index',  ['products' => $products, 'perPage' => $perPage, 'page' => $page, 'total' => count($totalproducts)]);
+        //return view('product.index',  ['products' => $products, 'perPage' => $perPage, 'page' => $page, 'total' => count($totalproducts)]);
+        return view('product.index',  ['products' => $products, 'perPage' => $perPage, 'page' => 1, 'total' => count($totalproducts)]);
     }
 
 
@@ -196,21 +204,8 @@ class ProductController extends Controller
         //read PART_NUM
         if (count($words) == 1 && strlen($words[0]) > 4) {
             $word = $words[0];
-            $productQuery = Product::select($this->selectFields)
-                ->when($word !== "", function ($query) use ($word) {
-                    $query->where("part_num",  "{$word}");
-                    // $query->whereRaw("LOWER(part_num) LIKE ?", ["%{$word}%"]);
-                })
-                ->get();
-            // PART_NUM with special characters
-            if ($productQuery->isEmpty($productQuery)) {
-                $productQuery = Product::select($this->selectFields)
-                    ->when($word !== "", function ($query) use ($word) {
-                        $query->whereRaw("LOWER(part_num) LIKE ?", ["{$word}%"]);
-                    })
-                    ->get();
-            }
-            if (!$productQuery->isEmpty($productQuery)) return $productQuery;
+            $product=  $this->searchSpecialSku( $word);
+            if ($product) return $product;
         }
 
         foreach ($words as $word) {
@@ -241,7 +236,7 @@ class ProductController extends Controller
         $commonWords = ['el', 'la', 'los', 'las'];
         return in_array(Str::lower($word), $commonWords);
     }
-
+    /*
     public function loadMore()
     {
         $page = $this->AddPage();
@@ -277,90 +272,14 @@ class ProductController extends Controller
     {
         return 30;
     }
+    */
+
     /*
     public function toExcel($sku)
     {
         return Excel::download(new ProductsExport($sku), 'product_' . $sku . '.xlsx');
     }
     */
-
-    public function toCsvOrig(Request $request)
-    {
-        $sku = $request->input('sku');
-        $folder_path = $request->input('filepath');
-        Log::error("CSV.  " . $sku . " path = " . $folder_path);
-        $product = Product::where('part_num', "{$sku}")->get();
-
-        if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
-        }
-
-        $file_name = 'product_' . $sku . '.csv';
-        //$full_path = storage_path('app/public/' . $folder_path . '/' . $file_name);
-        $full_path = storage_path($folder_path . '/' . $file_name);
-        Log::error("CSV.  final file = " . $full_path);
-        // $handle = fopen($full_path, 'w');
-        // // Add BOM to fix UTF-8 in Excel
-        // fputs($handle, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
-
-        // // Add CSV headers
-        // fputcsv($handle, ['PartNum', 'Name', 'Price']); // Adjust headers as needed
-
-        // // Add product data
-        // fputcsv($handle, [$product->part_num, $product->name, $product->regular_price]); // Adjust fields as needed
-
-        // fclose($handle);
-
-        return response()->json(['message' => 'CSV file has been saved to ' . $full_path]);
-    }
-
-    public function toCsv5(Request $request)
-    {
-        $sku = ($request->input('sku')) ?? "";
-        $folder_path = ($request->input('filepath')) ?? "";
-        Log::error("CSV.  " . $sku . " path = " . $folder_path);
-        $product = Product::where('part_num', "{$sku}")->get();
-
-        if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
-        }
-
-        $file_name = 'product_' . $sku . '.csv';
-        //$full_path = storage_path('app/public/' . $folder_path . '/' . $file_name);
-        $full_path = storage_path($folder_path . '/' . $file_name);
-        Log::error("CSV.  final file = " . $full_path);
-
-        return response()->json(['message' => 'Salvado el archivo'], 200);
-    }
-
-    public function exportCsv(Request $request)
-    {
-        try {
-
-            $company = $request->header('x-api-company');
-            $useremail = $request->header('x-api-user');
-            //$token = $request->bearerToken();
-            $name = $request->query('name');
-            $response = Http::sedfunc()->post('/authentication/?name=' .$name, [
-                'nit' => $company,
-                'email' =>  $useremail,
-            ]);
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                return response()->json([
-                    'error' => 'Api SED Customer User',
-                    'code' => $response->status(),
-                ], 403);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ], 403);
-        }
-
-    }
 
     public function toCsv(Request $request)
     {
@@ -381,18 +300,79 @@ class ProductController extends Controller
         }
     }
 
-    public function mailProducts(Request $request)
+    public function abilities(Request $request)
     {
-        $sender= $request->get('sender');
-        $receiver= $request->get('receiver');
-        $products = $request->input('products');
 
-        $output = array('sender' => $sender,
-             'receiver' => $receiver,
-             'products' => $products,
-        );
-    return $output;
-
+        $abilities = $request->user()->tokens()->pluck('abilities'); // Get ability names ;
+        return response()->json($abilities);
     }
 
+    private function searchSpecialSku( string $sku = '' )
+    {
+        if($sku == '')
+        {
+            return collect(); // null;
+        }
+        $product = Product::select($this->selectFields)
+            ->when($sku !== "", function ($query) use ($sku) {
+                $query->where("part_num",  "{$sku}");
+            })
+            -> get(); //first()
+
+        if (count($product) == 0) {
+            $product = Product::select($this->selectFields)
+                ->when($sku !== "", function ($query) use ($sku) {
+                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$sku}%"]);
+                })
+                ->get(); //->first();
+        }
+        return $product;
+    }
+
+    public function mailProducts(Request $request, string $sku)
+    {
+        $sender = ($request->has('user')) ? $request->user()->email : ((Auth::check()) ? Auth::user()->email :
+                env('MAIL_FROM_ADDRESS'));
+        $receiver = $request->header('x-api-receiver');
+
+        Log::info("user.  " . $sender . " sku " . $sku);
+        $products=  $this->searchSpecialSku( $sku);
+
+        if (count($products) == 0) {
+            return response()->json([
+                'result' => "Product not found {$sku} ",
+                'code' => 404,
+            ], 404);
+        }
+        $product = $products[0];
+        /*
+        $output = array(
+            'sender' => $sender,
+             'receiver' => $receiver,
+             'sku' => $sku,
+             'product.name' => $product->name,
+             'product.name twice' => $product['name'],
+
+        );
+        return response()->json($output, 200);
+        */
+        /*
+        Mail::to($receiver)
+            ->cc($sender)
+            ->send(new ProductMailable($sender, $product));
+        //Mail::to($receiver)->send( new ProductDetailtMailable($sender, $product));
+*/
+        Mail::to($receiver)
+            ->cc($sender)
+            ->send(new ProductMailable($sender, $product), function ($message, $sender,) {
+                $message->subject('SKU imperativo');
+                $message->from($sender);
+                $message->setContentType('text/html'); // Set Content-Type header
+            });
+
+        return response()->json([
+            'result' => 'mail sent',
+            'code' => 200,
+        ], 200);
+    }
 }

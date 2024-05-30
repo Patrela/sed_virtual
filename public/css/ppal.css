@@ -252,6 +252,7 @@ span {
 	}
 }
 
+
 .filter-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -407,6 +408,13 @@ margin-right: 0.175rem;
     background-color: rgba(0,0,0,0.5); /* Color negro con opacidad del 50% */
   }
 
+  .modal_mail {
+    padding: 1rem;
+    width: 80%;
+    height: 100vh; /* Algura completa */
+    overflow: auto; /* Se activará el scroll si es necesario */
+    /*background-color: rgba(0,0,0,0.5);  */
+  }
   /* Ventana o caja modal */
 .modal-container {
     position: relative; /* Relativo con respecto al contenedor -modal- */
@@ -414,7 +422,7 @@ margin-right: 0.175rem;
     margin: auto; /* Centrada */
     padding: 1rem;
     width: 70%;
-    height: 60rem;
+    /* height: 60rem; */
     -webkit-animation-name: animarsuperior;
     -webkit-animation-duration: 0.5s;
     animation-name: animarsuperior;
@@ -488,6 +496,44 @@ margin-right: 0.175rem;
     font-weight: normal;
     min-height: 0.75rem;
 }
+
+/** thumbnails */
+.modal-box-img {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    padding: 0;
+    width: 560px;
+}
+.modal-full-img {
+    position: relative;
+    display: block;
+    height: 480px;
+    width: inherit;
+  }
+#prod_full_img {
+    padding: 0.125rem;
+    border:1px solid var(--main-body-color);
+}
+.modal-thumb-bar {
+    display: flex;
+    flex-direction: row;
+    height: 150px;
+    width: inherit;
+    gap:0;
+}
+
+  .modal-thumb-bar img {
+    /*display: block; */
+    width: 25%;
+    height:inherit;
+    /*float: left; */
+    cursor: pointer;
+    /* border:1px solid var(--main-body-color); */
+
+  }
+
+
 .text-input {
     display: block;
     margin-top: 0.25rem;
@@ -596,7 +642,9 @@ margin-right: 0.175rem;
       .modal-container {
         width: 100%;
         height: auto;
-
+      }
+      .modal-box-img {
+        width: 100%;
       }
   }
  /* mobile */
@@ -722,6 +770,9 @@ margin-right: 0.175rem;
         -webkit-animation-duration: 0.5s;
         animation-name: animarsuperior;
         animation-duration: 0.5s
+      }
+      .modal-box-img {
+        width: 100%;
       }
     .title {
         display: none !important;

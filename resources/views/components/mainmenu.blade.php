@@ -57,6 +57,9 @@
                 <button class="navitem" type="button" onclick="searchWilcardProduct()">
                     <i class="fas fa-search  navitem-icon"></i>
                 </button>
+                @auth
+                    <span>{{ Auth::user()->name }}</span>
+                @endauth
                 <button class="navitem" type="button"  onclick="window.location.href = '{{ route('ppal') }}'">
                     <i class="fas fa-home navitem-icon"></i>
                 </button>
