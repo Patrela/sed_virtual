@@ -248,23 +248,34 @@
             INTERNATIONAL DE COLOMBIA S.A.S., y está protegido por las leyes internacionales de derecho de autor.</p>
     </footer>
 
-    <div id="productWindowCSV" class="modal">
+    <div id="window-csv" class="modal">
 
-        <form id="productCSVForm" class="modal-container" method="get" action="#" class="p-6">
+        <form id="form-csv" class="modal-container" method="get" action="#" class="p-6">
             @csrf
             <h1 class="footer-title">CSV - Copiar a Excel TEXTO EN COLUMNA: Delimitado (,) Texto(")</h1>
+            <div id="product_csv_desc" name="product_csv_desc" class="modal-card-item-container">
+                <div class="modal-card-item" id="prod_csv_desc"></div>
+            </div>
+
+            <h3 class="modal-card-item-title">CSV y encabezado</h3>
             <div id="product_csv" name="product_csv" class="modal-card-item-container">
                 {{-- <textarea class="modal-card-item" id="prod_csv" cols="30" rows="10"> --}}
                 <div class="modal-card-item" id="prod_csv"></div>
             </div>
-            <div class="modal-card-item-division">
-                <button onclick="closeModal('productWindowCSV')">Cerrar</button>
+            <h3 class="modal-card-item-title">CSV datos</h3>
+            <div id="product_csv_noheader" name="product_csv_noheader" class="modal-card-item-container">
+                <div class="modal-card-item" id="prod_csv_noheader"></div>
+            </div>
+            <div class="filter-container-one-column centered distance-top">
+                <div class="modal-card-item-division">
+                    <button onclick="closeModal('window-csv')">Cerrar</button>
+                </div>
             </div>
         </form>
     </div>
 
-    <div id="productWindow" class="modal">
-        <form id="skuDetailForm" class="modal-container" method="get" action="#" class="p-6">
+    <div id="window-detail" class="modal">
+        <form id="form-detail" class="modal-container" method="get" action="#" class="p-6">
             @csrf
             <div class="modal-card-title" id="prod_name"></div>
             <div class="modal-box-img">
@@ -371,7 +382,7 @@
                 <div class="modal-card-item-division">
                     {{-- <button id="prod_email" name="prod_email" onclick="productMail('')">email</button> --}}
                     {{-- <button id="btn_prod_csv" name="btn_prod_csv" onclick="productCSV()">CSV</button> --}}
-                    <button onclick="closeModal('productWindow')">Cerrar</button>
+                    <button onclick="closeModal('window-detail')">Cerrar</button>
                 </div>
             </div>
 
@@ -536,17 +547,13 @@
         dimension_length, dimension_width, dimension_height, dimension_weight
     ) {
 
-        var modal = document.getElementById("productWindowCSV");
-        const description = document.createElement("div");
+        var modal = document.getElementById("window-csv");
+        const description = document.getElementById("prod_csv_desc");
         // Replace `<br>` tags
-        description.innerText = replaceModelString(decodeURIComponent(prod_attributes), "&lt;br&gt;", " | ");;
+        description.innerHTML = replaceModelString(decodeURIComponent(prod_attributes), "&lt;br&gt;", " | ");;
 
-        var csvFormat = document.getElementById("prod_csv");
+        var csvFormat = document.getElementById("prod_csv_noheader");
         csvFormat.innerText =
-            "prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4," +
-            " prod_currency, prod_description, prod_unit, prod_department, prod_category, prod_brand, prod_segment, prod_attributes, prod_guarantee," +
-            " prod_contact, prod_contact_unit, dimension_length, dimension_width, dimension_height, dimension_weight" +
-            '\r\n' +
             '"' + prod_name + '"' + ',' + '"' + prod_sku + '"' + ',' + prod_stock + ',' + prod_price + ',' + '"' +
             prod_tax_status + '"' + ',' +
             '"' + prod_img_1 + '"' + ',' + '"' + prod_img_2 + '"' + ',' + '"' + prod_img_3 + '"' + ',' + '"' +
@@ -557,7 +564,16 @@
             '"' + description.innerHTML + '"' + ',' + '"' + prod_guarantee + '"' + ',' + '"' + prod_contact + '"' +
             ',' + '"' + prod_contact_unit + '"' + ',' +
             dimension_length + ',' + dimension_width + ',' + dimension_height + ',' + dimension_weight;
+        //csvFormat.innerText = csvFormat.innerHTML;
 
+        var csvData = document.getElementById("prod_csv");
+        csvData.innerText =
+            "prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4," +
+            " prod_currency, prod_description, prod_unit, prod_department, prod_category, prod_brand, prod_segment, prod_attributes, prod_guarantee," +
+            " prod_contact, prod_contact_unit, dimension_length, dimension_width, dimension_height, dimension_weight" +
+            '\r\n' + csvFormat.innerHTML;
+
+        description.innerText = "";
         modal.style.display = "block";
     }
 
@@ -572,7 +588,7 @@
         const processedAttributes = replaceModelString(decodeURIComponent(prod_attributes), "&lt;br&gt;", " | ");
         // console.log(prod_attributes);
         // console.log(processedAttributes);
-        var modal = document.getElementById("productWindow");
+        var modal = document.getElementById("window-detail");
         var name = document.getElementById("prod_name");
         name.innerText = prod_name;
         var sku = document.getElementById("prod_sku");
@@ -964,32 +980,32 @@
 
         let receiver = prompt("Correo del destinatario:");
         if (receiver.indexOf('@') !== -1) {
-            const urlpath = "{{route('product.email', ['sku' => ':sku'])}}".replace(':sku', sku);
+            const urlpath = "{{ route('product.email', ['sku' => ':sku']) }}".replace(':sku', sku);
             console.log(urlpath);
 
             fetch(urlpath, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-receiver': receiver,
-            }
-            })
-            .then(response => response.json())
-            .then(data => {
-                //resolve(data);
-                if (data['code'] === 200) alert("correo enviado");
-                if (data['code'] === 404) alert(data['result']);
-                console.log(data);
-            })
-            .catch(error => {
-                // Check for 404 response specifically
-                if (error.response && error.response.status === 404) {
-                alert("Product not found! Could not send email.");
-                console.error('Product not found:', error.response.data); // Log error details for debugging
-                } else {
-                console.error('Error fetching mail:', error); // Log other errors
-                }
-            });
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-receiver': receiver,
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    //resolve(data);
+                    if (data['code'] === 200) alert("correo enviado");
+                    if (data['code'] === 404) alert(data['result']);
+                    console.log(data);
+                })
+                .catch(error => {
+                    // Check for 404 response specifically
+                    if (error.response && error.response.status === 404) {
+                        alert("Product not found! Could not send email.");
+                        console.error('Product not found:', error.response.data); // Log error details for debugging
+                    } else {
+                        console.error('Error fetching mail:', error); // Log other errors
+                    }
+                });
         }
     }
 
@@ -1001,7 +1017,7 @@
     }
 
     function productCSV() {
-        document.getElementById('productWindowCSV').display = 'block';
+        document.getElementById('window-csv').display = 'block';
     }
 </script>
 
