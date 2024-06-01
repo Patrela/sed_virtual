@@ -93,7 +93,7 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('home'); // '/'
+        return Redirect::to('login'); // '/' 'home'
     }
     /*PVR sanctum read user sanctum abilities */
     public function userAbilities(string $username)

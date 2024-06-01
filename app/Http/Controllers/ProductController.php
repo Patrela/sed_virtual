@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Product;
+use App\Jobs\ProcessMailer;
 use Illuminate\Support\Str;
+
 use Illuminate\Http\Request;
-use App\Mail\ProductMailable;
-//use App\Exports\ProductsExport;
-//use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\App;
+use app\Jobs\ProcessProductMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Mail;
+use App\Jobs\ProcessExternalProducts;
 use Illuminate\Support\Facades\Cache;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+
+
 
 
 
@@ -57,7 +57,6 @@ class ProductController extends Controller
      */
     public function getDepartmentProducts($group = "Computadores")
     {
-        app(SedController::class)->syncProductsAPI();
         //Log::info("products GET  " . $group);
         $products = Product::where('department', "{$group}")
             ->select($this->selectFields)
@@ -67,18 +66,9 @@ class ProductController extends Controller
             ->get();
         return $products;
     }
-    public function getDepartmentClearCache()
-    {
-        //$products =app(LogController::class)->keyInCache('sync_products');
-        app(LogController::class)->clearCacheKey('sync_products');
 
-        //$products = app(SedController::class)->syncProductsAPI();
-        $products = $this->getDepartmentProducts();
-        return $products;
-    }
     public function getBrandProducts($group, $brands)
     {
-        app(SedController::class)->syncProductsAPI();
         // Explode the comma-separated list of brands into an array
         $brandsArray = explode(',', $brands);
 
@@ -100,7 +90,6 @@ class ProductController extends Controller
 
     public function getCategoriesProducts($group, $categories)
     {
-        app(SedController::class)->syncProductsAPI();
         // Explode the comma-separated list of brands into an array
         $catsArray = explode(',', $categories);
 
@@ -124,7 +113,6 @@ class ProductController extends Controller
 
     public function getSegmentProducts($group)
     {
-        app(SedController::class)->syncProductsAPI();
         // Build the query for searching by multiple brands
         $query = Product::where('segment', $group);
 
@@ -142,7 +130,6 @@ class ProductController extends Controller
     public function getOrderProducts(string $group, string $order = "")
     {
         if ($order !== "") {
-            app(SedController::class)->syncProductsAPI();
             // Build the query for searching by multiple brands
             $query = Product::where("department", "{$group}")
                 ->when($order == "price-plus", function ($query) {
@@ -171,7 +158,7 @@ class ProductController extends Controller
     */
     public function index()
     {
-        app(SedController::class)->syncProductsAPI();
+        app(SedController::class)->getProviderProducts();
         $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
             return Product::all();
         });
@@ -335,7 +322,7 @@ class ProductController extends Controller
                 env('MAIL_FROM_ADDRESS'));
         $receiver = $request->header('x-api-receiver');
 
-        Log::info("user.  " . $sender . " sku " . $sku);
+        //Log::info("user.  " . $sender . " sku " . $sku);
         $products=  $this->searchSpecialSku( $sku);
 
         if (count($products) == 0) {
@@ -345,31 +332,14 @@ class ProductController extends Controller
             ], 404);
         }
         $product = $products[0];
-        /*
-        $output = array(
-            'sender' => $sender,
-             'receiver' => $receiver,
-             'sku' => $sku,
-             'product.name' => $product->name,
-             'product.name twice' => $product['name'],
+        // $mailjob= new ProcessExternalProducts;
+        // $mailjob->dispatchAfterResponse();
+        $mailjob= new ProcessMailer();
+        $mailjob->dispatchAfterResponse();
+        //Process Mail Asynchronously
 
-        );
-        return response()->json($output, 200);
-        */
-        /*
-        Mail::to($receiver)
-            ->cc($sender)
-            ->send(new ProductMailable($sender, $product));
-        //Mail::to($receiver)->send( new ProductDetailtMailable($sender, $product));
-*/
-        Mail::to($receiver)
-            ->cc($sender)
-            ->send(new ProductMailable($sender, $product), function ($message, $sender,) {
-                $message->subject('SKU imperativo');
-                $message->from($sender);
-                $message->setContentType('text/html'); // Set Content-Type header
-            });
-
+        // $mailjob= new ProcessProductMail($receiver, $sender, $product);
+        // $mailjob->dispatchAfterResponse();
         return response()->json([
             'result' => 'mail sent',
             'code' => 200,

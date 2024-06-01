@@ -27,6 +27,11 @@
     <x-mainmenu />
     <main> <!--class="mt-6" -->
         <aside>
+
+            {{-- <button id="btn-1" name="btn-test" type="button" onclick="fetchAbilities('Saly')">abilities</button>
+            <button id="btn-2" name="btn-2" type="button" onclick="productMail('30FN0031LM')">30FN0031LM</button> --}}
+
+
             <div class="aside-container" name="main_group" id="main_group">
                 <input type="hidden" name="current-group" id="current-group" value="{{ $maingroup }}" />
                 <input type="hidden" name="current-group-name" id="current-group-name" value="{{ $maingroupName }}" />
@@ -61,38 +66,36 @@
             </div>
             <p></p>
             <div class="aside-container filter">
-                @if ($searchText === '')
-                    <h3 class="title">FILTROS</h3>
-                    <button>Categoría</button>
-                    <div id="category_detail" name="category_detail" class="filter-container-two-column">
-                        @foreach ($categories as $key => $category)
-                            <div class="filter-checkbox">
-                                <div class="filter-checkbox-input">
-                                    <input id="cat-{{ $category['id'] }}" name="cat-array" value="{{ $category['name'] }}"
-                                        type="checkbox" {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}>
+                <h3 class="title">FILTROS</h3>
+                <button>Categoría</button>
+                <div id="category_detail" name="category_detail" class="filter-container-two-column">
+                    @foreach ($categories as $key => $category)
+                        <div class="filter-checkbox">
+                            <div class="filter-checkbox-input">
+                                <input id="cat-{{ $category['id'] }}" name="cat-array" value="{{ $category['name'] }}"
+                                    type="checkbox" {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}>
 
-                                </div>
-                                <div class="filter-checkbox-label">
-                                    {{ $category['name'] }}
-                                </div>
                             </div>
-                        @endforeach
-                    </div>
-                    <button>Marca</button>
-                    <div id="brand_detail" name="brand_detail" class="filter-container">
-                        @foreach ($brands as $key => $brand)
-                            <div class="filter-checkbox">
-                                <div class="filter-checkbox-input">
-                                    <input id="brand-{{ $brand['id'] }}" type="checkbox" name="brand-array"
-                                        value="{{ $brand['name'] }}" {{-- onclick="addBrandToList(this, '{{ $brand['name'] }}','{{ $maingroupName}}')" --}}>
-                                </div>
-                                <div class="filter-checkbox-label">
-                                    {{ $brand['name'] }}
-                                </div>
+                            <div class="filter-checkbox-label">
+                                {{ $category['name'] }}
                             </div>
-                        @endforeach
-                    </div>
-                @endif
+                        </div>
+                    @endforeach
+                </div>
+                <button>Marca</button>
+                <div id="brand_detail" name="brand_detail" class="filter-container">
+                    @foreach ($brands as $key => $brand)
+                        <div class="filter-checkbox">
+                            <div class="filter-checkbox-input">
+                                <input id="brand-{{ $brand['id'] }}" type="checkbox" name="brand-array"
+                                    value="{{ $brand['name'] }}" {{-- onclick="addBrandToList(this, '{{ $brand['name'] }}','{{ $maingroupName}}')" --}}>
+                            </div>
+                            <div class="filter-checkbox-label">
+                                {{ $brand['name'] }}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
                 <h3 class="title">LIMPIAR</h3>
                 <div class="filter-container-one-column">
                     <div class="centered">Última actualización</div>
@@ -112,12 +115,7 @@
         <section class="main-section" id="main-section">
             <div class="product-list">
                 <div>
-                    <h2 class="product-title" id="product-title" name="product-title">
-                        @if ($searchText === '')
-                            {{ $maingroupName }}
-                        @else
-                            {{ $searchText }}
-                        @endif
+                    <h2 class="product-title" id="product-title" name="product-title">{{ $maingroupName }}
                     </h2>
                 </div>
                 <div class="product-order">
@@ -172,17 +170,17 @@
                                     </button> --}}
 
                                     <button
-                                        onclick="ModalDetail(cleanQuotation('{{ $product['name'] }}'),
-                                        cleanQuotation('{{ $product['sku'] }}'),
+                                        onclick="ModalDetail('{{ WithoutQuotation($product['name']) }}',
+                                        '{{ WithoutQuotation($product['sku']) }}',
                                         {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, '{{ $product['price_tax_status'] }}',
                                         '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
                                         '{{ $product['currency'] }}',
-                                        cleanQuotation('{{ $product['description'] }}'),
+                                        '{{ WithoutQuotation($product['description']) }}',
                                         '{{ $product['unit'] }}',
                                         '{{ $product['department'] }}',
-                                        cleanQuotation('{{ $product['category'] }}'),
+                                        '{{ WithoutQuotation($product['category']) }}',
                                         '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                        cleanQuotation('{{ htmlentities(str_replace("\r\n", ' | ', $product['attributes'])) }}'),
+                                        '{{ htmlentities(str_replace("\r\n", ' | ', WithoutQuotation($product['attributes']))) }}',
                                         '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
                                         {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
                                     )">
@@ -227,41 +225,6 @@
                 @endforelse
 
                 {{-- @foreach ($products as $key => $product)
-                    @if ($key >= $start && $key < $end)
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="quantity">
-                                    {{ number_format($product['stock_quantity'], 0, ',', '.') }}
-                                </div>
-                                <h6 class="card-title">{{ $product['name'] }} </h6>
-                                <div class="card-image">
-                                    <img src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}">
-                                </div>
-                            </div>
-                            <div class="card-body-text">
-                                <div class="card-text">
-                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
-                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, {{ $product['price_tax_status'] }}
-                                    '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
-                                    '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
-                                    '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                    '{{ htmlentities(str_replace("\r\n", '<br>', $product['attributes'])) }}',
-                                    '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
-                                    )">
-                                        {{ $product['sku'] }} / {{ $product['brand'] }}
-                                    </button>
-                                </div>
-                                <div class="card-text">
-                                    {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }}  / {{ $product['unit'] }} {{ $product['price_tax_status'] }}
-                                </div>
-                            </div>
-                        </div>
-                        @php
-                            $counter++;
-                        @endphp
-                    @endif
                 @endforeach --}}
             </div>
         </section>
@@ -284,7 +247,6 @@
         <p class="footer-bottom">El contenido de este sitio, incluyendo textos, imágenes y código, es propiedad de SED
             INTERNATIONAL DE COLOMBIA S.A.S., y está protegido por las leyes internacionales de derecho de autor.</p>
     </footer>
-
 
     <div id="window-csv" class="modal">
 
@@ -313,7 +275,7 @@
     </div>
 
     <div id="window-detail" class="modal">
-        <form id="skuDetailForm" class="modal-container" method="get" action="#" class="p-6">
+        <form id="form-detail" class="modal-container" method="get" action="#" class="p-6">
             @csrf
             <div class="modal-card-title" id="prod_name"></div>
             <div class="modal-box-img">
@@ -426,92 +388,9 @@
 
         </form>
     </div>
+
 </body>
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
-        const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
-        const orderSelect = document.getElementById('order-options');
-        const searchText = document.getElementById('search');
-        categoryCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => updateProductsDisplay());
-        });
 
-        brandCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => updateProductsDisplay());
-        });
-
-        orderSelect.addEventListener('change', () => updateProductsDisplay());
-        searchText.addEventListener('keyup', function(event) {
-            //alert(event.key);
-            if (event.key === 'Enter') { // || event.key === 'Tab'
-                searchWilcardProduct();
-            }
-        });
-        searchText.addEventListener('change', function(event) {
-            //alert(event.key);
-            searchWilcardProduct();
-        });
-    });
-    /**
-     * activates the search route with the search text
-     */
-    function searchWilcardProduct() {
-        const searchText = document.getElementById('search').value;
-        if (searchText !== '') window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(
-            ':searchText', searchText);
-    }
-
-    function departmentRoute(groupName) {
-        temporalIndicator();
-        const productTitle = document.getElementById('product-title');
-        productTitle.textContent = groupName;
-        //window.location.href = '/products/' + groupName;
-        window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
-    }
-
-    function productMail(sku) {
-        if (sku === "") {
-            sku = document.getElementById("prod_sku").textContent;
-        }
-
-        let receiver = prompt("Correo del destinatario:");
-        if (receiver.indexOf("@") !== -1) {
-            const urlpath =
-                "{{ route('product.email', ['sku' => ':sku']) }}".replace(
-                    ":sku",
-                    sku
-                );
-            console.log(urlpath);
-
-            fetch(urlpath, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-api-receiver": receiver,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    //resolve(data);
-                    //if (data["code"] === 200) alert("correo enviado");
-                    //if (data["code"] === 404) alert(data["result"]);
-                    console.log(data);
-                })
-                .catch((error) => {
-                    // Check for 404 response specifically
-                    if (error.response && error.response.status === 404) {
-                        alert("Product not found! Could not send email.");
-                        console.error("Product not found:", error.response.data); // Log error details for debugging
-                    } else {
-                        console.error("Error fetching mail:", error); // Log other errors
-                    }
-                });
-        }
-    }
-
+<script type="text/javascript"  src="{{ asset('js/viewFunctions.js') }}"> // src="{{ asset('js/viewFunctions.js') }}"
 </script>
-
-<script type="text/javascript" src="{{ asset('js/viewFunctions.js') }}"></script>
-
 </html>

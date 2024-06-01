@@ -812,7 +812,9 @@
                     productMail(product.sku);
                 };
                 const icon = document.createElement("i");
-                icon.classList.add("fas fa-envelope navitem-icon");
+                icon.classList.add("fas");
+                icon.classList.add("fa-envelope");
+                icon.classList.add("navitem-icon");
                 button2.appendChild(icon);
 
                 const priceText = document.createElement("div");

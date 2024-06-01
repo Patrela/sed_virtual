@@ -190,7 +190,7 @@ class SedController extends Controller
      * Read SED Products abd update in the local database. Create some, update stock and price to others
      */
 
-    public function syncProductsAPI()
+    public function getProviderProducts()
     {
         // obtain ID_PROVIDER
         if (!app(LogController::class)->keyInCache('sync_products') ){
@@ -202,8 +202,7 @@ class SedController extends Controller
 
                 $response = Http::sedfunc()->post('/products/', [
                     'department' => '',
-                    // 'department' => 'Computadores',
-                    // 'category' => 'Portátiles',
+                    // 'department' => 'Computadores',   // 'category' => 'Portátiles',
                     // 'brand' => 'LENOVO',
                     // 'segment' => 'Hogar'
                 ]);
@@ -224,6 +223,8 @@ class SedController extends Controller
                         ->update(['is_discontinued' => 1, 'stock_quantity' => 0]);
                     // reset review status
                     $this->updateSyncState($idProvider);
+
+                    Log::info("Exec SED API " . now());
 
                     if (app(LogController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
