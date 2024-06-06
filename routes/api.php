@@ -72,4 +72,4 @@ Route::post('/sed/clearcache/{keycache}', [LogController::class, 'clearCacheKey'
 Route::get('/sed/customers', [SedController::class, 'CustomersB2B'])->name('sed.Customers');
 Route::post('/sed/customers/auth', [SedController::class, 'validateCustomerUser'])->name('sed.CustomerUser');
 
-Route::get('/vtex', [VtexController::class, 'connect'])->name('vtex.conection');
+Route::get('/vtex/login', [VtexController::class, 'connect'])->name('vtex.conection');

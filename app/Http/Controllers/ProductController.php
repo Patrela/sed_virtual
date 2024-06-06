@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\ProcessExternalProducts;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ProductMailable;
 
 
 
@@ -332,17 +334,25 @@ class ProductController extends Controller
             ], 404);
         }
         $product = $products[0];
-        // $mailjob= new ProcessExternalProducts;
-        // $mailjob->dispatchAfterResponse();
-        $mailjob= new ProcessMailer();
-        $mailjob->dispatchAfterResponse();
+
         //Process Mail Asynchronously
 
         // $mailjob= new ProcessProductMail($receiver, $sender, $product);
-        // $mailjob->dispatchAfterResponse();
+        // //$mailjob->dispatchAfterResponse();
+
+        Mail::to($receiver)
+            ->cc($sender)
+            ->send(new ProductMailable($sender, $product), function ($message, $sender,$product) {
+                $message->subject('SED: ' .$product->name);
+                $message->from($sender);
+                $message->setContentType('text/html'); // Set Content-Type header
+            });
+
         return response()->json([
             'result' => 'mail sent',
             'code' => 200,
         ], 200);
     }
 }
+
+

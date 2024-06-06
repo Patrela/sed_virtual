@@ -19,6 +19,7 @@ class VtexController extends Controller
             if (!$useremail || !$token) {
                 return response()->json([
                     'error' => 'Missing required Authorization Data',
+                    'code' => 401
                 ], 401);
             }
 
@@ -26,7 +27,8 @@ class VtexController extends Controller
             if (!$this->isValidToken($token)) { // Replace with your token validation logic
                 return response()->json([
                     'error' => 'Invalid token',
-                ], 401);
+                    'code' => 402,
+                ], 402);
             }
 
             // Find user using company and email (consider using model relationships for better structure)
@@ -44,6 +46,7 @@ class VtexController extends Controller
             } else {
                     return response()->json([
                         'error' => 'User not found',
+                        'code' => 404,
                     ], 404);
             }
 

@@ -90,9 +90,9 @@ function updateProductsDisplay() {
         return output;
     }
 
-    function getString(text) { return '"' + text + '", ' ;}
+    function getString(text) { return '"' + text + '",' ;}
 
-    function getNumber(numeric) { return '' + numeric + ', ' ; }
+    function getNumber(numeric) { return '' + numeric + ',' ; }
 
     function productFormCSV(
         prod_name,
@@ -137,11 +137,10 @@ function updateProductsDisplay() {
 
         var csvData = document.getElementById("prod_csv");
         csvData.innerText =
-            "prod_name, prod_sku, prod_stock, prod_price, prod_tax_status, prod_img_1, prod_img_2, prod_img_3, prod_img_4," +
-            " prod_currency, prod_description, prod_unit, prod_department, prod_category, prod_brand, prod_segment, prod_attributes, prod_guarantee," +
-            " prod_contact, prod_contact_unit, dimension_length, dimension_width, dimension_height, dimension_weight" +
-            "\r\n" +
-            csvFormat.innerHTML;
+            "prod_name,prod_sku,prod_stock,prod_price,prod_tax_status,prod_img_1,prod_img_2,prod_img_3,prod_img_4, " +
+            "prod_currency,prod_description,prod_unit,prod_department,prod_category,prod_brand,prod_segment,prod_attributes,prod_guarantee, " +
+            "prod_contact,prod_contact_unit,dimension_length,dimension_width,dimension_height,dimension_weight" +
+            "\r\n" + csvFormat.innerHTML;
 
         description.innerText = "";
         modal.style.display = "block";
