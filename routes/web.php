@@ -12,7 +12,8 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
-
+use App\Http\Controllers\VtexController;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     if (session()->has('current_user') || Cache::has('sync_products')) {
@@ -28,6 +29,39 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+/*
+Route::get('/vtex/login/{username}', function (Request $request, string $username) {
+    app(VtexController::class)->connect( $request,$username);
+    $products = app(ProductController::class)->getDepartmentProducts();
+    $data = app(CategoryController::class)->loadPageData($products);
+    if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+    return view('ppal', $data);
+})->name('vtex.conection');
+*/
+
+Route::get('/vtex/login/{username}', function (Request $request, string $username) {
+    $response = app(VtexController::class)->connect($request, $username);
+
+    if ($response->getStatusCode() === 200) {
+        $products = app(ProductController::class)->getDepartmentProducts();
+        $data = app(CategoryController::class)->loadPageData($products);
+        if (!app(LogController::class)->keyInCache('sync_products')) {
+            ProcessExternalProducts::dispatchAfterResponse();
+        }
+        return view('ppal', $data);
+    } else {
+        $errorData = json_decode($response->getContent(), true);
+        $errorMessage = $errorData['error'] ?? 'Connection from VTEX failed';
+        $statusCode = $response->getStatusCode();
+
+        return response()->json([
+            'error' => $errorMessage,
+            'code' => $statusCode,
+        ], $statusCode);
+    }
+})->name('vtex.conection');
+
 
 
 Route::middleware('auth')->group(function () {

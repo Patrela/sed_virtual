@@ -300,7 +300,7 @@ function updateProductsDisplay() {
         brandListElement.value = selectedBrands.join(','); // Update comma-separated list
         if (selectedBrands.length > 0)
             temporalIndicator();
-        productBrandCards(groupName); // Call fetchProductsByBrands function and create cards
+        productBrandCards(groupName);
         brandNamesElement.value = selectedBrandsName.join('-');
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = brandNamesElement.value;
@@ -324,7 +324,7 @@ function updateProductsDisplay() {
         catListElement.value = selectedCategories.join(','); // Update comma-separated list
         if (selectedCategories.length > 0)
             temporalIndicator();
-        productCategoriesCards(groupName); // Call fetchProductsByBrands function and create cards
+        productCategoriesCards(groupName);
         catNamesElement.value = selectedCatsName.join('-');
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = catNamesElement.value;

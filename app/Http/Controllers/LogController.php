@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class LogController extends Controller
 {
@@ -66,18 +70,117 @@ class LogController extends Controller
         return  false;
     }
 
-        //validate cache active status
-        public function isCache()
+    //validate cache active status
+    public function isCache()
+    {
+        $cachestore = config('cache.default');
+        if($cachestore){
+            $cachestore = config("cache.stores.{$cachestore}");
+        }
+        if($cachestore)
         {
-            $cachestore = config('cache.default');
-            if($cachestore){
-                $cachestore = config("cache.stores.{$cachestore}");
+                return true;
+        }
+        return  false;
+    }
+
+    public function loginAPI(string $useremail)
+    {
+        $error= "";
+        //$this->ensureIsNotRateLimited();
+        $password = "Test" . sprintf("%05d", rand(147841,999999));
+        $inputs = array('email' =>"{$useremail}", 'password' => "{$password}");
+        $rules = array( 'email' => 'required|email', 'password' => 'required');
+
+        $validator = Validator::make($inputs, $rules); //Input::all() , $rules);
+        try {
+            if (!$validator->fails()) {
+                $user = User::where( 'email', "{$useremail}")->first();
+                if($user)
+                {
+                    $user->password = Hash::make($password);
+                    $user->remember_token =$password;
+                    $user->save();
+                    //Auth::login($user);
+                    if (Auth::attempt( $inputs)){
+                        session()->regenerate();
+                        session(['current_trade' => $user->trade_id]);
+                        session(['current_user' =>  $user->email]);
+                        return Auth::user();
+                    } else {
+                        $error= "Invalid {$useremail} credentials";
+                    }
+                } else{
+                    $error= "User {$useremail} not found";
+                }
+            } else {
+                $error= "Validation error";
             }
-            if($cachestore)
-            {
-                 return true;
-            }
-            return  false;
+        } catch (\Exception $e) {
+            $error="Exception error " . $e->getMessage();
+        }
+        Log::error( "loginAPI. " .$error);
+        session()->regenerate();
+        return false;
+    }
+
+
+    public function authenticateAPI(string $useremail)
+    {
+
+        //$this->ensureIsNotRateLimited();
+        $password = "Test" . sprintf("%05d", rand(147841,999999));
+        $inputs = array('email' =>"{$useremail}", 'password' => "{$password}");
+        $rules = array( 'email' => 'required|email', 'password' => 'required');
+
+        $validator = Validator::make($inputs, $rules); //Input::all() , $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'result' => "Doesn't pass validation",
+                'code' => 402,
+            ], 402);
         }
 
+        $user = User::where( 'email', "{$useremail}")->first();
+        $user->password = Hash::make($password);
+        $user->remember_token =$password;
+        $user->save();
+
+        //Auth::login($user);
+
+        try {
+            if (!Auth::attempt( $inputs))
+            {
+                return response()->json([
+                    'result' => "User {$useremail} not found",
+                    'code' => 404,
+                ], 404);
+            }
+            return response()->json([
+                'email' => Auth::user()->email,
+                'trade_id' => Auth::user()->trade_id,
+                'result' => Auth::user()->trade_id, //'API',
+                'code' => 200
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 403);
+        }
+
+        //RateLimiter::clear($this->throttleKey());
+
+        // $request->session()->regenerate();
+        // session(['current_trade' => Auth::user()->trade_id]);
+        // session(['current_user' =>  Auth::user()->email]);
+        // Log::info("session API email.  " .session('current_user'));
+
+        // return response()->json([
+        //     'email' => Auth::user()->email,
+        //     'trade_id' => Auth::user()->trade_id,
+        //     'source' => 'API',
+        //     'code' => 200
+        // ], 200);
+    }
 }

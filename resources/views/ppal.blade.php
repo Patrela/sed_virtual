@@ -68,8 +68,8 @@
                         @foreach ($categories as $key => $category)
                             <div class="filter-checkbox">
                                 <div class="filter-checkbox-input">
-                                    <input id="cat-{{ $category['id'] }}" name="cat-array" value="{{ $category['name'] }}"
-                                        type="checkbox" {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}>
+                                    <input id="cat-{{ $category['id'] }}" name="cat-array"
+                                        value="{{ $category['name'] }}" type="checkbox" {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}>
 
                                 </div>
                                 <div class="filter-checkbox-label">
@@ -105,6 +105,12 @@
                             <button type="submit">Cargar Ahora</button>
                         </form>
                     </div>
+                    {{-- <div class="centered">
+                        <form action="#" method="GET">
+                            @csrf
+                            <button type="button" onclick="vtexLogin('a1@correo.com', 'Other One')">Vtex User</button>
+                        </form>
+                    </div> --}}
                 </div>
             </div>
 
@@ -478,19 +484,16 @@
         let receiver = prompt("Correo del destinatario:");
         if (receiver.indexOf("@") !== -1) {
             const urlpath =
-                "{{ route('product.email', ['sku' => ':sku']) }}".replace(
-                    ":sku",
-                    sku
-                );
+                "{{ route('product.email', ['sku' => ':sku']) }}".replace(":sku", sku);
             console.log(urlpath);
 
             fetch(urlpath, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-api-receiver": receiver,
-                },
-            })
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-api-receiver": receiver,
+                    },
+                })
                 .then((response) => response.json())
                 .then((data) => {
                     //resolve(data);
@@ -508,6 +511,42 @@
                     }
                 });
         }
+    }
+
+    function vtexLogin(usermail, username = "New User") {
+        const element = document.getElementById("products-container");
+        element.action = "";
+
+        const urlpath = "{{ route('vtex.conection', ['username' => ':username']) }}".replace(":username", username);
+
+        fetch(urlpath, {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer HsMaBkQPI1ReVNN1ppIZ9KXTeSTSJNJ9VNMY4U2bSxi2y",
+                    "Content-Type": "application/json",
+                    "x-api-user": usermail,
+                },
+            })
+            .then((response) =>(response.status==200)? response.text() : response.json())
+            .then((data) => {
+                if (data.hasOwnProperty("code")) {
+                    element.innerHTML = ` <strong>Code:</strong> ${data.code} <br>
+                                        <strong>Message:</strong> ${data.message || "No message provided"}`;
+                } else {
+                    //console.error(data);
+                    //element.innerHTML = data;
+                    window.location.href = "{{ route('ppal') }}";
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.error("Error:", error.response.status, error.response.statusText);
+                    element.innerText = `Error: ${error.response.statusText}`;
+                } else {
+                    console.error("Error fetching data:", error);
+                    element.innerText = "Error fetching data";
+                }
+            });
     }
 
 </script>

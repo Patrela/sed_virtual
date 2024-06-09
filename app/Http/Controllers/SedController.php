@@ -8,10 +8,12 @@ use App\Models\Category;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 use App\Models\FailedProduct;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use function PHPUnit\Framework\isEmpty;
+use Illuminate\Support\Facades\Hash;
 
 class SedController extends Controller
 {
@@ -172,16 +174,28 @@ class SedController extends Controller
                 'nit' => '',
             ]);
             if ($response->successful()) {
-                return $response->json();
+                //return $response->json();
+                $jsonResponse = $response->json();
+                $customers = $jsonResponse['customer']['customer'];
+                Log::info($customers);
+
+                foreach ($customers as $customer) {
+                    Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
+                    $this->createOrUpdateCustomer( $customer);
+                }
+                return response()->json([
+                    'result' => 'SED Providers updated',
+                    'code' => 200,
+                ], 200);
             } else {
                 return response()->json([
-                    'error' => 'Api SED Customer B2B',
+                    'result' => 'Api SED Customer B2B error',
                     'code' => $response->status(),
                 ], 403);
             }
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'result' => $e->getMessage(),
                 'code' => $e->getCode(),
             ], 403);
         }
@@ -189,6 +203,35 @@ class SedController extends Controller
     /**
      * Read SED Products abd update in the local database. Create some, update stock and price to others
      */
+    private function createOrUpdateCustomer( $customer)
+    {
+        $provider= Provider::where('nit', "{$customer['customer_nit']}")->first();
+        if(!$provider){
+            $idProvider= Provider::count();
+            $provider = Provider::create([
+                'id_provider' => $idProvider +1,
+                'name' =>$customer['customer_name'],
+                'nit' => $customer['customer_nit'],
+                'email' => $customer['contact_email'],
+            ]);
+        }
+        $user= User::where('email', "{$customer['contact_email']}")->first();
+        if(!$user){
+            $userId = substr($customer['contact_email'],0,strpos($customer['contact_email'],"@"));
+            $user = User::create([
+                'name' => $customer['contact_name'] ,
+                'email' =>$customer['contact_email'],
+                'password' => Hash::make($userId),
+                'trade_id' => $provider['id_provider'] ,
+                'user_id' => $userId,
+                'role_type' => ($provider['id_provider'] ==1)? User::ALLROLES["Staff"] : User::ALLROLES["Trade"],
+            ]);
+         } else {
+            $userId = substr($customer['contact_email'],0,strpos($customer['contact_email'],"@"));
+            $user['user_id'] = $userId;
+            $user->save();
+         }
+    }
 
     public function getProviderProducts()
     {
