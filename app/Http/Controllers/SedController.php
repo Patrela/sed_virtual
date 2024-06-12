@@ -167,7 +167,7 @@ class SedController extends Controller
      * @return Response of Customer List
      */
 
-    public function CustomersB2B()
+    public function getCustomersB2B()
     {
         try {
             $response = Http::sedfunc()->post('/authentication/', [
@@ -177,10 +177,10 @@ class SedController extends Controller
                 //return $response->json();
                 $jsonResponse = $response->json();
                 $customers = $jsonResponse['customer']['customer'];
-                Log::info($customers);
+                //Log::info($customers);
 
                 foreach ($customers as $customer) {
-                    Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
+                    //Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
                     $this->createOrUpdateCustomer( $customer);
                 }
                 return response()->json([

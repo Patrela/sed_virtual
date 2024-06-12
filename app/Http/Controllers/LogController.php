@@ -88,7 +88,8 @@ class LogController extends Controller
     {
         $error= "";
         //$this->ensureIsNotRateLimited();
-        $password = "Test" . sprintf("%05d", rand(147841,999999));
+        $password  = substr($useremail,0,strpos($useremail,"@"));
+        //$password = "Test" . sprintf("%05d", rand(147841,999999));
         $inputs = array('email' =>"{$useremail}", 'password' => "{$password}");
         $rules = array( 'email' => 'required|email', 'password' => 'required');
 
@@ -99,7 +100,7 @@ class LogController extends Controller
                 if($user)
                 {
                     $user->password = Hash::make($password);
-                    $user->remember_token =$password;
+                    $user->user_id =$password;
                     $user->save();
                     //Auth::login($user);
                     if (Auth::attempt( $inputs)){

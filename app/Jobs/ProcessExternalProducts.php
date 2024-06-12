@@ -27,5 +27,6 @@ class ProcessExternalProducts implements ShouldQueue
     public function handle(): void
     {
         app(SedController::class)->getProviderProducts();
+        app(SedController::class)->getCustomersB2B();
     }
 }
