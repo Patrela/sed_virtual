@@ -2,18 +2,20 @@
 
 
 
+//use App\Mail\TestMailable;
+//use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use App\Jobs\ProcessExternalProducts;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\VtexController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\VtexController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\SedController;
 
 Route::get('/', function () {
     if (session()->has('current_user') || Cache::has('sync_products')) {
@@ -61,8 +63,6 @@ Route::get('/vtex/login/{username}', function (Request $request, string $usernam
         ], $statusCode);
     }
 })->name('vtex.conection');
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -158,7 +158,7 @@ Route::post('/external', function () {
 
 /*
 Route::get('/mail/test/{contact}', function ($contact) {
-    //use Illuminate\Support\Facades\Mail;
+    use Illuminate\Support\Facades\Mail;
     try {
         Mail::to('patorela@gmail.com')->cc('patrela@hotmail.com')->send(new TestMailable($contact));
         return response()->json([

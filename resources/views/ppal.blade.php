@@ -105,12 +105,12 @@
                             <button type="submit">Cargar Ahora</button>
                         </form>
                     </div>
-                    <div class="centered">
+                    {{-- <div class="centered">
                         <form action="#" method="GET">
                             @csrf
                             <button type="button" onclick="vtexLogin('a1@correo.com', 'Other One')">Vtex User</button>
                         </form>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 

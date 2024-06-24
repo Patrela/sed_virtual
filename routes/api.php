@@ -2,11 +2,11 @@
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Jobs\ProcessNewUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SedController;
-use App\Http\Controllers\VtexController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -33,7 +33,8 @@ Route::post('/tokens/create', function (Request $request) {
     return ['token' => $token->plainTextToken];
 })->name('sanctum.token');
 
-Route::post('/login', function (Request $request) {
+/*
+Route::post('/user/login', function (Request $request) {
     $user = User::where('email', $request->input('email'))->first();
     if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json([
@@ -47,8 +48,8 @@ Route::post('/login', function (Request $request) {
         ],
         'token' => $user->createToken('api')->plainTextToken,
     ], 200);
-})->name('login');
-
+})->name('user.login');
+*/
 Route::post('/login/header', function (Request $request) {
     $user = User::where('email', $request->input('email'))->first();
     if (!$user || !Hash::check($request->password, $user->password)) {
@@ -71,6 +72,15 @@ Route::get('/sed/clasifications', [SedController::class, 'syncProductGroups'])->
 Route::post('/sed/clearcache/{keycache}', [LogController::class, 'clearCacheKey'])->name('sed.clearCache');
 Route::get('/sed/customers', [SedController::class, 'CustomersB2B'])->name('sed.Customers');
 Route::post('/sed/customers/auth', [SedController::class, 'validateCustomerUser'])->name('sed.CustomerUser');
+Route::get('/sed/staff',[SedController::class, 'getStaffUsers'])->name('sed.staff');
+Route::get('/sed/users', function () {
+    ProcessNewUsers::dispatchAfterResponse();
+    //ProcessNewUsers::dispatch();
+    return response()->json([
+        'result' => 'SED New User update process initiated in the background',
+        'code' => 202,
+    ], 202);
+})->name('sed.users');
 
 //Route::get('/vtex/login/{username}', [VtexController::class, 'connect'])->name('vtex.conection');
 Route::get('/vtex/login/mail/{useremail}', [LogController::class, 'authenticateAPI'])->name('vtex.login');

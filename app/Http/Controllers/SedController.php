@@ -3,17 +3,22 @@
 namespace App\Http\Controllers;
 
 use console;
+use App\Models\User;
+use App\Models\Trade;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Provider;
+use Illuminate\Support\Arr;
+use App\Models\UserImported;
 use Illuminate\Http\Request;
+
 use App\Models\FailedProduct;
-use App\Models\User;
+use App\Models\ProductImported;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use function PHPUnit\Framework\isEmpty;
-use Illuminate\Support\Facades\Hash;
 
 class SedController extends Controller
 {
@@ -34,9 +39,12 @@ class SedController extends Controller
             foreach ($groups as $key => $group) {
                 // execute the API with SED clasification group
                 try {
-                    $response = Http::sedfunc()->post('/' . $key . '/', [
-                        'item' => '',
-                    ]);
+                    if( env('APP_ENV') === 'production' ) {
+                        $response = Http::sedprod()->post('/' . $key . '/', ['item' => '',]);
+                    } else {
+                        $response = Http::seddev()->post('/' . $key . '/', ['item' => '',]);
+                    }
+
                     if ($response->successful()) {
                         $jsonResponse = $response->json();
                         // if($key == 'departments')
@@ -47,10 +55,10 @@ class SedController extends Controller
                         $this->createClasification($clasifications);
                     } else {
                         // Handle non-successful response (e.g., 4xx or 5xx status codes)
-                        Log::error("Error during API " . $key . " request");
+                        Log::error("Error during API Imort Products " . $key . " request");
                         // return response()->json([
                         //     'error' => "Error during API " . $key . " request:",
-                        //     'code' => config('services.api.erp') . "/" .$key ."/ " .$response->status(),
+                        //     'code' => config('services.api.dev') . "/" .$key ."/ " .$response->status(),
                         // ], 403);
                     }
 
@@ -111,9 +119,13 @@ class SedController extends Controller
     public function syncDepartmentProducts(string $department)
     {
         try {
-            $response = Http::sedfunc()->post('/products/', [
-                'department' => $department,
-            ]);
+            if( env('APP_ENV') === 'production' ) {
+                $response = Http::sedprod()->post('/products/', [ 'department' => $department,]);
+            } else {
+                $response = Http::seddev()->post('/products/', [ 'department' => $department,]);
+            }
+
+
             if ($response->successful()) {
                 return $response->json();
             } else {
@@ -144,10 +156,19 @@ class SedController extends Controller
             $useremail = $request->header('x-api-user');
             //$token = $request->bearerToken();
             $name = $request->query('name');
-            $response = Http::sedfunc()->post('/authentication/?name=' .$name, [
-                'nit' => $company,
-                'email' =>  $useremail,
-            ]);
+
+            if( env('APP_ENV') === 'production' ) {
+                $response = Http::sedprod()->post('/authentication/?name=' .$name, [
+                    'nit' => $company,
+                    'email' =>  $useremail,
+                ]);
+            } else {
+                $response = Http::seddev()->post('/authentication/?name=' .$name, [
+                    'nit' => $company,
+                    'email' =>  $useremail,
+                ]);
+            }
+
             if ($response->successful()) {
                 return $response->json();
             } else {
@@ -163,205 +184,279 @@ class SedController extends Controller
             ], 403);
         }
     }
-    /**
-     * @return Response of Customer List
-     */
 
-    public function getCustomersB2B()
+
+    public function updateNewUsers()
+    {
+        Log::info("Starting Authentication update");
+        try {
+            $newUsers = User::where('password','')->get();
+            foreach($newUsers as $user) {
+                $user['password'] = Hash::make($user['user_id']);
+                //$user['remember_token'] = Hash::make($user['name']);
+                $user->save();
+            }
+            Log::info("Ending Authentication update");
+            return response()->json([
+                'result' => 'SED New Users updated',
+                'code' => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error("Error during API Staff New Users register: {$e->getMessage()}");
+            return response()->json([
+                'result' => 'error ' .$e->getCode(),
+                'message' => $e->getMessage(),
+            ], 401);
+        }
+
+    }
+
+    public function getStaffUsers()
     {
         try {
-            $response = Http::sedfunc()->post('/authentication/', [
-                'nit' => '',
-            ]);
+
+            if( env('APP_ENV') === 'production' ) {
+                $response = Http::sedprod()->post('/staff/', [ 'email' => '',]);
+            } else {
+                $response = Http::seddev()->post('/staff/', [ 'email' => '',]);
+            }
             if ($response->successful()) {
                 //return $response->json();
                 $jsonResponse = $response->json();
-                $customers = $jsonResponse['customer']['customer'];
+                $staff = $jsonResponse['staff']['staff'];
                 //Log::info($customers);
 
-                foreach ($customers as $customer) {
+                $itemsKey= "|";
+                $staffData = [];
+                UserImported::truncate();
+                foreach ($staff as $customer) {
                     //Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
-                    $this->createOrUpdateCustomer( $customer);
+                    $key = "{$customer['contact_email']}";
+                    if(!strpos($itemsKey, "|" .$key ."|" )) {
+                        $itemsKey = $itemsKey .$key  ."|";
+                        $staffData[] = [
+                            'name' => $customer["contact_name"],
+                            'email' => $key,
+                            'role_type' => User::ALLROLES["Staff"],
+                    ];
+                        // Insert in batches of 100
+                        if (count($staffData) === 100) {
+                            //Log::info($itemsKey);
+                            UserImported::insert($staffData);
+                            //Log::info("Exec SED API User Staff Imported = " .UserImported::all()->count() ." data =" .count($staffData) );
+                            $staffData = [];
+                        }
+                    }
                 }
+                // Insert any remaining records
+                if (!empty($staffData)) {
+                    //Log::info($itemsKey);
+                    UserImported::insert($staffData);
+                    Log::info("Exec SED API Staff Users Imported = " .UserImported::all()->count() ." data =" .count($staffData) );
+                }
+                DB::select("CALL sp_import_users(?)",[User::ALLROLES["Staff"] ]);
                 return response()->json([
-                    'result' => 'SED Providers updated',
+                    'result' => 'SED Staff Users updated',
                     'code' => 200,
                 ], 200);
             } else {
                 return response()->json([
-                    'result' => 'Api SED Customer B2B error',
-                    'code' => $response->status(),
-                ], 403);
+                    'result' => 'error ' . $response->status(),
+                    'message' => json_encode($response->json()),
+                ], $response->status());
             }
         } catch (\Exception $e) {
+            Log::error("Error during API Staff Users request: {$e->getMessage()}");
             return response()->json([
-                'result' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ], 403);
+                'result' => 'error ' .$e->getCode(),
+                'message' => $e->getMessage(),
+            ], 401);
         }
-    }
-    /**
-     * Read SED Products abd update in the local database. Create some, update stock and price to others
-     */
-    private function createOrUpdateCustomer( $customer)
-    {
-        $provider= Provider::where('nit', "{$customer['customer_nit']}")->first();
-        if(!$provider){
-            $idProvider= Provider::count();
-            $provider = Provider::create([
-                'id_provider' => $idProvider +1,
-                'name' =>$customer['customer_name'],
-                'nit' => $customer['customer_nit'],
-                'email' => $customer['contact_email'],
-            ]);
-        }
-        $user= User::where('email', "{$customer['contact_email']}")->first();
-        if(!$user){
-            $userId = substr($customer['contact_email'],0,strpos($customer['contact_email'],"@"));
-            $user = User::create([
-                'name' => $customer['contact_name'] ,
-                'email' =>$customer['contact_email'],
-                'password' => Hash::make($userId),
-                'trade_id' => $provider['id_provider'] ,
-                'user_id' => $userId,
-                'role_type' => ($provider['id_provider'] ==1)? User::ALLROLES["Staff"] : User::ALLROLES["Trade"],
-            ]);
-         } else {
-            $userId = substr($customer['contact_email'],0,strpos($customer['contact_email'],"@"));
-            $user['user_id'] = $userId;
-            $user->save();
-         }
     }
 
-    public function getProviderProducts()
+    public function getTradeUsers()
     {
-        // obtain ID_PROVIDER
+        try {
+
+            if( env('APP_ENV') === 'production' ) {
+                $response = Http::sedprod()->post('/authentication/', [ 'nit' => '',]);
+            } else {
+                $response = Http::seddev()->post('/authentication/', [ 'nit' => '',]);
+            }
+            if ($response->successful()) {
+                //return $response->json();
+                $jsonResponse = $response->json();
+                $tradesusers = $jsonResponse['customers']['customers'];
+                //Log::info($customers);
+
+                $itemsKey= "|";
+                $tradesData = [];
+                UserImported::truncate();
+                foreach ($tradesusers as $customer) {
+                    //Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
+                    $key = "{$customer['contact_email']}";
+                    if(!strpos($itemsKey, "|" .$key ."|" )) {
+                        $itemsKey = $itemsKey .$key  ."|";
+                        $tradesData[] = [
+                            'trade_name' => $customer["customer_name"],
+                            'trade_nit' => $customer["customer_nit"],
+                            'trade_id' => $customer["customer_number"],
+                            'name' => $customer["contact_name"],
+                            'email' => $key,
+                            'role_type' => User::ALLROLES["Trade"],
+                        ];
+                        // Insert in batches of 100
+                        if (count($tradesData) === 100) {
+                            //Log::info($itemsKey);
+                            UserImported::insert($tradesData);
+                            //Log::info("Exec SED API User Trade Imported = " .UserImported::all()->count() ." data =" .count($tradesData) );
+                            $tradesData = [];
+                        }
+                    }
+
+                }
+                // Insert any remaining records
+                if (!empty($tradesData)) {
+                    //Log::info($itemsKey);
+                    UserImported::insert($tradesData);
+                    Log::info("Exec SED API Trade Users Imported = " .UserImported::all()->count() ." data =" .count($tradesData) );
+                }
+                DB::select("CALL sp_import_users(?)",[User::ALLROLES["Trade"] ]);
+                return response()->json([
+                    'result' => 'SED Trade Users updated',
+                    'code' => 200,
+                ], 200);
+            } else {
+                return response()->json([
+                    'result' => 'error ' . $response->status(),
+                    'message' => json_encode($response->json()),
+                ], $response->status());
+            }
+
+        } catch (\Exception $e) {
+            Log::error("Error during API  Trade Users request: {$e->getMessage()}");
+            return response()->json([
+                'result' => 'error ' .$e->getCode(),
+                'message' => $e->getMessage(),
+            ], 401);
+        }
+
+    }
+
+    public function getProviderProducts($idProvider = 1)
+    {
         if (!app(LogController::class)->keyInCache('sync_products') ){
-            $Provider = Provider::where('nit', '8300361083')->first(); //SED_PROVIDER
-            $idProvider = ($Provider) ? $Provider->id : 2;
+            //$Provider = Provider::where('nit', '8300361083')->first(); //SED_PROVIDER
+            //$idProvider = ($Provider) ? $Provider->id : 1;
             session(['lastUpdated' =>  date('d/m/Y H:i:s')]);
 
             try {
 
-                $response = Http::sedfunc()->post('/products/', [
-                    'department' => '',
-                    // 'department' => 'Computadores',   // 'category' => 'Portátiles',
-                    // 'brand' => 'LENOVO',
-                    // 'segment' => 'Hogar'
-                ]);
+                if( env('APP_ENV') === 'production' ) {
+                    $response = Http::sedprod()->post('/products/', [
+                        'department' => '',
+                    ]);
+                } else {
+                    $response = Http::seddev()->post('/products/', [
+                        'department' => '',
+                        // 'department' => 'Computadores',   // 'category' => 'Portátiles',
+                        // 'brand' => 'LENOVO',
+                        // 'segment' => 'Hogar'
+                    ]);
+                }
 
                 // Check if the response was successful (status code 2xx)
                 if ($response->successful()) {
-                    // reset review status
-                    $this->updateSyncState($idProvider);
                     $jsonResponse = $response->json();
                     $products = $jsonResponse['products']['products'];
-
+                    $productData = [];
+                    $itemsKey= "|";
+                    ProductImported::truncate();
                     foreach ($products as $product) {
-                        $this->createOrUpdateProducts($idProvider, $product);
-                    }
-                    // identify offline products
-                    Product::where('id_provider', $idProvider)
-                        ->where('is_reviewed', 0)
-                        ->update(['is_discontinued' => 1, 'stock_quantity' => 0]);
-                    // reset review status
-                    $this->updateSyncState($idProvider);
+                        $key = "{$product['part_num']}";
+                        if(!strpos($itemsKey, "|" .$key ."|" ))
+                        {
+                            $itemsKey = $itemsKey .$key  ."|";
+                            $productData[] = [
+                                'id_provider' => $idProvider,
+                                'sku' => $key,
+                                'part_num' => $key,
+                                'name' => "{$product['name']}",
+                                'slug' => "{$product['slug']}",
+                                'description' => "{$product['description']}",
+                                'short_description' => "{$product['short_description']}",
+                                'stock_quantity' => $product['stock_quantity'],
+                                'unit' => "{$product['unit']}",
+                                'guarantee' => "{$product['guarantee']}",
+                                'regular_price' => $product['regular_price'],
+                                'sale_price' => $product['regular_price'],
+                                'price_tax_status' => "{$product['price_tax_status']}",
+                                'currency' => "{$product['currency']}",
+                                'department' => "{$product['department']}",
+                                'category' => "{$product['category']}",
+                                'segment' => "{$product['segment']}",
+                                'brand' => "{$product['brand']}",
+                                'attributes' => "{$product['attributes']}",
+                                'dimension_length' => $product['dimension_length'],
+                                'dimension_width' => $product['dimension_width'],
+                                'dimension_height' => $product['dimension_height'],
+                                'dimension_weight' => $product['dimension_weight'],
+                                'image_1' => "{$product['image_1']}",
+                                'image_2' => "{$product['image_2']}",
+                                'image_3' => "{$product['image_3']}",
+                                'image_4' => "{$product['image_4']}",
+                                'contact_unit' => "{$product['contact_unit']}",
+                                'contact_agent' => "{$product['contact_agent']}",
+                                'contact_email' => "{$product['contact_email']}",
+                                'is_new' =>0,
+                            ];
 
-                    Log::info("Exec SED API " . now());
+                            // Insert in batches of 100
+                            if (count($productData) === 100) {
+                                //Log::info($itemsKey);
+                                //Log::info($productData);
+                                ProductImported::insert($productData);
+                                //Log::info("SED API Product Imported = " .ProductImported::all()->count() ." data =" .count($productData) );
+                                $productData = [];
+                            }
+
+                        }
+                    }
+
+                    // Insert any remaining records
+                    if (!empty($productData)) {
+                        //Log::info($itemsKey);
+                        //Log::info($productData);
+                        ProductImported::insert($productData);
+                        Log::info("SED API Product Imported = " .ProductImported::all()->count() ." data =" .count($productData) );
+                    }
+                    DB::select("CALL sp_import_products()");
 
                     if (app(LogController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
                     return response()->json([
-                        'estado' => 'ok',
+                        'result' => 'ok',
                         'message' => 'Imported Succcessfully',
                     ], 200);
                 } else {
-                    // Handle non-successful response (e.g., 4xx or 5xx status codes)
-                    $this->errorPrint('' . $response->status(), json_encode($response->json()));
+                    return response()->json([
+                        'result' => 'error ' . $response->status(),
+                        'message' => json_encode($response->json()),
+                    ], $response->status());
                 }
             } catch (\Exception $e) {
-                // Log the error
                 Log::error("Error during API request: {$e->getMessage()}");
-                // Handle the error as needed (e.g., store failed records)
-                return $this->errorPrint('API error', $e->getMessage());
+                return response()->json([
+                    'result' => 'error ' .$e->getCode(),
+                    'message' => $e->getMessage(),
+                ], 401);
             }
         } else {
             // return Cache::get('sync_products');
             return response()->json([
-                'estado' => 'ok',
+                'result' => 'ok',
                 'message' => Cache::get('sync_products'),
             ], 200);
         }
-    }
-
-    /**
-     * start or end of the syncronization  process. Mark each product as not reviewed
-     */
-    private function updateSyncState($idProvider)
-    {
-        Product::where('id_provider', $idProvider)
-            ->where('is_reviewed', 1)
-            ->update(['is_reviewed' => 0]);
-    }
-
-    /**
-     * each product from the provider is searched in the database. If exists, updates price and stock, otherwise, creates new product
-     * @param int $idProvider: id of the syncronization provider
-     * @param Product $product
-     */
-    private function createOrUpdateProducts($idProvider, $product)
-    {
-        try {
-            $existingProduct = Product::where('part_num', $product['part_num'])
-                ->where('id_provider', $idProvider)
-                ->first();
-
-            // If the product doesn't exist, create it
-            if (!$existingProduct) {
-                $product['id_provider'] = $idProvider;
-                //$product['stock_quantity'] = $product['stock_quantity'];
-                //if (strlen($product['short_description'] )> 200) $product['short_description'] = substr($product['short_description'],0,200);
-                $product['is_reviewed'] = 1;
-                $product['is_insale'] = 0;
-                $product['is_sold'] = 0;
-                $product['is_discontinued'] = 0;
-                $product['is_reserved'] = 0;
-                Product::create($product);
-                //$this->errorPrint($product['part_num'], substr($product['name'], 0, 100));
-            } else {
-                // update states from rules
-                $existingProduct->is_reviewed = 1;
-                //update tax condition
-                $existingProduct->price_tax_status = $product['price_tax_status']; ;
-                if ($product['regular_price'] < $existingProduct->regular_price) {
-                    $existingProduct->is_insale = 1;
-                    $existingProduct->sale_price = $product['regular_price'];
-                } elseif ($product['regular_price'] > $existingProduct->regular_price) {
-                    $existingProduct->is_insale = 0;
-                }
-                $existingProduct->regular_price = $product['regular_price'];
-                $existingProduct->stock_quantity = (int)$product['stock_quantity'];
-                $existingProduct->save();
-            }
-        } catch (\Exception $e) {
-            // Store the failed record
-            Log::error("Error during product creation request: {$product['part_num']}");
-            $this->errorPrint($product['part_num'], $e->getMessage());
-        }
-    }
-
-    /**
-     * Its the blueprint for part_num that could not be imported in the database
-     */
-    private function errorPrint($partNum, $errorMessage)
-    {
-        $imporerror = FailedProduct::create([
-            'part_num' => $partNum,
-            'error_message' => isEmpty($errorMessage) ? "" : $errorMessage
-        ]);
-        return response()->json([
-            'part_num' => $imporerror->part_num,
-            'error_message' => $imporerror->error_message,
-        ], 403);
     }
 }

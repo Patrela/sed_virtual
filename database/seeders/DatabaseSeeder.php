@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Trade;
+use App\Models\Product;
 use App\Models\Provider;
 use Illuminate\Database\Seeder;
 
@@ -23,8 +24,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
             'password' => 'Test123456',
             'remember_token' => 'Test123456',
-            'trade_id' => 'SED',
-            'user_id' => 'SED_TRADE',
+            'trade_id' => '1',
+            'user_id' => 'test',
             'role_type' =>User::ALLROLES['Trade'],
         ]);
         $user = User::create([
@@ -32,8 +33,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'analista.procesos@sedintl.com',
             'password' => 'Test123456',
             'remember_token' => 'Test123456',
-            'trade_id' => '402e83e9-cc23-11ee-8452-0e4de3ffebc3',
-            'user_id' => '75a6b76a-4605-4300-9c94-085208582eeb',
+            'trade_id' => '1',
+            'user_id' => 'analista.procesos',
             'role_type' =>User::ALLROLES['Staff'],
         ]);
         $user->createToken('profile', ['user-create','user-edit', 'user-show']);
@@ -45,7 +46,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'adm@correo.com',
             'password' => 'Adm123456',
             'remember_token' => 'Adm123456',
-            'trade_id' => 'SED',
+            'trade_id' => '1',
             'user_id' => 'SED_ADMIN',
             'role_type' =>User::ALLROLES['Administrator'],
         ]);
@@ -55,23 +56,28 @@ class DatabaseSeeder extends Seeder
         $user->createToken('post', ['post-create']);
 
         Trade::create([
-            'name' => 'PRUEBAS 1',
-            'email' => 'test@correo.com',
-            'trade_id' => '402e83e9-cc23-11ee-8452-0e4de3ffebc3',
-            'nit' => '001',
+            'name' => 'SED International de Colombia S.A.S',
+            'email' => 'contactenos@sedintl.com',
+            'trade_id' => '1',
+            'nit' => '8300361083',
             'is_active' => 1,
         ]);
+
         Provider::create([
             'id_provider' => '1',
             'name' => 'SED International de Colombia S.A.S',
             'nit' => '8300361083',
             'email' => 'contactenos@sedintl.com',
         ]);
-        Provider::create([
-            'id_provider' => '2',
-            'name' => 'Testing Trade',
-            'nit' => '800850',
-            'email' => 'test@proofs.com',
+
+        Product::create([
+            'name' => 'test_product',
+            'short_description' => 'test_product',
+            'part_num' => '_001',
+            'sku' => '_001',
+            'id_provider' => '1',
+            'stock_quantity' => 0,
         ]);
+
     }
 }

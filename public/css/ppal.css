@@ -352,6 +352,11 @@ margin-right: 0.175rem;
     text-align: center;
     color:var(--main-dark-color);
 }
+.form-center{
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
 .main-button{
     line-height: 1.5rem !important;
     background-color: var(--main-body-color)  !important;
@@ -609,7 +614,7 @@ margin-right: 0.175rem;
 
   /* Estilos para dispositivos móviles */
   /* tablet */
-  @media (max-width: 1080px) {
+  @media (max-width: 992px) {
     body {
         width: 100%;
         max-width: 100%;
@@ -618,6 +623,9 @@ margin-right: 0.175rem;
     .modal-card-hide {
         display: none;
     } */
+    .form-center{
+        width: 70%;
+    }
     .mainmenu .logo {
         /* flex: 1; */
         width: 5rem;
@@ -720,6 +728,9 @@ margin-right: 0.175rem;
     .footer-medium-right button {
         height: auto !important;
         margin: 0.25rem;
+    }
+    .form-center{
+        width: 100%;
     }
     .mainmenu {
         display: flex;

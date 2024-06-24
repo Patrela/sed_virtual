@@ -4,12 +4,12 @@ namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
-use App\Http\Controllers\SedController;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Http\Controllers\SedController;
 
-class ProcessExternalProducts implements ShouldQueue
+class ProcessNewUsers implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,6 +26,8 @@ class ProcessExternalProducts implements ShouldQueue
      */
     public function handle(): void
     {
-        app(SedController::class)->getProviderProducts();
+        app(SedController::class)->getTradeUsers();
+        app(SedController::class)->getStaffUsers();
+        app(SedController::class)->updateNewUsers();
     }
 }

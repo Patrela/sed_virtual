@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('products_imported', function (Blueprint $table) {
             $table->id();
             $table->integer('id_provider');
             $table->string('sku', 30);
             $table->string('part_num', 30)->unique();
-            $table->string('department', 32)->index()->nullable();
-            $table->string('category', 32)->index()->nullable();
-            $table->string('segment', 32)->index()->nullable();
-            $table->string('brand', 32)->index()->nullable();
+            $table->string('department', 32)->nullable();
+            $table->string('category', 32)->nullable();
+            $table->string('segment', 32)->nullable();
+            $table->string('brand', 32)->nullable();
             $table->text('attributes')->nullable();
             $table->string('name', 180);
             $table->string('slug', 180)->nullable();
@@ -43,14 +43,7 @@ return new class extends Migration
             $table->string('contact_unit',30)->nullable();
             $table->string('contact_agent',70)->nullable();
             $table->string('contact_email',125)->nullable();
-            $table->boolean('is_insale')->defaultFalse()->nullable();
-            $table->boolean('is_sold')->defaultFalse()->nullable();
-            $table->boolean('is_discontinued')->defaultFalse()->nullable();
-            $table->boolean('is_reviewed')->defaultFalse()->nullable();
-            $table->boolean('is_reserved')->defaultFalse()->nullable();
-            $table->timestamps();
-            $table->foreign('id_provider')->references('id_provider')->on('providers')->onDelete('cascade');
-
+            $table->boolean('is_new')->defaultFalse()->nullable();
         });
     }
 
@@ -59,6 +52,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('products_imported');
     }
 };

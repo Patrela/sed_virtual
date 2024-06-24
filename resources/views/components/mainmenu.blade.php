@@ -60,6 +60,11 @@
                 @auth
                     <span>{{ Auth::user()->name }}</span>
                 @endauth
+                @auth
+                    <button class="navitem" type="button"  alt="Load New Users" onclick="window.location.href = '{{ route('sed.users') }}'">
+                        <i class="fas fa-user-friends navitem-icon"></i>
+                    </button>
+                @endauth
                 <button class="navitem" type="button"  onclick="window.location.href = '{{ route('ppal') }}'">
                     <i class="fas fa-home navitem-icon"></i>
                 </button>

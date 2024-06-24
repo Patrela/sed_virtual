@@ -135,13 +135,13 @@
 .table-row {
     /* max-width: 960px;  */
     max-width: 90%;
-    display: flex;
+    display: flex !important;
     /* justify-content: space-between; */
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan en múltiples líneas */
+    flex-wrap: wrap;
     flex-direction: row;
 }
     /* Para tablets */
-@media screen and (max-width: 1080px) {
+@media screen and (max-width: 992px) {
     .card {
         width: 202px;
     }
@@ -196,6 +196,9 @@
         flex-direction: row;
         margin:  0.25rem;
         gap: 0.25rem;
+    }
+    .quantity {
+        right: -1px;
     }
     .table-row {
         max-width: 100%;

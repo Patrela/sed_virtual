@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_nonimported', function (Blueprint $table) {
+        Schema::create('trades_imported', function (Blueprint $table) {
             $table->id();
-            $table->string('part_num', 30);
-            $table->string('error_message',125)->nullable();
+            $table->string('name',125);
+            $table->string('nit',25)->nullable();
+            $table->string('trade_id',40)->unique();
+            $table->tinyInteger('is_new')->default(0);
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_nonimported');
+        Schema::dropIfExists('trades_imported');
     }
 };

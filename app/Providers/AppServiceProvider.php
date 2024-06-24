@@ -20,11 +20,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Http::macro('sedfunc', function () {
-            return Http::baseUrl(config('services.api.erp'))
+        Http::macro('seddev', function () {
+            return Http::baseUrl(config('services.api.dev'))
                 ->withBasicAuth('Bodega_Virtual', 'Sed.2024')
                 ->withHeaders([
                     'x-api-key' => 'HsMaBkQPI1ReVNN1ppIZ9KXTeSTSJNJ9VNMY4U2bSxi2y',
+                    'Content-Type' => 'application/json',
+                ]);
+        });
+
+        Http::macro('sedprod', function () {
+            return Http::baseUrl(config('services.api.prod'))
+                ->withBasicAuth('Bodega_Virtual', 'Sed.2024')
+                ->withHeaders([
+                    'x-api-key' => 'TfBS4ZNFr9JxUqKQjiGmTanp29Ocix8TJORDCnTo4wg8q',
                     'Content-Type' => 'application/json',
                 ]);
         });

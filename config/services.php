@@ -36,10 +36,11 @@ return [
     ],
     /*
     |--------------------------------------------------------------------------
-    |  Arguments for Macro sedfunc HTTP connection in AppServiceProvider
+    |  Arguments for Macro seddev HTTP connection in AppServiceProvider
     |-
     */
     'api' => [
-        'erp' => 'https://epicor.sedintl.com/erppilot/api/v2/efx/SED/BodegaVirtual',
+        'dev' => 'https://epicor.sedintl.com/erppilot/api/v2/efx/SED/BodegaVirtual',
+        'prod' => 'https://epicor.sedintl.com/erp102500/api/v2/efx/SED/sedvirtual',
     ],
 ];

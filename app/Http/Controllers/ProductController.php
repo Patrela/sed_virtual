@@ -2,23 +2,17 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Product;
-use App\Jobs\ProcessMailer;
+use App\Mail\ProductMailable;
+//use App\Jobs\ProcessMailer;
+//use app\Jobs\ProcessProductMail;
+//use App\Jobs\ProcessExternalProducts;
 use Illuminate\Support\Str;
-
 use Illuminate\Http\Request;
-use app\Jobs\ProcessProductMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\ProcessExternalProducts;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ProductMailable;
-
-
-
-
 
 class ProductController extends Controller
 {
@@ -61,6 +55,9 @@ class ProductController extends Controller
     {
         //Log::info("products GET  " . $group);
         $products = Product::where('department', "{$group}")
+            ->when($group !== "", function ($query) {
+                    $query->where('is_discontinued', 0);
+                })
             ->select($this->selectFields)
             ->orderBy('name', 'ASC')
             //->cacheTags(['products'])
@@ -78,6 +75,9 @@ class ProductController extends Controller
         $query = Product::whereIn('brand', $brandsArray)
             ->when($group !== "", function ($query) use ($group) {
                 $query->where('department', "{$group}");
+            })
+            ->when($group !== "", function ($query) {
+                $query->where('is_discontinued', 0);
             });
 
         $products = $query->select($this->selectFields)
@@ -99,6 +99,9 @@ class ProductController extends Controller
         $query = Product::whereIn('category', $catsArray)
             ->when($group !== "", function ($query) use ($group) {
                 $query->where('department', "{$group}");
+            })
+            ->when($group !== "", function ($query) {
+                $query->where('is_discontinued', 0);
             });
 
         $products = $query->select($this->selectFields)
@@ -111,19 +114,22 @@ class ProductController extends Controller
         return $products;
     }
 
-
-
     public function getSegmentProducts($group)
     {
         // Build the query for searching by multiple brands
-        $query = Product::where('segment', $group);
+        $query = Product::where('segment', $group)
+                        ->when($group !== "", function ($query) {
+                            $query->where('is_discontinued', 0);
+                        });
 
         $products = $query->select($this->selectFields)
             ->orderBy('department', 'ASC')
             ->orderBy('name', 'ASC')
             //->cacheTags(['products'])
             //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
-            ->get();
+            ->when($group !== "", function ($query) {
+                $query->where('is_discontinued', 0);
+            })->get();
 
         return $products;
     }
@@ -162,7 +168,7 @@ class ProductController extends Controller
     {
         app(SedController::class)->getProviderProducts();
         $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
-            return Product::all();
+            return Product::where('is_discontinued', 0)->get();
         });
         /*
         $page =  $this->CurrentPage(); */
@@ -202,6 +208,9 @@ class ProductController extends Controller
             $productQuery = Product::select($this->selectFields)
                 ->when($word !== "", function ($query) use ($word) {
                     $query->whereRaw("LOWER(name) LIKE ?", ["%{$word}%"]);
+                })
+                ->when($words !== "", function ($query) {
+                    $query->where('is_discontinued', 0);
                 });
 
             // Execute the query and merge results

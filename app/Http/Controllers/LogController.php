@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redirect;
@@ -128,41 +128,22 @@ class LogController extends Controller
 
     public function authenticateAPI(string $useremail)
     {
-
-        //$this->ensureIsNotRateLimited();
-        $password = "Test" . sprintf("%05d", rand(147841,999999));
-        $inputs = array('email' =>"{$useremail}", 'password' => "{$password}");
-        $rules = array( 'email' => 'required|email', 'password' => 'required');
-
-        $validator = Validator::make($inputs, $rules); //Input::all() , $rules);
-        if ($validator->fails()) {
-            return response()->json([
-                'result' => "Doesn't pass validation",
-                'code' => 402,
-            ], 402);
-        }
-
-        $user = User::where( 'email', "{$useremail}")->first();
-        $user->password = Hash::make($password);
-        $user->remember_token =$password;
-        $user->save();
-
-        //Auth::login($user);
-
         try {
-            if (!Auth::attempt( $inputs))
-            {
+            $user = $this->loginAPI($useremail);
+            if($user){
                 return response()->json([
-                    'result' => "User {$useremail} not found",
-                    'code' => 404,
-                ], 404);
+                    'id' => $user->id,
+                    'trade_id' => $user->trade_id,
+                    'email' => $user->email,
+                    'name' =>  $user->name,
+                    'code' => 200,
+                ], 200);
+            } else {
+                    return response()->json([
+                        'error' => "User {$useremail} not found",
+                        'code' => 404,
+                    ], 404);
             }
-            return response()->json([
-                'email' => Auth::user()->email,
-                'trade_id' => Auth::user()->trade_id,
-                'result' => Auth::user()->trade_id, //'API',
-                'code' => 200
-            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'result' => $e->getMessage(),
@@ -170,18 +151,6 @@ class LogController extends Controller
             ], 403);
         }
 
-        //RateLimiter::clear($this->throttleKey());
-
-        // $request->session()->regenerate();
-        // session(['current_trade' => Auth::user()->trade_id]);
-        // session(['current_user' =>  Auth::user()->email]);
         // Log::info("session API email.  " .session('current_user'));
-
-        // return response()->json([
-        //     'email' => Auth::user()->email,
-        //     'trade_id' => Auth::user()->trade_id,
-        //     'source' => 'API',
-        //     'code' => 200
-        // ], 200);
     }
 }

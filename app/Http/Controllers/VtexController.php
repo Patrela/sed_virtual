@@ -41,31 +41,6 @@ class VtexController extends Controller
                     'name' =>  $username,
                     'code' => 200,
                 ], 200);
-            /*
-            //init the password
-            //$password = "Test123456";
-            $password = "Test" . sprintf("%05d", rand(147841,999999)); //+ rand(547841,999999);
-            $user->password = Hash::make($password);
-            $user->remember_token =$password;
-            $user->save();
-
-            // Handle user existence and return appropriate response
-            if ($user) {
-                //$user->password = $password;
-                Auth::login($user);
-                session(['current_trade' => $user->trade_id]);
-                session(['current_user' =>  $user->email]);
-                //Log::info("user Vtex  " . $user->email);
-
-                //return redirect('/products');
-
-                return response()->json([
-                    'id' => $user->id,
-                    'name' =>  $username,
-                ], 200);
-
-                //return app(LogController::class)->authenticateAPI($request, $useremail);
-                */
             } else {
                     return response()->json([
                         'error' => "User {$username} not found",
@@ -84,13 +59,16 @@ class VtexController extends Controller
     /***
      * constant token for Epicor
      * @param
-     * @return SED Epicor Token
+     * @return SED Epicor Token validation
      */
     private function isValidToken($token): bool
     {
-        $generalToken = "HsMaBkQPI1ReVNN1ppIZ9KXTeSTSJNJ9VNMY4U2bSxi2y";
-        // Replace with your actual token validation logic (e.g., using a JWT library)
-        return $token == $generalToken; // Change this to return true/false based on token validity
+        if( env('APP_ENV') === 'production' ) {
+            $generalToken = "TfBS4ZNFr9JxUqKQjiGmTanp29Ocix8TJORDCnTo4wg8q";
+        } else {
+            $generalToken = "HsMaBkQPI1ReVNN1ppIZ9KXTeSTSJNJ9VNMY4U2bSxi2y";
+        }
+        return $token === $generalToken; // Change this to return true/false based on token validity
     }
 
 }
