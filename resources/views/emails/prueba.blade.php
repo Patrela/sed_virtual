@@ -47,7 +47,8 @@
     <h3>Contacto: {{ $sender }}</h3>
     <p>{{ $product['image_1'] }}</p>
     <p><img src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}"></p>
-    <img src="https://i.ibb.co/BBdb3BF/EPSON-V11-H981020-1.jpg" alt="EPSON-V11-H981020-1" border="0">
+    <img src="http://sedvirtual.sedcolombia.com.co/stockimages/49VL5PJ-A.AWC-3.jpg" width="300px" height="300px" alt="Entorno PROD http" border="0">
+    <img src="https://sedcolombia.com.co/Imagenes_Vtex/49VL5PJ-A.AWC-3.JPG"  width="300px" height="300px" alt="Entorno DEV https" border="0">
     <h1>REF. {{ $product['sku'] }} : {{ $product['name'] }}</h1>
     <h2>STOCK= {{ $product['stock_quantity'] }} {{ $product['unit'] }}  MARCA= {{ $product['brand'] }}</h2>
     <div class="modal-card-image">

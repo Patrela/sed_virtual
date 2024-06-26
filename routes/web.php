@@ -2,20 +2,22 @@
 
 
 
-//use App\Mail\TestMailable;
+
 //use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\ProcessExternalProducts;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Jobs\ProcessExternalProducts;
+
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\SedController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\MailController;
 use App\Http\Controllers\VtexController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\SedController;
 
 Route::get('/', function () {
     if (session()->has('current_user') || Cache::has('sync_products')) {
@@ -128,8 +130,7 @@ Route::middleware(['auth:sanctum', 'abilities:product-list,product-show'])->grou
         return view('ppal', $data);
        // return $products;
     })->name('search');
-    Route::get('/products/mail/{sku}',  [ProductController::class, 'mailProducts'])->name('product.email');
-
+    //Route::get('/products/mail/{sku}',  [ProductController::class, 'mailProducts'])->name('product.email');
     /*
     Route::get('/products/order/{group}/{order}', function ($group, $order) {
         $products = app(ProductController::class)->getOrderProducts($group, $order);
@@ -138,6 +139,9 @@ Route::middleware(['auth:sanctum', 'abilities:product-list,product-show'])->grou
     })->name('order');
     */
 });
+
+Route::get('/products/mail/{sku}',  [MailController::class, 'sendMail'])->name('product.email');
+
 
 //categories routes
 Route::middleware('auth')->group(function () {
@@ -156,23 +160,6 @@ Route::post('/external', function () {
     return redirect()->away('https://www.postman.com/sed-stock/workspace/stock/collection/32783257-162e661d-7d69-42c2-a7d4-2cf3f6fcecec');
 })->name('postman.stock');
 
-/*
-Route::get('/mail/test/{contact}', function ($contact) {
-    use Illuminate\Support\Facades\Mail;
-    try {
-        Mail::to('patorela@gmail.com')->cc('patrela@hotmail.com')->send(new TestMailable($contact));
-        return response()->json([
-            'result' => "correo enviado",
-            'code' => 200,
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'code' => $e->getCode(),
-        ], 403);
-    }
-
-})->name('mail.test');;
-*/
+Route::get('send-mail/{email}', [MailController::class, 'sendMail']);
 
 require __DIR__.'/auth.php';

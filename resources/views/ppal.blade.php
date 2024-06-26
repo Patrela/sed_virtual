@@ -93,7 +93,7 @@
                         @endforeach
                     </div>
                 @endif
-                <h3 class="title">LIMPIAR</h3>
+                <h3 class="title">ACTUALIZAR</h3>
                 <div class="filter-container-one-column">
                     <div class="centered">Última actualización</div>
                     <div class="centered">
@@ -483,8 +483,7 @@
 
         let receiver = prompt("Correo del destinatario:");
         if (receiver.indexOf("@") !== -1) {
-            const urlpath =
-                "{{ route('product.email', ['sku' => ':sku']) }}".replace(":sku", sku);
+            const urlpath = "{{ route('product.email', ['sku' => ':sku']) }}".replace(":sku", sku);
             console.log(urlpath);
 
             fetch(urlpath, {

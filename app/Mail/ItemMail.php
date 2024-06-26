@@ -2,31 +2,28 @@
 
 namespace App\Mail;
 
-use App\Models\Product;
 use Illuminate\Bus\Queueable;
-use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Contracts\Queue\ShouldQueue;
-
-
-class ProductMailable extends Mailable
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+//use Illuminate\Mail\Mailables\Address;
+class ItemMail extends Mailable
 {
     use Queueable, SerializesModels;
+
+
+    public $mailData;
+
 
     /**
      * Create a new message instance.
      */
-    protected $sender;
-    protected $product;
-    public function __construct(string $sender, Product $product)
+    public function __construct($mailData)
     {
-        $this->sender = $sender;
-        $this->product = $product;
+        $this->mailData = $mailData;
     }
-
     /**
      * Get the message envelope.
      */
@@ -34,19 +31,20 @@ class ProductMailable extends Mailable
     {
         return new Envelope(
             /* use Illuminate\Mail\Mailables\Address; */
-            from: new Address("{$this->sender}"),
-            subject: 'SED Producto: ' . $this->product->name,
+            //from: new Address("{$this->mailData['from']}"),
+            subject: "{$this->mailData['subject']}",
         );
-    }
 
+    }
     /**
      * Get the message content definition.
      */
     public function content(): Content
     {
         return new Content(
-            view: 'emails.product',
-            with: ['product' => $this->product]
+            //view: 'emails.product',
+            view: 'emails.prueba',
+            with: ['product' =>$this->mailData['product'], 'sender' => $this->mailData['from']],
         );
     }
 

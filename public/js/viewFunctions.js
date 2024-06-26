@@ -481,7 +481,7 @@ function updateProductsDisplay() {
 
                 const iconA = document.createElement("i");
                 iconA.classList.add("fas");
-                iconA.classList.add("fa-envelope");
+                iconA.classList.add("fa-file-csv");
                 iconA.classList.add("navitem-icon");
 
                 btnCSV.appendChild(iconA);

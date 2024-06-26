@@ -96,7 +96,7 @@
                         </div>
                     @endforeach
                 </div>
-                <h3 class="title">LIMPIAR</h3>
+                <h3 class="title">ACTUALIZAR</h3>
                 <div class="filter-container-one-column">
                     <div class="centered">Última actualización</div>
                     <div class="centered">

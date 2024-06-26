@@ -3,16 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Mail\ProductMailable;
-//use App\Jobs\ProcessMailer;
-//use app\Jobs\ProcessProductMail;
-//use App\Jobs\ProcessExternalProducts;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
+
 
 class ProductController extends Controller
 {
@@ -305,7 +300,7 @@ class ProductController extends Controller
         return response()->json($abilities);
     }
 
-    private function searchSpecialSku( string $sku = '' )
+    public function searchSpecialSku( string $sku = '' )
     {
         if($sku == '')
         {
@@ -327,41 +322,6 @@ class ProductController extends Controller
         return $product;
     }
 
-    public function mailProducts(Request $request, string $sku)
-    {
-        $sender = ($request->has('user')) ? $request->user()->email : ((Auth::check()) ? Auth::user()->email :
-                env('MAIL_FROM_ADDRESS'));
-        $receiver = $request->header('x-api-receiver');
-
-        //Log::info("user.  " . $sender . " sku " . $sku);
-        $products=  $this->searchSpecialSku( $sku);
-
-        if (count($products) == 0) {
-            return response()->json([
-                'result' => "Product not found {$sku} ",
-                'code' => 404,
-            ], 404);
-        }
-        $product = $products[0];
-
-        //Process Mail Asynchronously
-
-        // $mailjob= new ProcessProductMail($receiver, $sender, $product);
-        // //$mailjob->dispatchAfterResponse();
-
-        Mail::to($receiver)
-            ->cc($sender)
-            ->send(new ProductMailable($sender, $product), function ($message, $sender,$product) {
-                $message->subject('SED: ' .$product->name);
-                $message->from($sender);
-                $message->setContentType('text/html'); // Set Content-Type header
-            });
-
-        return response()->json([
-            'result' => 'mail sent',
-            'code' => 200,
-        ], 200);
-    }
 }
 
 
