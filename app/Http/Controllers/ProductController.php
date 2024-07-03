@@ -173,7 +173,6 @@ class ProductController extends Controller
         // Mostrar los primeros productos
         $products = $totalproducts->select($this->selectFields)->take($perPage);
         //dd($products->select('part_num','name','stock_quantity','regular_price','image_1','sku'));
-        //return view('product.index',  ['products' => $products, 'perPage' => $perPage, 'page' => $page, 'total' => count($totalproducts)]);
         return view('product.index',  ['products' => $products, 'perPage' => $perPage, 'page' => 1, 'total' => count($totalproducts)]);
     }
 

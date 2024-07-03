@@ -18,8 +18,7 @@
         }
     @endphp
     <script type="text/javascript">
-        var products = @json($products);
-        let allProducts = products; // Global variable to store all products
+        let allProducts = @json($products); // Global variable to store all products
     </script>
 </head>
 
@@ -40,7 +39,7 @@
                     @foreach ($departments as $key => $department)
                         <button
                             class="department-button {{ $maingroup == $department['id'] ? 'aside-button-active' : '' }}"
-                            value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}" {{-- onclick="departmentActions(this)" --}}
+                            value="{{ $department['id'] }}" id="dep-{{ $department['id'] }}"
                             onclick="departmentRoute('{{ $department['name'] }}')"
                             name="dep-{{ $department['id'] }}">{{ $department['name'] }}</button>
                         @if ($department['id'] == $maingroup)
@@ -50,9 +49,6 @@
                             <script type="text/javascript">
                                 const GroupTitle = document.getElementById('current-group-name');
                                 GroupTitle.value = "<?php echo $department['name']; ?>";
-                                //alert(NameInput.value);
-                                //const currentButton = document.getElementById("dep-<?php echo $department['id']; ?>");
-                                //departmentActions(currentButton);
                             </script>
                         @endif
                     @endforeach
@@ -69,7 +65,7 @@
                             <div class="filter-checkbox">
                                 <div class="filter-checkbox-input">
                                     <input id="cat-{{ $category['id'] }}" name="cat-array"
-                                        value="{{ $category['name'] }}" type="checkbox" {{-- onclick="addCategoryToList(this, '{{ $category['name'] }}','{{ $maingroupName}}')" --}}>
+                                        value="{{ $category['name'] }}" type="checkbox">
 
                                 </div>
                                 <div class="filter-checkbox-label">
@@ -84,7 +80,7 @@
                             <div class="filter-checkbox">
                                 <div class="filter-checkbox-input">
                                     <input id="brand-{{ $brand['id'] }}" type="checkbox" name="brand-array"
-                                        value="{{ $brand['name'] }}" {{-- onclick="addBrandToList(this, '{{ $brand['name'] }}','{{ $maingroupName}}')" --}}>
+                                        value="{{ $brand['name'] }}">
                                 </div>
                                 <div class="filter-checkbox-label">
                                     {{ $brand['name'] }}
@@ -108,7 +104,7 @@
                     {{-- <div class="centered">
                         <form action="#" method="GET">
                             @csrf
-                            <button type="button" onclick="vtexLogin('a1@correo.com', 'Other One')">Vtex User</button>
+                            <button type="button" onclick="vtexLogin('alejandra.losada@sedintl.com', 'Other One')">Vtex User</button>
                         </form>
                     </div> --}}
                 </div>
@@ -165,55 +161,16 @@
                             </div>
                             <div class="card-body-text">
                                 <div class="card-text">
-                                    {{-- <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
-                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }},
-                                    '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
-                                    '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
-                                    '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                    '{{ htmlentities(str_replace("\r\n", '<br>', $product['attributes'])) }}',
-                                    '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
-                                    )">
+                                    {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
+                                    <button onclick="ModalData({{ json_encode($product) }})">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
-                                    </button> --}}
-
-                                    <button
-                                        onclick="ModalDetail(cleanQuotation('{{ $product['name'] }}'),
-                                        cleanQuotation('{{ $product['sku'] }}'),
-                                        {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, '{{ $product['price_tax_status'] }}',
-                                        '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
-                                        '{{ $product['currency'] }}',
-                                        cleanQuotation('{{ $product['description'] }}'),
-                                        '{{ $product['unit'] }}',
-                                        '{{ $product['department'] }}',
-                                        cleanQuotation('{{ $product['category'] }}'),
-                                        '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                        cleanQuotation('{{ htmlentities(str_replace("\r\n", ' | ', $product['attributes'])) }}'),
-                                        '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                        {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
-                                    )">
-                                        {{ $product['sku'] }} / {{ $product['brand'] }}
-                                        {{-- {{ Illuminate\Support\Facades\Log::info($product['attributes']) }} --}}
                                     </button>
                                     <button class="navitem" type="button"
                                         onclick="productMail('{{ $product['sku'] }}')">
                                         <i class="fas fa-envelope navitem-icon"></i>
                                     </button>
                                     <button class="navitem" type="button"
-                                        onclick="productFormCSV('{{ WithoutQuotation($product['name']) }}',
-                                        '{{ WithoutQuotation($product['sku']) }}',
-                                        {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, '{{ $product['price_tax_status'] }}',
-                                        '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
-                                        '{{ $product['currency'] }}',
-                                        '{{ WithoutQuotation($product['description']) }}',
-                                        '{{ $product['unit'] }}',
-                                        '{{ $product['department'] }}',
-                                        '{{ WithoutQuotation($product['category']) }}',
-                                        '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                        '{{ htmlentities(str_replace("\r\n", ' | ', WithoutQuotation($product['attributes']))) }}',
-                                        '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                        {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
-                                    )">
+                                        onclick="productFormCSV({{ json_encode($product) }})">
                                         <i class="fas fa-file-csv navitem-icon"></i>
                                     </button>
                                 </div>
@@ -232,43 +189,6 @@
                     <h1> No hay productos para la selección</h1>
                 @endforelse
 
-                {{-- @foreach ($products as $key => $product)
-                    @if ($key >= $start && $key < $end)
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="quantity">
-                                    {{ number_format($product['stock_quantity'], 0, ',', '.') }}
-                                </div>
-                                <h6 class="card-title">{{ $product['name'] }} </h6>
-                                <div class="card-image">
-                                    <img src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}">
-                                </div>
-                            </div>
-                            <div class="card-body-text">
-                                <div class="card-text">
-                                    <button onclick="ModalDetail('{{ $product['name'] }}', '{{ $product['sku'] }}',
-                                    {{ $product['stock_quantity'] }}, {{ $product['regular_price'] }}, {{ $product['price_tax_status'] }}
-                                    '{{ $product['image_1'] }}', '{{ $product['image_2'] }}', '{{ $product['image_3'] }}', '{{ $product['image_4'] }}',
-                                    '{{ $product['currency'] }}', '{{ $product['description'] }}', '{{ $product['unit'] }}',
-                                    '{{ $product['department'] }}', '{{ $product['category'] }}', '{{ $product['brand'] }}', '{{ $product['segment'] }}',
-                                    '{{ htmlentities(str_replace("\r\n", '<br>', $product['attributes'])) }}',
-                                    '{{ $product['guarantee'] }}', '{{ $product['contact_agent'] }}', '{{ $product['contact_unit'] }}',
-                                    {{ $product['dimension_length'] }}, {{ $product['dimension_width'] }}, {{ $product['dimension_height'] }},{{ $product['dimension_weight'] }}
-                                    )">
-                                        {{ $product['sku'] }} / {{ $product['brand'] }}
-                                    </button>
-                                </div>
-                                <div class="card-text">
-                                    {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }}  / {{ $product['unit'] }} {{ $product['price_tax_status'] }}
-                                </div>
-                            </div>
-                        </div>
-                        @php
-                            $counter++;
-                        @endphp
-                    @endif
-                @endforeach --}}
             </div>
         </section>
 
@@ -333,29 +253,6 @@
                     <img id="prod_img_4" src="" alt="" onclick="changeFullImage(this)">
                 </div>
             </div>
-            {{-- <div class="filter-container-two-column">
-                <div class="modal-card-body">
-                    <div class="quantity" id="prod_stock"></div>
-                    <div class="modal-card-image">
-                        <img id="prod_img_1" src="" alt="">
-                    </div>
-                </div>
-                <div class="modal-card-body">
-                    <div class="modal-card-image">
-                        <img id="prod_img_2" src="" alt="">
-                    </div>
-                </div>
-                <div class="modal-card-body modal-card-hide">
-                    <div class="modal-card-image">
-                        <img id="prod_img_3" src="" alt="">
-                    </div>
-                </div>
-                <div class="modal-card-body modal-card-hide">
-                    <div class="modal-card-image">
-                        <img id="prod_img_4" src="" alt="">
-                    </div>
-                </div>
-            </div> --}}
             <div class="modal-card-item-container">
                 <div class="modal-card-item-division">
                     <div class="modal-card-item-title">Sku</div>
@@ -418,14 +315,8 @@
                     <div class="modal-card-item" id="prod_contact_unit"></div>
                 </div>
             </div>
-            {{-- <div id="product_csv" name="product_csv"  class="modal-card-item-container invisible">
-                    <div class="modal-card-item-title">CSV</div>
-                    <div class="modal-card-item" id="prod_csv"></div>
-            </div> --}}
             <div class="filter-container-one-column centered distance-top">
                 <div class="modal-card-item-division">
-                    {{-- <button id="prod_email" name="prod_email" onclick="productMail('')">email</button> --}}
-                    {{-- <button id="btn_prod_csv" name="btn_prod_csv" onclick="productCSV()">CSV</button> --}}
                     <button onclick="closeModal('window-detail')">Cerrar</button>
                 </div>
             </div>
@@ -521,12 +412,12 @@
         fetch(urlpath, {
                 method: "GET",
                 headers: {
-                    "Authorization": "Bearer HsMaBkQPI1ReVNN1ppIZ9KXTeSTSJNJ9VNMY4U2bSxi2y",
+                    "Authorization": "Bearer TfBS4ZNFr9JxUqKQjiGmTanp29Ocix8TJORDCnTo4wg8q",
                     "Content-Type": "application/json",
                     "x-api-user": usermail,
                 },
             })
-            .then((response) =>(response.status==200)? response.text() : response.json())
+            .then((response) => (response.status == 200) ? response.text() : response.json())
             .then((data) => {
                 if (data.hasOwnProperty("code")) {
                     element.innerHTML = ` <strong>Code:</strong> ${data.code} <br>
@@ -547,7 +438,6 @@
                 }
             });
     }
-
 </script>
 
 <script type="text/javascript" src="{{ asset('js/viewFunctions.js') }}"></script>

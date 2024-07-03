@@ -128,7 +128,6 @@ Route::middleware(['auth:sanctum', 'abilities:product-list,product-show'])->grou
         $products = app(ProductController::class)->getSearchProducts($searchText);
         $data = app(CategoryController::class)->loadPageData($products, "", $searchText);
         return view('ppal', $data);
-       // return $products;
     })->name('search');
     //Route::get('/products/mail/{sku}',  [ProductController::class, 'mailProducts'])->name('product.email');
     /*

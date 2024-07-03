@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SedController;
+use App\Http\Controllers\VtexController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -82,7 +83,7 @@ Route::get('/sed/users', function () {
     ], 202);
 })->name('sed.users');
 
-//Route::get('/vtex/login/{username}', [VtexController::class, 'connect'])->name('vtex.conection');
+Route::get('/vtex/login/{username}', [VtexController::class, 'connect'])->name('vtex.conection');
 Route::get('/vtex/login/mail/{useremail}', [LogController::class, 'authenticateAPI'])->name('vtex.login');
 /*
 Route::get('/vtex/login/{username}', function ($username) {

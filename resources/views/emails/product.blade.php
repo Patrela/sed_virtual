@@ -45,9 +45,7 @@
 </head>
 <body>
     <h3>Contacto: {{ $sender }}</h3>
-    <p>{{ $product['image_1'] }}</p>
-    <p><img src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}"></p>
-    <img src="https://i.ibb.co/BBdb3BF/EPSON-V11-H981020-1.jpg" alt="EPSON-V11-H981020-1" border="0">
+    <br />
     <h1>REF. {{ $product['sku'] }} : {{ $product['name'] }}</h1>
     <h2>STOCK= {{ $product['stock_quantity'] }} {{ $product['unit'] }}  MARCA= {{ $product['brand'] }}</h2>
     <div class="modal-card-image">

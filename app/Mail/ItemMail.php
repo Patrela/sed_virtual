@@ -42,8 +42,8 @@ class ItemMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            //view: 'emails.product',
-            view: 'emails.prueba',
+            //view: 'emails.prueba',
+            view: 'emails.product',
             with: ['product' =>$this->mailData['product'], 'sender' => $this->mailData['from']],
         );
     }
