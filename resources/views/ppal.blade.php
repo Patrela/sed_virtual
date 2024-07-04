@@ -23,7 +23,12 @@
 </head>
 
 <body>
-    <x-mainmenu />
+    @if (isset($administrator))
+        <x-mainmenu :administrator="$administrator" />
+    @else
+        <x-mainmenu />
+    @endif
+    {{-- <x-mainmenu /> --}}
     <main> <!--class="mt-6" -->
         <aside>
             <div class="aside-container" name="main_group" id="main_group">
@@ -421,7 +426,7 @@
             .then((data) => {
                 if (data.hasOwnProperty("code")) {
                     element.innerHTML = ` <strong>Code:</strong> ${data.code} <br>
-                                        <strong>Message:</strong> ${data.message || "No message provided"}`;
+                                        <strong>Message:</strong> ${data.result || "No message provided"}`;
                 } else {
                     //console.error(data);
                     //element.innerHTML = data;

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ProductController;
-use App\Jobs\ProcessMail;
+use App\Jobs\SendEmail;
 use Illuminate\Support\Facades\Auth;
 
 class MailController extends Controller
@@ -16,7 +16,7 @@ class MailController extends Controller
                 ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
         $email = $request->header('x-api-receiver');
 
-        Log::info("user.  " . $sender . " sku " . $sku);
+        //Log::info("user.  " . $sender . " sku " . $sku);
         $products=  app(ProductController::class)->searchSpecialSku( $sku);
 
         if (count($products) == 0) {
@@ -35,7 +35,7 @@ class MailController extends Controller
             'product' => $product,
         ];
 
-        ProcessMail::dispatchAfterResponse($dispatchData);
+        SendEmail::dispatchAfterResponse($dispatchData);
         /*
         Mail::to($$email)
             ->cc($sender)

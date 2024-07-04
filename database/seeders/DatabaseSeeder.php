@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Trade;
 use App\Models\Product;
 use App\Models\Provider;
+use App\Jobs\ImportFixedStaff;
+use App\Jobs\ImportProductGroups;
 use Illuminate\Database\Seeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -78,6 +80,8 @@ class DatabaseSeeder extends Seeder
             'id_provider' => '1',
             'stock_quantity' => 0,
         ]);
-
+        //Import SED Categories Groups and the Excel Original Staff- Prevents load views errors
+        ImportProductGroups::dispatchAfterResponse();
+        ImportFixedStaff::dispatchAfterResponse();
     }
 }

@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
         session(['current_trade' => Auth::user()->trade_id]);
         session(['current_user' =>  Auth::user()->email]);
-        Log::info("session user email.  " .session('current_user'));
+        //Log::info("session user email.  " .session('current_user'));
         return redirect()->intended(route('ppal', absolute: false));
     }
 

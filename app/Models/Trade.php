@@ -12,9 +12,9 @@ class Trade extends Model
     //protected $primaryKey = 'part_num';
     protected $fillable = [
         'name',
-        'email',
         'trade_id',
         'nit',
+        'email',
         'is_active',
     ];
 }

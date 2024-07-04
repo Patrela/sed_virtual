@@ -2,30 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use console;
 use App\Models\User;
-use App\Models\Trade;
-use App\Models\Product;
 use App\Models\Category;
-use Illuminate\Support\Arr;
 use App\Models\UserImported;
-use Illuminate\Http\Request;
-
-use App\Models\FailedProduct;
 use App\Models\ProductImported;
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use function PHPUnit\Framework\isEmpty;
 
 class SedController extends Controller
 {
     /**
      * update SED clasifications
      */
-    public function syncProductGroups()
+    public function getProductGroups()
     {
         if (!app(LogController::class)->keyInCache('clasifications')) {
             // 4 SED clasification groups
@@ -47,15 +41,12 @@ class SedController extends Controller
 
                     if ($response->successful()) {
                         $jsonResponse = $response->json();
-                        // if($key == 'departments')
-                        //     $clasifications = $jsonResponse['departaments']['departaments'];
-                        // else
                         $clasifications = $jsonResponse[$key][$key];
                         //only insertion from new clasisifications
-                        $this->createClasification($clasifications);
+                        $this->CreateGroups($clasifications);
                     } else {
                         // Handle non-successful response (e.g., 4xx or 5xx status codes)
-                        Log::error("Error during API Imort Products " . $key . " request");
+                        Log::error("Error during API Import Products " . $key . " request");
                         // return response()->json([
                         //     'error' => "Error during API " . $key . " request:",
                         //     'code' => config('services.api.dev') . "/" .$key ."/ " .$response->status(),
@@ -63,10 +54,10 @@ class SedController extends Controller
                     }
 
                     // store clasificacion in cache
-                    $groupdata = Category::where('group_name', "{$group}")
-                        ->orderBy('parent_id', 'asc')
-                        ->orderBy('id', 'asc')
-                        ->get();
+                    // $groupdata = Category::where('group_name', "{$group}")
+                    //     ->orderBy('parent_id', 'asc')
+                    //     ->orderBy('id', 'asc')
+                    //     ->get();
                     //Cache::put($key, $groupdata, now()->addDays(7));
                 } catch (\Exception $e) {
                     return response()->json([
@@ -78,21 +69,23 @@ class SedController extends Controller
             if (app(LogController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
 
             return response()->json([
-                'result' => "Successfully imported. ",
+                'result' => "Successfully Product Groups and Categories imported. ",
                 'code' => 200,
             ], 200);
-        } else
+        } else {
             return response()->json([
-                'state' => 'in cache',
+                'state' => 'Product Groups and Categories in cache',
                 'clasifications' => Cache::get('clasifications'),
             ], 200);
+        }
     }
+
 
 
     /**
      * Read ordered clasification, if is higger than current, then insert new clasificacion
      */
-    private function createClasification($groups)
+    private function CreateGroups($groups)
     {
         $maingroup = $groups[0]['group_name'];
         $parentid =  "X"; // $groups[0]['parent_id'];
@@ -142,12 +135,7 @@ class SedController extends Controller
         }
     }
 
-    /**
-     * validate user profile from customers B2B
-     * @param trade Customer B2B
-     * @param email Customer contact email
-     * @return validated user data
-     */
+
     public function validateCustomerUser(Request $request)
     {
         try {

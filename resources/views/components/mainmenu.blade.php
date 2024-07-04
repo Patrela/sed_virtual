@@ -1,3 +1,4 @@
+@props(['administrator' => false])
 <header class="mainmenu">
 
     <div class="logo">
@@ -14,7 +15,7 @@
                     <a href="{{ route('profile.abilities') }}" onclick="getAbilities()" class="navitem">
                         Permisos
                     </a>
-                    <a href="{{ route('sed.syncGroupsAPI') }}" class="navitem">
+                    <a href="{{ route('sed.getProviderGroups') }}" class="navitem">
                         Importar Grupos
                     </a>
                 @endif
@@ -60,11 +61,19 @@
                 @auth
                     <span>{{ Auth::user()->name }}</span>
                 @endauth
-                @auth
+                @if ($administrator)
+                    @if (Route::has('register'))
+                        <button class="navitem" type="button"  alt="Create User" onclick="window.location.href = '{{ route('register') }}'">
+                            <i class="fas fa-plus-circle navitem-icon"></i>
+                        </button>
+                    @endif
+                    <button class="navitem" type="button"  alt="Load New Users" onclick="window.location.href = '{{ route('sed.getProviderGroups') }}'">
+                        <i class="fas fa-boxes navitem-icon"></i>
+                    </button>
                     <button class="navitem" type="button"  alt="Load New Users" onclick="window.location.href = '{{ route('sed.users') }}'">
                         <i class="fas fa-user-friends navitem-icon"></i>
                     </button>
-                @endauth
+                @endif
                 <button class="navitem" type="button"  onclick="window.location.href = '{{ route('ppal') }}'">
                     <i class="fas fa-home navitem-icon"></i>
                 </button>

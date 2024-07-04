@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name',125);
             $table->string('nit',25)->nullable();
-            $table->string('email',125);
+            $table->string('email',125)->nullable();
             $table->string('trade_id',40)->unique();
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();

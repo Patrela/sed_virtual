@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name',125);
             $table->string('nit',25)->nullable();
             $table->string('trade_id',40)->unique();
-            $table->tinyInteger('is_new')->default(0);
+            $table->tinyInteger('is_new')->default(0)->index();
             $table->timestamps();
         });
     }

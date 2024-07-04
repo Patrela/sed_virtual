@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Category;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -17,6 +20,7 @@ class CategoryController extends Controller
     public function loadPageData($products, $maingroupName="Computadores", $searchText = "")
     {
         // Get common data from CategoryController
+
         if($maingroupName != ""){
             $department = $this->mainDepartment($maingroupName);
             $maingroup = $department->id;
@@ -33,19 +37,32 @@ class CategoryController extends Controller
         // $perPage = app(ProductController::class)->PerPage();
         // $page = app(ProductController::class)->CurrentPage();
 
-        return [
+
+
+        $data = [
             'products' => $products,
             'maingroup' => $maingroup,
             'maingroupName' => $maingroupName,
             'departments' => $departments,
             'brands' => $brands,
-            'categories' => CategoryController::childGroups('categoria',$maingroup),
+            'categories' => CategoryController::childGroups('categoria', $maingroup),
             'searchText' => $searchText,
+
             //'segments' => $segments, //revoked
             //   'perPage' => $perPage,
             //   'page' => $page,
             //   'total' => count($totalproducts),
         ];
+
+        // Check if the user is authenticated
+        if (Auth::check()) {
+            if(Auth::user()->role_type == User::ALLROLES["Administrator"])
+            $data['administrator'] = Auth::user()->role_type;
+        }
+        //Log::info("Auth Type condition " . Auth::user()->role_type);
+        //Log::info($data);
+        return $data;
+
     }
     private function mainDepartment(string $name = 'Computadores')
     {
@@ -76,36 +93,6 @@ class CategoryController extends Controller
             ->get();
 
         return $departments;
-    }
-
-    /**
-     * @return the category = brands
-     */
-    private function brands(int $brand = 0)
-    {
-        $brands = Category::where('group_name', "marca")
-            ->when($brand !== 0, function ($query) use ($brand) {
-                $query->where('id', "{$brand}");
-            })
-            ->orderBy('id', 'ASC')
-            ->get();
-        return $brands;
-    }
-
-
-    /**
-     * @return the category = segments
-     */
-    private function segments(int $segment = 0)
-    {
-        //return Category::where('group_name', "segmento")->orderBy('id')->get();
-        $segments = Category::where('group_name', "segmento")
-            ->when($segment !== 0, function ($query) use ($segment) {
-                $query->where('id', "{$segment}");
-            })
-            ->orderBy('id', 'ASC')
-            ->get();
-        return $segments;
     }
 
     /**

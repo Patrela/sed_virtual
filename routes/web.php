@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use App\Jobs\ProcessExternalProducts;
+use App\Jobs\ImportProducts;
 
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SedController;
@@ -39,32 +39,36 @@ Route::get('/vtex/login/{username}', function (Request $request, string $usernam
     app(VtexController::class)->connect( $request,$username);
     $products = app(ProductController::class)->getDepartmentProducts();
     $data = app(CategoryController::class)->loadPageData($products);
-    if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+    if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
     return view('ppal', $data);
 })->name('vtex.conection');
 */
 
-Route::get('/vtex/login/{username}', function (Request $request, string $username) {
-    $response = app(VtexController::class)->connect($request, $username);
 
-    if ($response->getStatusCode() === 200) {
-        $products = app(ProductController::class)->getDepartmentProducts();
-        $data = app(CategoryController::class)->loadPageData($products);
-        if (!app(LogController::class)->keyInCache('sync_products')) {
-            ProcessExternalProducts::dispatchAfterResponse();
+    Route::get('/api/vtex/login/{username}', function (Request $request, string $username) {
+        $response = app(VtexController::class)->connect($request, $username);
+
+        if ($response->getStatusCode() === 200) {
+            //return $response;
+            //return response()->json(['code' => 200, 'result' => 'Login successful', 'redirect' => route('ppal')], 200);
+            $products = app(ProductController::class)->getDepartmentProducts();
+            $data = app(CategoryController::class)->loadPageData($products);
+            if (!app(LogController::class)->keyInCache('sync_products')) {
+                 ImportProducts::dispatchAfterResponse();
+            }
+            return view('ppal', $data);
+        } else {
+            $errorData = json_decode($response->getContent(), true);
+            $errorMessage = $errorData['error'] ?? 'Connection from VTEX failed';
+            $statusCode = $response->getStatusCode();
+
+            return response()->json([
+                'error' => $errorMessage,
+                'code' => $statusCode,
+            ], $statusCode);
         }
-        return view('ppal', $data);
-    } else {
-        $errorData = json_decode($response->getContent(), true);
-        $errorMessage = $errorData['error'] ?? 'Connection from VTEX failed';
-        $statusCode = $response->getStatusCode();
+    })->name('vtex.conection');
 
-        return response()->json([
-            'error' => $errorMessage,
-            'code' => $statusCode,
-        ], $statusCode);
-    }
-})->name('vtex.conection');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -75,13 +79,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/ppal', function () {
         $products = app(ProductController::class)->getDepartmentProducts();
         $data = app(CategoryController::class)->loadPageData($products);
-        if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+        if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
         return view('ppal', $data);
     })->name('ppal');
 
     Route::get('/refresh', function () {
         app(LogController::class)->clearCacheKey('sync_products');
-        ProcessExternalProducts::dispatchSync();
+        ImportProducts::dispatchSync();
         $products = app(ProductController::class)->getDepartmentProducts();
         $data = app(CategoryController::class)->loadPageData($products);
         return view('ppal', $data);
@@ -97,31 +101,31 @@ Route::middleware(['auth:sanctum', 'abilities:product-list,product-show'])->grou
     Route::get('/products', function () {
         $products = app(ProductController::class)->getDepartmentProducts();
         $data = app(CategoryController::class)->loadPageData($products);
-        //if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+        //if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
         return view('ppal', $data);
     })->name('product.index');
     Route::get('/products/brands/{group}/{brands}', function ($group, $brands) {
         app(ProductController::class)->getBrandProducts($group, $brands);
-        if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+        if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
     })->name('product.brand');
 
     Route::get('/products/categories/{group}/{categories}', function ($group, $categories) {
         $products = app(ProductController::class)->getCategoriesProducts($group,$categories);
         $data = app(CategoryController::class)->loadPageData($products,$group);
-        if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+        if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
         return view('ppal', $data);
     })->name('product.categories');
     /*
     Route::get('/products/segment/{group}', function ($group) {
         $products = app(ProductController::class)->getSegmentProducts($group);
         $data = app(CategoryController::class)->loadPageData($products,$group);
-        if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+        if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
         return view('ppal', $data);
     })->name('product.segment');    */
     Route::get('/products/{group}', function ($group) {
         $products = app(ProductController::class)->getDepartmentProducts($group);
         $data = app(CategoryController::class)->loadPageData($products,$group);
-        if (!app(LogController::class)->keyInCache('sync_products') )  ProcessExternalProducts::dispatchAfterResponse();
+        if (!app(LogController::class)->keyInCache('sync_products') )  ImportProducts::dispatchAfterResponse();
         return view('ppal', $data);
     })->name('product.show');
     Route::get('/products/search/{searchText}', function ($searchText) {

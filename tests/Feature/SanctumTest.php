@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use console;
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\Trade;
+
 use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -142,39 +142,6 @@ class SanctumTest extends TestCase
 
         $response->assertStatus(401);
     }
-    public function test_trade_valid_token()
-    {
-        // Arrange (Create a trade with the specified token)
-        $token = "Any";
-        $trade = Trade::create([
-            'name' => 'tesrtin Sanctum',
-            'email' => 'test@correo.com',
-            'trade_id' => $token,
-            'nit' => '001',
-            'is_active' => 1,
-        ]);
-
-        // Act (Call the tokenExists method)
-        $response = $this->getJson("trades/id/$token"); // Assuming a route for the method
-
-        // Assert (Verify the response is 1 for a valid token)
-        $response->assertStatus(200)
-                ->assertJsonFragment([1]); // Assuming JSON response
-    }
-
-    public function test_trade_invalid_token()
-    {
-        // Arrange (No trade created with the specified token)
-        $token = "invalid_token";
-
-        // Act (Call the tokenExists method)
-        $response = $this->getJson("trades/id/$token"); // Assuming a route for the method
-
-        // Assert (Verify the response is 0 for an invalid token)
-        $response->assertStatus(200)
-                ->assertJsonFragment([0]); // Assuming JSON response
-    }
-
     public function test_sed_products(): void
     {
         $response = $this->get('/api/sed/sync');

@@ -19,7 +19,7 @@ class VtexController extends Controller
             // Validate required headers
             if (!$useremail || !$token) {
                 return response()->json([
-                    'error' => 'Missing required Authorization Data',
+                    'result' => ' Error Missing required Authorization Data',
                     'code' => 401
                 ], 401);
             }
@@ -27,7 +27,7 @@ class VtexController extends Controller
             // Validate token (consider using Laravel's built-in token authentication)
             if (!$this->isValidToken($token)) { // Replace with your token validation logic
                 return response()->json([
-                    'error' => 'Invalid token',
+                    'result' => 'Error Invalid token',
                     'code' => 402,
                 ], 402);
             }
@@ -35,22 +35,23 @@ class VtexController extends Controller
             // Find user using company and email (consider using model relationships for better structure)
             $user = app(LogController::class)->loginAPI($useremail);
             if($user){
-                return response()->json([
-                    'id' => $user->id,
-                    'trade_id' => $user->trade_id,
-                    'name' =>  $username,
-                    'code' => 200,
-                ], 200);
+                    return response()->json([
+                        'id' => $user->id,
+                        'trade_id' => $user->trade_id,
+                        'name' =>  $username,
+                        'result' => 'ok',
+                        'code' => 200,
+                    ], 200);
             } else {
                     return response()->json([
-                        'error' => "User {$username} not found",
+                        'result' => "Error User {$username} not found",
                         'code' => 404,
                     ], 404);
             }
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'result' => 'Error ' .$e->getMessage(),
                 'code' => $e->getCode(),
             ], 403);
         }
