@@ -10,14 +10,6 @@
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @php
-        $maingroupName = $maingroupName ?? '';
-        function WithoutQuotation($text)
-        {
-            $text = str_replace("'", '´', $text);
-            return str_replace('"', '´', $text);
-        }
-    @endphp
     <script type="text/javascript">
         let allProducts = @json($products); // Global variable to store all products
     </script>
