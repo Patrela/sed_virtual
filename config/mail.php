@@ -96,6 +96,18 @@ return [
             ],
         ],
 
+        // For office365 accounts. Install with: composer require innoge/laravel-msgraph-mail
+        'microsoft-graph' => [
+            'transport' => 'microsoft-graph',
+            'client_id' => env('MICROSOFT_GRAPH_CLIENT_ID'),
+            'client_secret' => env('MICROSOFT_GRAPH_CLIENT_SECRET'),
+            'tenant_id' => env('MICROSOFT_GRAPH_TENANT_ID'),
+            'from' => [
+                'address' => env('MAIL_FROM_ADDRESS'),
+                'name' => env('MAIL_FROM_NAME'),
+            ],
+],
+
     ],
 
     /*

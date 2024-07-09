@@ -17,7 +17,7 @@ class MailController extends Controller
         $email = $request->header('x-api-receiver');
 
         //Log::info("user.  " . $sender . " sku " . $sku);
-        $products=  app(ProductController::class)->searchSpecialSku( $sku);
+        $products=  app(ProductController::class)->searchProductBySku( $sku);
 
         if (count($products) == 0) {
             return response()->json([

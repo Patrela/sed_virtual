@@ -4,10 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>SED Inventario MU</title>
-    <link rel="stylesheet" href="{{ asset('css/ppal.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
+
     <!-- Fonts -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
 
@@ -115,6 +117,10 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    </script>
 </body>
 
 </html>

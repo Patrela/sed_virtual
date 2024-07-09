@@ -61,54 +61,7 @@ class ProductController extends Controller
         return $products;
     }
 
-    public function getBrandProducts($group, $brands)
-    {
-        // Explode the comma-separated list of brands into an array
-        $brandsArray = explode(',', $brands);
-
-        // Build the query for searching by multiple brands
-        $query = Product::whereIn('brand', $brandsArray)
-            ->when($group !== "", function ($query) use ($group) {
-                $query->where('department', "{$group}");
-            })
-            ->when($group !== "", function ($query) {
-                $query->where('is_discontinued', 0);
-            });
-
-        $products = $query->select($this->selectFields)
-            ->orderBy('brand', 'ASC')
-            ->orderBy('name', 'ASC')
-            //->cacheTags(['products'])
-            //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
-            ->get();
-
-        return $products;
-    }
-
-    public function getCategoriesProducts($group, $categories)
-    {
-        // Explode the comma-separated list of brands into an array
-        $catsArray = explode(',', $categories);
-
-        // Build the query for searching by multiple brands
-        $query = Product::whereIn('category', $catsArray)
-            ->when($group !== "", function ($query) use ($group) {
-                $query->where('department', "{$group}");
-            })
-            ->when($group !== "", function ($query) {
-                $query->where('is_discontinued', 0);
-            });
-
-        $products = $query->select($this->selectFields)
-            ->orderBy('category', 'ASC')
-            ->orderBy('name', 'ASC')
-            //->cacheTags(['products'])
-            //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
-            ->get();
-
-        return $products;
-    }
-
+/*
     public function getSegmentProducts($group)
     {
         // Build the query for searching by multiple brands
@@ -128,6 +81,7 @@ class ProductController extends Controller
 
         return $products;
     }
+*/
 
     /*
     public function getOrderProducts(string $group, string $order = "")
@@ -159,23 +113,6 @@ class ProductController extends Controller
         }
     }
     */
-    public function index()
-    {
-        app(SedController::class)->getProviderProducts();
-        $totalproducts = Cache::remember('products', now()->addMinutes(30), function () {
-            return Product::where('is_discontinued', 0)->get();
-        });
-        /*
-        $page =  $this->CurrentPage(); */
-        $perPage = 12;
-
-
-        // Mostrar los primeros productos
-        $products = $totalproducts->select($this->selectFields)->take($perPage);
-        //dd($products->select('part_num','name','stock_quantity','regular_price','image_1','sku'));
-        return view('product.index',  ['products' => $products, 'perPage' => $perPage, 'page' => 1, 'total' => count($totalproducts)]);
-    }
-
 
     // All products searching
     public function getSearchProducts(string $searchText)
@@ -193,7 +130,7 @@ class ProductController extends Controller
         //read PART_NUM
         if (count($words) == 1 && strlen($words[0]) > 4) {
             $word = $words[0];
-            $product=  $this->searchSpecialSku( $word);
+            $product=  $this->searchProductBySku( $word);
             if ($product) return $product;
         }
 
@@ -299,7 +236,7 @@ class ProductController extends Controller
         return response()->json($abilities);
     }
 
-    public function searchSpecialSku( string $sku = '' )
+    public function searchProductBySku( string $sku = '' )
     {
         if($sku == '')
         {

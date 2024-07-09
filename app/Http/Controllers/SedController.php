@@ -21,7 +21,7 @@ class SedController extends Controller
      */
     public function getProductGroups()
     {
-        if (!app(LogController::class)->keyInCache('clasifications')) {
+        if (!Cache::has('clasifications')) {
             // 4 SED clasification groups
             $groups = [
                 'departments' => 'departamento',
@@ -33,12 +33,7 @@ class SedController extends Controller
             foreach ($groups as $key => $group) {
                 // execute the API with SED clasification group
                 try {
-                    if( env('APP_ENV') === 'production' ) {
-                        $response = Http::sedprod()->post('/' . $key . '/', ['item' => '',]);
-                    } else {
-                        $response = Http::seddev()->post('/' . $key . '/', ['item' => '',]);
-                    }
-
+                    $response = Http::connector()->post('/' . $key . '/', ['item' => '',]);
                     if ($response->successful()) {
                         $jsonResponse = $response->json();
                         $clasifications = $jsonResponse[$key][$key];
@@ -66,7 +61,8 @@ class SedController extends Controller
                     ], 403);
                 }
             }
-            if (app(LogController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
+
+            if (app(CacheController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
 
             return response()->json([
                 'result' => "Successfully Product Groups and Categories imported. ",
@@ -106,35 +102,6 @@ class SedController extends Controller
         }
     }
 
-    /**
-     * @return SED Products from a Department
-     */
-    public function syncDepartmentProducts(string $department)
-    {
-        try {
-            if( env('APP_ENV') === 'production' ) {
-                $response = Http::sedprod()->post('/products/', [ 'department' => $department,]);
-            } else {
-                $response = Http::seddev()->post('/products/', [ 'department' => $department,]);
-            }
-
-
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                return response()->json([
-                    'error' => 'Api SED Department Products',
-                    'code' => $response->status(),
-                ], 403);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ], 403);
-        }
-    }
-
 
     public function validateCustomerUser(Request $request)
     {
@@ -144,19 +111,10 @@ class SedController extends Controller
             $useremail = $request->header('x-api-user');
             //$token = $request->bearerToken();
             $name = $request->query('name');
-
-            if( env('APP_ENV') === 'production' ) {
-                $response = Http::sedprod()->post('/authentication/?name=' .$name, [
-                    'nit' => $company,
-                    'email' =>  $useremail,
-                ]);
-            } else {
-                $response = Http::seddev()->post('/authentication/?name=' .$name, [
-                    'nit' => $company,
-                    'email' =>  $useremail,
-                ]);
-            }
-
+            $response = Http::connector()->post('/authentication/?name=' .$name, [
+                'nit' => $company,
+                'email' =>  $useremail,
+            ]);
             if ($response->successful()) {
                 return $response->json();
             } else {
@@ -202,12 +160,7 @@ class SedController extends Controller
     public function getStaffUsers()
     {
         try {
-
-            if( env('APP_ENV') === 'production' ) {
-                $response = Http::sedprod()->post('/staff/', [ 'email' => '',]);
-            } else {
-                $response = Http::seddev()->post('/staff/', [ 'email' => '',]);
-            }
+            $response = Http::connector()->post('/staff/', [ 'email' => '',]);
             if ($response->successful()) {
                 //return $response->json();
                 $jsonResponse = $response->json();
@@ -265,12 +218,7 @@ class SedController extends Controller
     public function getTradeUsers()
     {
         try {
-
-            if( env('APP_ENV') === 'production' ) {
-                $response = Http::sedprod()->post('/authentication/', [ 'nit' => '',]);
-            } else {
-                $response = Http::seddev()->post('/authentication/', [ 'nit' => '',]);
-            }
+            $response = Http::connector()->post('/authentication/', [ 'nit' => '',]);
             if ($response->successful()) {
                 //return $response->json();
                 $jsonResponse = $response->json();
@@ -333,25 +281,15 @@ class SedController extends Controller
 
     public function getProviderProducts($idProvider = 1)
     {
-        if (!app(LogController::class)->keyInCache('sync_products') ){
+        if (!Cache::has('sync_products') ){
             //$Provider = Provider::where('nit', '8300361083')->first(); //SED_PROVIDER
             //$idProvider = ($Provider) ? $Provider->id : 1;
             session(['lastUpdated' =>  date('d/m/Y H:i:s')]);
 
             try {
-
-                if( env('APP_ENV') === 'production' ) {
-                    $response = Http::sedprod()->post('/products/', [
-                        'department' => '',
-                    ]);
-                } else {
-                    $response = Http::seddev()->post('/products/', [
-                        'department' => '',
-                        // 'department' => 'Computadores',   // 'category' => 'Portátiles',
-                        // 'brand' => 'LENOVO',
-                        // 'segment' => 'Hogar'
-                    ]);
-                }
+                $response = Http::connector()->post('/products/', [
+                    'department' => '',
+                ]);
 
                 // Check if the response was successful (status code 2xx)
                 if ($response->successful()) {
@@ -420,7 +358,7 @@ class SedController extends Controller
                     }
                     DB::select("CALL sp_import_products()");
 
-                    if (app(LogController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
+                    if (app(CacheController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
                     return response()->json([
                         'result' => 'ok',

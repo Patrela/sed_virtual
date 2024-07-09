@@ -28,10 +28,9 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        session(['current_trade' => Auth::user()->trade_id]);
         session(['current_user' =>  Auth::user()->email]);
         //Log::info("session user email.  " .session('current_user'));
-        return redirect()->intended(route('ppal', absolute: false));
+        return redirect()->intended(route('stock', absolute: false));
     }
 
     /**
@@ -40,7 +39,7 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
+        //Log::info("AuthenticatedSessionController.destroy Activated " );
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();

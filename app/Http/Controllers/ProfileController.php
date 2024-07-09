@@ -89,7 +89,7 @@ class ProfileController extends Controller
         Auth::logout();
 
         $user->delete();
-
+        //Log::info("ProfileController.destroy Activated " );
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

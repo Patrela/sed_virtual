@@ -19,8 +19,8 @@
                         Importar Grupos
                     </a>
                 @endif
-                @if (Route::has('ppal'))
-                    <a href="{{ route('ppal') }}" class="navitem">
+                @if (Route::has('stock'))
+                    <a href="{{ route('stock') }}" class="navitem">
                         Productos
                     </a>
                 @endif
@@ -34,8 +34,8 @@
                         Registro
                     </a>
                 @endif
-                @if (Route::has('ppal'))
-                    <a href="{{ route('ppal') }}" class="navitem">
+                @if (Route::has('stock'))
+                    <a href="{{ route('stock') }}" class="navitem">
                         Productos
                     </a>
                 @endif
@@ -51,7 +51,7 @@
             {{-- <a href="{{ route('product.search') }}" onclick="searchProduct()"><i
                     class="fas fa-search  navitem-icon"></i></a>
             <a href="{{ route('home') }}"><i class="fas fa-home navitem-icon"></i></a> --}}
-            {{-- <form id="homeForm" method="get" action="{{ route('ppal') }}" class="mainmenu-icons-text"> --}}
+            {{-- <form id="homeForm" method="get" action="{{ route('stock') }}" class="mainmenu-icons-text"> --}}
             <form method="GET" action="{{ route('logout') }}" class="mainmenu-icons-text">
                     @csrf
                 @csrf
@@ -74,7 +74,7 @@
                         <i class="fas fa-user-friends navitem-icon"></i>
                     </button>
                 @endif
-                <button class="navitem" type="button"  onclick="window.location.href = '{{ route('ppal') }}'">
+                <button class="navitem" type="button"  onclick="window.location.href = '{{ route('stock') }}'">
                     <i class="fas fa-home navitem-icon"></i>
                 </button>
                 <button class="navitem" type="submit">

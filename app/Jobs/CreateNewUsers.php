@@ -14,9 +14,7 @@ class CreateNewUsers implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
+
     public function __construct()
     {
         //
@@ -27,6 +25,7 @@ class CreateNewUsers implements ShouldQueue
      */
     public function handle(): void
     {
+        app(SedController::class)->updateNewUsers();
         app(SedController::class)->getTradeUsers();
         // TODO:disable until Epicor update Staff emails.
         // Meanwhile, put new users in table users_staff. Store Procedure sp_import_users proccesses all through updateNewUsers job.

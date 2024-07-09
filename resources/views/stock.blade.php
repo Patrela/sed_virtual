@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title')</title>
-    <link rel="stylesheet" href="{{ asset('css/ppal.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>SED Stock</title>
+    <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -106,12 +107,6 @@
                             <button type="submit">Cargar Ahora</button>
                         </form>
                     </div>
-                    {{-- <div class="centered">
-                        <form action="#" method="GET">
-                            @csrf
-                            <button type="button" onclick="vtexLogin('alejandra.losada@sedintl.com', 'Other One')">Vtex User</button>
-                        </form>
-                    </div> --}}
                 </div>
             </div>
 
@@ -369,7 +364,7 @@
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = groupName;
         //window.location.href = '/products/' + groupName;
-        window.location.href = "{{ route('product.show', ['group' => ':group']) }}".replace(':group', groupName);
+        window.location.href = "{{ route('product.index', ['group' => ':group']) }}".replace(':group', groupName);
     }
 
     function productMail(sku) {
@@ -408,43 +403,11 @@
         }
     }
 
-    function vtexLogin(usermail, username = "New User") {
-        const element = document.getElementById("products-container");
-        element.action = "";
-
-        const urlpath = "{{ route('vtex.conection', ['username' => ':username']) }}".replace(":username", username);
-
-        fetch(urlpath, {
-                method: "GET",
-                headers: {
-                    "Authorization": "Bearer TfBS4ZNFr9JxUqKQjiGmTanp29Ocix8TJORDCnTo4wg8q",
-                    "Content-Type": "application/json",
-                    "x-api-user": usermail,
-                },
-            })
-            .then((response) => (response.status == 200) ? response.text() : response.json())
-            .then((data) => {
-                if (data.hasOwnProperty("code")) {
-                    element.innerHTML = ` <strong>Code:</strong> ${data.code} <br>
-                                        <strong>Message:</strong> ${data.result || "No message provided"}`;
-                } else {
-                    //console.error(data);
-                    //element.innerHTML = data;
-                    window.location.href = "{{ route('ppal') }}";
-                }
-            })
-            .catch((error) => {
-                if (error.response) {
-                    console.error("Error:", error.response.status, error.response.statusText);
-                    element.innerText = `Error: ${error.response.statusText}`;
-                } else {
-                    console.error("Error fetching data:", error);
-                    element.innerText = "Error fetching data";
-                }
-            });
-    }
 </script>
 
 <script type="text/javascript" src="{{ asset('js/viewFunctions.js') }}"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+</script>
 </html>

@@ -17,7 +17,7 @@ class RedirectIfNotPublic
     {  //     return $next($request)
         $path = $request->getPathInfo();
 
-        if ($path === '/' || strpos($path, '/public') !== 0 || strpos($path, '/ppal') !== 0) {
+        if ($path === '/' || strpos($path, '/public') !== 0 || strpos($path, '/stock') !== 0) {
             return redirect('/login');
         }
 

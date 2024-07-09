@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>SED Inventario MU - invitado</title>
-        <link rel="stylesheet" href="{{ asset('css/ppal.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
         <link rel="stylesheet" href="{{ asset('css/product.css') }}">
         <!-- Fonts -->
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
