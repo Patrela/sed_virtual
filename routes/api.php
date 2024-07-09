@@ -26,35 +26,10 @@ Route::middleware(['cors'])->group(function () {
     })->name('api.connect');
 });
 
-/*
-Route::middleware(['cors'])->group(function () {
-    Route::get('/external_login', [ConnectController::class, 'connectLogin'])->name('api.login');
-})->middleware(['handlememory']);
-*/
-/*
-Route::middleware(['cors'])->group(function () {
-    Route::get('/external_login', function (Request $request) {
-        return app(ConnectController::class)->connectLogin($request);
-    })->middleware('handlememory')->name('api.login');
-});
-*/
 
 Route::middleware('cors')->get('/external_login', function (Request $request) {
-    $output= app(ConnectController::class)->connectLogin($request);
-    if(!Auth::check()){
-        Log::info("external_login create user");
-        $email = $request->query('email')?? "";
-        if($email != ""){
-            Log::info("email create user: " . $email);
-            app(ConnectController::class)->userOfflineAuthentication( $email, "", $request->ip());
-        }
-    }
-    return $output;
-})->middleware(HandleMemory::class)->name('api.login'); //->middleware('handlememory')->name('api.login');
-
-
-
-
+    return app(ConnectController::class)->connectLogin($request);
+})->middleware(HandleMemory::class)->name('api.login'); //->middleware(HandleMemory::class)->name('api.login');
 
 
 Route::get('/post/create', function (Request $request) { //sanctum with ability
