@@ -40,10 +40,10 @@ return [
     |-
     */
     'api' => [
-        'dev' => 'https://epicor.sedintl.com/erppilot/api/v2/efx/SED/BodegaVirtual',
-        'prod' => 'https://epicor.sedintl.com/erp102500/api/v2/efx/SED/sedvirtual',
-        'token_dev' => 'HsMaBkQPI1ReVNN1ppIZ9KXTeSTSJNJ9VNMY4U2bSxi2y',
-        'token_prod' => 'TfBS4ZNFr9JxUqKQjiGmTanp29Ocix8TJORDCnTo4wg8q',
+        'dev' => env('API_DEV_URL'),
+        'prod' => env('API_PROD_URL'),
+        'token_dev' => env('API_DEV_TOKEN'),
+        'token_prod' => env('API_PROD_TOKEN'),
 
     ],
 ];
