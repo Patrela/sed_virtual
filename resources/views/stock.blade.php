@@ -193,9 +193,10 @@
                 <p>Documentación técnica para API de Consulta de Inventarios</p>
             </div>
             <div class="footer-medium-right">
-                <form action="{{ route('postman.stock') }}" method="POST">
+                <form action="{{ route('api.documentation') }}" method="POST">
                     @csrf
-                    <button type="submit">API Postman</button>
+                    <button type="submit">API Postman</button> {{-- type="button" onclick="documentationRoute()"" --}}
+
                 </form>
             </div>
         </div>
@@ -357,6 +358,22 @@
         productTitle.textContent = groupName;
         //window.location.href = '/products/' + groupName;
         window.location.href = "{{ route('product.index', ['group' => ':group']) }}".replace(':group', groupName);
+    }
+    function usersRoute() {
+        temporalIndicator();
+        window.location.href = "{{ route('sed.users') }}";
+    }
+    function classificationsRoute() {
+        temporalIndicator();
+        window.location.href = "{{ route('sed.getProviderGroups') }}";
+    }
+
+    function documentationRoute() {
+        window.location.href = "{{route('api.documentation') }}";
+        // window.onload = function() {
+        //     window.open("{{ route('api.documentation') }}", "_blank");
+        //     window.location.href = "/";
+        // }
     }
 
     function productMail(sku) {
