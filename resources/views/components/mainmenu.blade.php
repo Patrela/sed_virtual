@@ -60,20 +60,20 @@
                 </button>
                 @auth
                     <span>{{ Auth::user()->name }}</span>
-                @endauth
-                @if ($administrator)
-                    @if (Route::has('register'))
-                        <button class="navitem" type="button"  alt="Create User" onclick="window.location.href = '{{ route('register') }}'">
-                            <i class="fas fa-plus-circle navitem-icon"></i>
+                    @if ($administrator)
+                        @if (Route::has('register'))
+                            <button class="navitem" type="button"  alt="Create User" onclick="window.location.href = '{{ route('register') }}'">
+                                <i class="fas fa-plus-circle navitem-icon"></i>
+                            </button>
+                        @endif
+                        <button class="navitem" type="button"  alt="Load New Users" onclick="classificationsRoute()">
+                            <i class="fas fa-boxes navitem-icon"></i>
+                        </button>
+                        <button class="navitem" type="button"  alt="Load New Users" onclick="usersRoute()"> {{-- onclick="window.location.href = '{{ route('sed.users') }}'" --}}
+                            <i class="fas fa-user-friends navitem-icon"></i>
                         </button>
                     @endif
-                    <button class="navitem" type="button"  alt="Load New Users" onclick="window.location.href = '{{ route('sed.getProviderGroups') }}'">
-                        <i class="fas fa-boxes navitem-icon"></i>
-                    </button>
-                    <button class="navitem" type="button"  alt="Load New Users" onclick="window.location.href = '{{ route('sed.users') }}'">
-                        <i class="fas fa-user-friends navitem-icon"></i>
-                    </button>
-                @endif
+                @endauth
                 <button class="navitem" type="button"  onclick="window.location.href = '{{ route('stock') }}'">
                     <i class="fas fa-home navitem-icon"></i>
                 </button>

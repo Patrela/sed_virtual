@@ -44,7 +44,7 @@ Route::middleware('auth')->group(function () {
         $products = app(ProductController::class)->getDepartmentProducts();
         $data = app(CategoryController::class)->loadPageData($products);
         if (!Cache::has('sync_products') )  ImportProducts::dispatchAfterResponse();
-        (Auth::check())? Log::info("Auth check  successful 4"): Log::info("Auth check  failed 4");
+        //(Auth::check())? Log::info("Auth check  successful 4"): Log::info("Auth check  failed 4");
         return view('stock', $data);
     })->name('stock');
 
@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/products/mail/{sku}',  [MailController::class, 'sendMail'])->name('product.email');
+Route::get('send-mail/{email}', [MailController::class, 'sendMail']);
 
 
 //categories routes
@@ -119,10 +120,5 @@ Route::post('/products/csv', [ProductController::class, 'toCsv'])->name('product
 //read Vtex Images Directory
 Route::get('/guardar-carpeta', [FileController::class, 'guardarCarpeta'])->name('files.scan');
 
-Route::post('/external', function () {
-    return redirect()->away('https://www.postman.com/sed-stock/workspace/stock/collection/32783257-162e661d-7d69-42c2-a7d4-2cf3f6fcecec');
-})->name('postman.stock');
-
-Route::get('send-mail/{email}', [MailController::class, 'sendMail']);
 
 require __DIR__.'/auth.php';
