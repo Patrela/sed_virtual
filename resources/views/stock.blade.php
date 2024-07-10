@@ -397,7 +397,7 @@
                 .then((data) => {
                     //resolve(data);
                     //if (data["code"] === 200) alert("correo enviado");
-                    //if (data["code"] === 404) alert(data["result"]);
+                    //if (data["code"] === 404) alert(data["message"]);
                     console.log(data);
                 })
                 .catch((error) => {

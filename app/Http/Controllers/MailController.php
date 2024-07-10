@@ -21,7 +21,7 @@ class MailController extends Controller
 
         if (count($products) == 0) {
             return response()->json([
-                'result' => "Product not found {$sku} ",
+                'message' => "Error Product not found {$sku} ",
                 'code' => 404,
             ], 404);
         }

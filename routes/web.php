@@ -86,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     */
 
     Route::get('/products/{group}', function ($group) {
-        Log::info("path PRODUCTS get in");
+        //Log::info("path PRODUCTS get in");
 
         $products = app(ProductController::class)->getDepartmentProducts($group);
         $data = app(CategoryController::class)->loadPageData($products,$group);
@@ -95,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('product.index');
 
     Route::get('/products/search/{searchText}', function ($searchText) {
-        Log::info("path SEARCH get in");
+        //Log::info("path SEARCH get in");
         $products = app(ProductController::class)->getSearchProducts($searchText);
         $data = app(CategoryController::class)->loadPageData($products, "", $searchText);
         return view('stock', $data);

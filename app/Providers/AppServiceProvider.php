@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
 
         Http::macro('connector', function () {
-            if( env('APP_ENV') === 'production' )
+            if( app()->isProduction() )
             {
                 return Http::baseUrl(config('services.api.prod'))
                 ->withBasicAuth('Bodega_Virtual', 'Sed.2024')

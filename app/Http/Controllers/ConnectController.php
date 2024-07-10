@@ -66,8 +66,8 @@ class ConnectController extends Controller
 
     private function isValidToken($token): bool
     {
-        $generalToken = ( env('APP_ENV') === 'production' )? config('services.api.token_prod') : config('services.api.token_dev');
-
+        $generalToken = ( app()->isProduction() )? config('services.api.token_prod') : config('services.api.token_dev');
+        Log::info("generalToken " .$generalToken);
         return $token === $generalToken;
     }
 

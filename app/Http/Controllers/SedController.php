@@ -65,7 +65,7 @@ class SedController extends Controller
             if (app(CacheController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
 
             return response()->json([
-                'result' => "Successfully Product Groups and Categories imported. ",
+                'message' => "Successfully Product Groups and Categories imported. ",
                 'code' => 200,
             ], 200);
         } else {
@@ -134,7 +134,7 @@ class SedController extends Controller
 
     public function updateNewUsers()
     {
-        Log::info("Starting Authentication update");
+        //Log::info("Starting Authentication update");
         try {
             $newUsers = User::where('password','')->get();
             foreach($newUsers as $user) {
@@ -142,16 +142,16 @@ class SedController extends Controller
                 //$user['remember_token'] = Hash::make($user['name']);
                 $user->save();
             }
-            Log::info("Ending Authentication update");
+            //Log::info("Ending Authentication update");
             return response()->json([
-                'result' => 'SED New Users updated',
+                'message' => 'SED New Users updated',
                 'code' => 200,
             ], 200);
         } catch (\Exception $e) {
             Log::error("Error during API Staff New Users register: {$e->getMessage()}");
             return response()->json([
-                'result' => 'error ' .$e->getCode(),
-                'message' => $e->getMessage(),
+                'message' => 'error ' .$e->getMessage(),
+                'code' => $e->getCode(),
             ], 401);
         }
 
@@ -197,20 +197,20 @@ class SedController extends Controller
                 }
                 DB::select("CALL sp_import_users(?)",[User::ALLROLES["Staff"] ]);
                 return response()->json([
-                    'result' => 'SED Staff Users updated',
+                    'message' => 'SED Staff Users updated',
                     'code' => 200,
                 ], 200);
             } else {
                 return response()->json([
-                    'result' => 'error ' . $response->status(),
-                    'message' => json_encode($response->json()),
+                    'message' => 'error ' .json_encode($response->json()),
+                    'code' => $response->status(),
                 ], $response->status());
             }
         } catch (\Exception $e) {
             Log::error("Error during API Staff Users request: {$e->getMessage()}");
             return response()->json([
-                'result' => 'error ' .$e->getCode(),
-                'message' => $e->getMessage(),
+                'message' =>  'error ' . $e->getMessage(),
+                'code' => $e->getCode(),
             ], 401);
         }
     }
@@ -259,21 +259,21 @@ class SedController extends Controller
                 }
                 DB::select("CALL sp_import_users(?)",[User::ALLROLES["Trade"] ]);
                 return response()->json([
-                    'result' => 'SED Trade Users updated',
+                    'message' => 'SED Trade Users updated',
                     'code' => 200,
                 ], 200);
             } else {
                 return response()->json([
-                    'result' => 'error ' . $response->status(),
-                    'message' => json_encode($response->json()),
+                    'message' => 'error ' .json_encode($response->json()),
+                    'code' =>  $response->status(),
                 ], $response->status());
             }
 
         } catch (\Exception $e) {
             Log::error("Error during API  Trade Users request: {$e->getMessage()}");
             return response()->json([
-                'result' => 'error ' .$e->getCode(),
-                'message' => $e->getMessage(),
+                'message' => 'error ' . $e->getMessage(),
+                'code' => $e->getCode(),
             ], 401);
         }
 
@@ -354,34 +354,34 @@ class SedController extends Controller
                         //Log::info($itemsKey);
                         //Log::info($productData);
                         ProductImported::insert($productData);
-                        Log::info("SED API Product Imported = " .ProductImported::all()->count() ." data =" .count($productData) );
+                        //Log::info("SED API Product Imported = " .ProductImported::all()->count() ." data =" .count($productData) );
                     }
                     DB::select("CALL sp_import_products()");
 
                     if (app(CacheController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
                     return response()->json([
-                        'result' => 'ok',
                         'message' => 'Imported Succcessfully',
+                        'code' => 200,
                     ], 200);
                 } else {
                     return response()->json([
-                        'result' => 'error ' . $response->status(),
-                        'message' => json_encode($response->json()),
+                        'message' => 'error ' .json_encode($response->json()),
+                        'code' =>  $response->status(),
                     ], $response->status());
                 }
             } catch (\Exception $e) {
                 Log::error("Error during API request: {$e->getMessage()}");
                 return response()->json([
-                    'result' => 'error ' .$e->getCode(),
-                    'message' => $e->getMessage(),
+                    'message' => 'error ' .$e->getMessage(),
+                    'code' => $e->getCode(),
                 ], 401);
             }
         } else {
             // return Cache::get('sync_products');
             return response()->json([
-                'result' => 'ok',
                 'message' => Cache::get('sync_products'),
+                'code' => 200,
             ], 200);
         }
     }

@@ -58,7 +58,7 @@ Route::middleware(['cors'])->group(function () {
         CreateNewUsers::dispatchAfterResponse();
         //CreateNewUsers::dispatch();
         return response()->json([
-            'result' => 'SED New Users update process initiated in the background',
+            'message' => 'SED New Users update process initiated in the background',
             'code' => 202,
         ], 202);
     })->name('sed.users');
