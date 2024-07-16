@@ -347,7 +347,8 @@
      * activates the search route with the search text
      */
     function searchWilcardProduct() {
-        const searchText = document.getElementById('search').value;
+        let searchText = document.getElementById('search').value;
+        searchText = searchText.trim();
         if (searchText !== '') window.location.href = "{{ route('search', ['searchText' => ':searchText']) }}".replace(
             ':searchText', searchText);
     }
@@ -370,10 +371,6 @@
 
     function documentationRoute() {
         window.location.href = "{{route('api.documentation') }}";
-        // window.onload = function() {
-        //     window.open("{{ route('api.documentation') }}", "_blank");
-        //     window.location.href = "/";
-        // }
     }
 
     function productMail(sku) {

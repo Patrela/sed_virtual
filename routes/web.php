@@ -1,15 +1,16 @@
 <?php
 
+use App\Jobs\ImportProducts;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 
-use App\Jobs\ImportProducts;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\ConnectController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
@@ -119,6 +120,7 @@ Route::post('/products/csv', [ProductController::class, 'toCsv'])->name('product
 */
 //read Vtex Images Directory
 Route::get('/guardar-carpeta', [FileController::class, 'guardarCarpeta'])->name('files.scan');
-
+Route::get('/local/login', [ConnectController::class, 'connectLogin'])->name('local.login');
+Route::get('/connect_test', [ConnectController::class, 'connectTest'])->name('local.test');
 
 require __DIR__.'/auth.php';

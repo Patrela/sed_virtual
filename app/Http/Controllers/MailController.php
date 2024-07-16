@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ItemMail;
+use App\Jobs\SendEmail;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\ProductController;
-use App\Jobs\SendEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class MailController extends Controller
 {
     public function sendMail(Request $request, string $sku) //Request $request
     {
-        $sender = ($request->has('user')) ? $request->user()->email :
-                ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
+        // $sender = ($request->has('user')) ? $request->user()->email :
+        //         ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
+        $sender = env('MAIL_FROM_ADDRESS');
         $email = $request->header('x-api-receiver');
 
         //Log::info("user.  " . $sender . " sku " . $sku);
@@ -29,13 +32,17 @@ class MailController extends Controller
 
         $dispatchData = [
             'mail_to' => $email,
+            //'to' => $email,
             'from' => $sender,
             'subject' => 'SED: ' .$product->name,
             'message' => "Approval the request...",
             'product' => $product,
         ];
 
+        //Mail::mailer('msgraph')->to($dispatchData['to'])->send(new ItemMail($dispatchData));
+
         SendEmail::dispatchAfterResponse($dispatchData);
+
         /*
         Mail::to($$email)
             ->cc($sender)

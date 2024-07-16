@@ -17,16 +17,12 @@ class ItemMail extends Mailable
     public $mailData;
 
 
-    /**
-     * Create a new message instance.
-     */
+
     public function __construct($mailData)
     {
         $this->mailData = $mailData;
     }
-    /**
-     * Get the message envelope.
-     */
+
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -36,25 +32,32 @@ class ItemMail extends Mailable
         );
 
     }
-    /**
-     * Get the message content definition.
-     */
+
     public function content(): Content
     {
         return new Content(
-            //view: 'emails.prueba',
-            view: 'emails.product',
+            //view: 'emails.product',
+            view: 'emails.quote',
             with: ['product' =>$this->mailData['product'], 'sender' => $this->mailData['from']],
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
+
     public function attachments(): array
     {
         return [];
     }
+
+    /*
+    public function build()
+    {
+        return $this->view('emails.product')
+                    ->with([
+                        'product' => $this->mailData['product'],
+                        'sender' => $this->mailData['from'],
+                    ])
+                    ->subject($this->mailData['subject'])
+                    ->from($this->mailData['from']);
+    }
+    */
 }
