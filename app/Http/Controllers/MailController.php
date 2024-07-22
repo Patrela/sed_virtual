@@ -17,6 +17,7 @@ class MailController extends Controller
         // $sender = ($request->has('user')) ? $request->user()->email :
         //         ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
         $sender = env('MAIL_FROM_ADDRESS');
+        $owner = ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
         $email = $request->header('x-api-receiver');
 
         //Log::info("user.  " . $sender . " sku " . $sku);
@@ -34,6 +35,7 @@ class MailController extends Controller
             'mail_to' => $email,
             //'to' => $email,
             'from' => $sender,
+            'owner' => $owner,
             'subject' => 'SED: ' .$product->name,
             'message' => "Approval the request...",
             'product' => $product,

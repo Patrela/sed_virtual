@@ -24,9 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
 
         Http::macro('connector', function () {
-            $flag = ( app()->isProduction() )? 'production' : 'development';
-            Log::info('Production flag: ' . $flag);
-            echo $flag;
             if( app()->isProduction() )
             {
                 return Http::baseUrl(config('services.api.prod'))

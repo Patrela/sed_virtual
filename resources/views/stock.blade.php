@@ -168,7 +168,7 @@
                                 </div>
                                 <div class="card-text">
                                     {{ '$ ' . number_format($product['regular_price'], 2, ',', '.') }}
-                                    {{ $product['currency'] }} / {{ $product['unit'] }}
+                                    {{ $product['currency'] }}
                                     {{ $product['price_tax_status'] }}
                                 </div>
                             </div>
@@ -258,8 +258,8 @@
                         <div class="modal-card-item" id="prod_currency"></div>
                     </div>
                     <div class="modal-card-item-division">
-                        <div class="modal-card-item-title">/</div>
-                        <div class="modal-card-item" id="prod_unit"></div>
+                        <div class="modal-card-item-title"></div>
+                        {{-- <div class="modal-card-item" id="prod_unit"></div> --}}
                         <div class="modal-card-item" id="prod_tax_status"></div>
                     </div>
                 </div>

@@ -38,7 +38,7 @@ class ItemMail extends Mailable
         return new Content(
             //view: 'emails.product',
             view: 'emails.quote',
-            with: ['product' =>$this->mailData['product'], 'sender' => $this->mailData['from']],
+            with: ['product' =>$this->mailData['product'], 'sender' => $this->mailData['owner']],
         );
     }
 

@@ -33,6 +33,7 @@ class SendEmail implements ShouldQueue
             Mail::to($this->data['mail_to'])->send(new ItemMail([
                 'subject' => $this->data['subject'],
                 'mail_to' =>  $this->data['mail_to'],
+                'owner' => $this->data['owner'],
                 'from' => $this->data['from'],
                 'product' =>$this->data['product'],
             ]));

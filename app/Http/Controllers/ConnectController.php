@@ -134,27 +134,5 @@ class ConnectController extends Controller
         session(['current_user' => $email]);
         return redirect()->route('stock', ['email' => $email]);
     }
-    public function connectTest(Request $request) {
-        $flags = [
-            'app_prod' => 2,
-            'env' =>env('APP_ENV'),
-            'prod' => config('services.api.prod'),
-            'dev' => config('services.api.dev'),
-            'prod_token' => config('services.api.token_prod'),
-            'dev_token' => config('services.api.token_dev')
-        ];
-        Log::info($flags);
-        //echo $flags;
-        try {
-            $flags['app_prod'] =app()->isProduction();
-            return  var_dump($flags); //response()->json( $flags);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error ' .$e->getMessage(),
-                'code' => $e->getCode(),
-            ], 403);
-        }
-    }
 
 }

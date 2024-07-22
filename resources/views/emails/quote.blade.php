@@ -10,6 +10,7 @@
             font-family: Calibri, sans-serif;
             font-size: 17px;
             margin-left: 48px;
+            border-left: 6px solid #FF2D20;
         }
 
         h1 {
@@ -60,54 +61,68 @@
         .card-content {
             margin-left: 10px;
         }
+
+        .main-content {
+            margin-left: 3px;
+            border-left: 1px solid black;
+            padding-left: 15px;
+        }
+        .title {
+            margin-left: 40px;
+            margin-top: 60px;
+            align-items: center
+        }
     </style>
 
 </head>
 
 <body>
-    <div class="card">
-        <div class="card-image">
-            <img id="img_logo" src="{{ asset('images/mainlogo.png') }}" alt="SED INTERNATIONAL">
+    <div class="main-content">
+        <div class="card">
+            <div class="card-image">
+                <img id="img_logo" src="{{ asset('images/mainlogo.png') }}" alt="SED INTERNATIONAL">
+            </div>
+            <div class="card-content title">
+                <h1>COTIZACIÓN SED</h1>
+            </div>
         </div>
-        <div class="card-content">
-            <h1>      COTIZACIÓN SED</h1>
+        <detail>
+            <br>
+            <p>Fecha: {{ date('Y-m-d') }}</p>
+            <p>Contacto: {{ $sender }}</p>
+            <p>Agradecemos su confianza e interés por nuestro portafolio, a continuación, adjuntamos la cotización
+                solicitada:</p>
+        </detail>
+        <div class="card">
+            <div class="card-image">
+                <img id="prod_img_1" src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}">
+            </div>
+            <div class="card-content">
+                <h2>REF. {{ $product['sku'] }} : {{ $product['name'] }}</h2>
+                <h3>STOCK= {{ number_format($product['stock_quantity']) }} {{ $product['unit'] }} MARCA={{ $product['brand'] }}</h3>
+                <h3> ${{ number_format($product['regular_price']) }} {{ $product['currency'] }} {{ $product['price_tax_status'] }}</h3>
+            </div>
         </div>
-    </div>
-    <detail>
-        <br>
-        <p>Fecha: {{ date('Y-m-d') }}</p>
-        <p>Contacto: {{ $sender }}</p>
-        <p>Agradecemos su confianza e interés por nuestro portafolio, a continuación, adjuntamos la cotización
-            solicitada:</p>
-    </detail>
-    <div class="card">
-        <div class="card-image">
-            <img id="prod_img_1" src="{{ $product['image_1'] }}" alt="{{ $product['name'] }}">
-        </div>
-        <div class="card-content">
-            <h2>REF. {{ $product['sku'] }} : {{ $product['name'] }}</h2>
-            <h3>STOCK= {{ number_format($product['stock_quantity']) }} {{ $product['unit'] }} MARCA={{ $product['brand'] }}</h3>
-            <h3> ${{ number_format($product['regular_price']) }} {{ $product['currency'] }} {{ $product['price_tax_status'] }}</h3>
-        </div>
-    </div>
-    <detail>
-        <p>{{ $product['description'] }}</p>
-        <p>{{ $product['attributes'] }}. {{ $product['guarantee'] }} </p>
-    </detail>
+        <detail>
+            <p>{{ $product['description'] }}</p>
+            <p>{{ $product['attributes'] }}. {{ $product['guarantee'] }} </p>
+        </detail>
 
-    <p>Condiciones Comerciales:</p>
-    <ul>
-        <li>Esta cotización es una recomendación por lo tanto debe ser analizada y aprobada por su departamento de
-            ingeniería.</li>
-        <li>Debe revisar los detalles técnicos adjuntos, con el fin de verificar si se cumplen o no con lo solicitado
-            por su Cliente.</li>
-        <li>La disponibilidad y los precios puede variar sin previo aviso.</li>
-        <li>Asegure la mercancía generando la reserva con su ejecutivo de cuenta.</li>
-        <li>Los precios no incluyen flete.</li>
-        <li>Facturación en pesos a la TRM del día.</li>
-        <li>Política de garantías https://www.sed.international/servicios_info.</li>
-    </ul>
-
+        <p>Condiciones Comerciales:</p>
+        <ul>
+            <li>Esta cotización es una recomendación por lo tanto debe ser analizada y aprobada por su departamento de
+                ingeniería.</li>
+            <li>Debe revisar los detalles técnicos adjuntos, con el fin de verificar si se cumplen o no con lo solicitado
+                por su Cliente.</li>
+            <li>La disponibilidad y los precios puede variar sin previo aviso.</li>
+            <li>Asegure la mercancía generando la reserva con su ejecutivo de cuenta.</li>
+            <li>Los precios no incluyen flete.</li>
+            <li>Facturación en pesos a la TRM del día.</li>
+            <li>Política de garantías https://www.sed.international/servicios_info.</li>
+        </ul>
+        <br/>
+        <br/>
+    </div>
 </body>
 
 </html>
