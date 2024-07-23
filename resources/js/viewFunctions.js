@@ -225,10 +225,10 @@ function ModalData(product) {
     // console.log(product.attributes);
     description = document.getElementById("prod_attributes");
     description.innerHTML = product.attributes.replaceAll("\r\n", " | ");
-
+    /*
     var unit = document.getElementById("prod_unit");
     unit.innerText = product.unit;
-
+    */
     var group = document.getElementById("prod_department");
     group.innerText = product.department;
     group = document.getElementById("prod_category");

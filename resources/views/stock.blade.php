@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>SED Stock</title>
+    <link rel="icon" href="{{ asset('images/icoSedDigital.png') }}">
     <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
@@ -195,8 +196,7 @@
             <div class="footer-medium-right">
                 <form action="{{ route('api.documentation') }}" method="POST">
                     @csrf
-                    <button type="submit">API Postman</button> {{-- type="button" onclick="documentationRoute()"" --}}
-
+                    <button type="button">API DOCUMENTATION</button>  {{-- <button type="submit">API Postman</button>  --}}
                 </form>
             </div>
         </div>

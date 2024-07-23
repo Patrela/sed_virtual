@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>SED Inventario MU</title>
+    <link rel="icon" href="{{ asset('images/icoSedDigital.png') }}">
     <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
 
@@ -105,11 +106,10 @@
                             <p>Documentación técnica para API de Consulta de Inventarios</p>
                         </div>
                         <div class="footer-medium-right">
-                            <form action="{{ route('postman.stock') }}" method="POST">
+                            <form action="{{ route('api.documentation') }}" method="POST">
                                 @csrf
-                                <button type="submit">API Postman</button>
-                              </form>
-
+                                <button type="button">API DOCUMENTATION</button>  {{-- <button type="submit">API Postman</button>  --}}
+                            </form>
                         </div>
                     </div>
                     <p class="footer-bottom">El contenido de este sitio, incluyendo textos, imágenes y código, es propiedad de SED INTERNATIONAL DE COLOMBIA S.A.S., y está protegido por las leyes internacionales de derecho de autor.</p>
