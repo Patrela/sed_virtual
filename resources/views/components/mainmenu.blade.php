@@ -68,7 +68,7 @@
                     @endif
                 @endauth
                 @if ($developer)
-                    <button class="navitem" type="button"  onclick="window.location.href = '{{ route('doc.document') }}'">
+                    <button class="navitem" type="button"  onclick="window.location.href = '{{ route('documentation.show') }}'">
                         <i class="fas fa-atlas navitem-icon"></i>
                     </button>
                 @endif

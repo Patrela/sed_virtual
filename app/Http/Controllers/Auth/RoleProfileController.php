@@ -35,9 +35,10 @@ class RoleProfileController extends Controller
     }
 
     public function updateRoleProfile(Request $request, string $email, string $role_type){
-        // $userLogged = (session()->has('current_user'))? session('current_user'): $request->user()->email; // Auth::user()->email;
-        // Log::info("user logged", ['userLogged' => $userLogged]);
-        // if (app(CacheController::class)->hasAbility($userLogged, 'user-edit')) {
+         $userLogged =  $request->input('sender_email'); // Auth::user()->email;
+         //Log::info("user logged", ['userLogged' => $userLogged]);
+
+        if (app(CacheController::class)->hasAbility($userLogged, 'user-edit')) {
             Log::info(['email' => $email, 'role_type' => $role_type]);
             $user = User::where( 'email', "{$email}")->first();
             if(!$user) {
@@ -46,18 +47,27 @@ class RoleProfileController extends Controller
                     'code' => 404,
                 ], 404);
             }
-            $user['role_type'] = $role_type;
-            $user->save();
-            Log::info("user", ['user' => $user]);
-            //return  json_encode($user) ;
+            if($user['role_type'] !== $role_type) {
+                switch ($role_type) {
+                    case User::ALLROLES["Administrator"]:
+                            $user->createToken('profile', ['user-list','user-create','user-edit', 'user-show', 'user-delete']);
+                        case User::ALLROLES["Developer"]:
+                            $user->createToken('api', ['product-import', 'app-validation','document-read']);
+                            break;
+                }
+                $user['role_type'] = $role_type;
+                $user->save();
+            }
             return response()->json([
                 'message' => 'User Profile updated',
                 'code' => 200,
             ], 200);
-        // }
-        // return response()->json([
-        //     'message' => 'Unauthorized - Access is denied due to invalid credentials.',
-        //     'code' => 401,
-        // ], 401);
+        }
+        return response()->json([
+            'message' => 'Unauthorized - Access is denied due to invalid credentials.',
+            'code' => 401,
+        ], 401);
+
+
     }
 }

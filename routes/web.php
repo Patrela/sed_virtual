@@ -63,10 +63,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () { //middleware('auth:sanctum')
-    Route::get('/api/documentation', [SwaggerController::class, 'show'])->name('doc.document')->middleware('ability:document-read');
-    Route::get('/api/documentation/json/swagger.json', [SwaggerController::class, 'getSwaggerJson'])->name('doc.json')->middleware('ability:document-read');
-    // Route::get('/api/documentation', [SwaggerController::class, 'show'])->name('doc.document')->middleware('ability:document-read');
-    // Route::get('/api/documentation/json/swagger.json', [SwaggerController::class, 'getSwaggerJson'])->name('doc.json')->middleware('ability:document-read');
+    Route::get('/api/documentation', [SwaggerController::class, 'show'])->name('documentation.show')->middleware('ability:document-read');
+    Route::get('/api/documentation/json/swagger.json', [SwaggerController::class, 'getSwaggerJson'])->name('documentation.json')->middleware('ability:document-read');
 });
 
 Route::middleware('auth')->group(function () {

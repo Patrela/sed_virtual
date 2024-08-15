@@ -95,7 +95,7 @@
         }
 
         function loadUserCard(user) {
-            console.log("2 ", user.name);
+            //console.log("2 ", user.name);
             //alert(user.name);
             let item = document.getElementById('name');
             item.value = user.name;
@@ -136,17 +136,20 @@
         }
 
         function fetchPutUserProfile() {
+            sender = "{{ Auth::user()->email}}";
             const email= document.getElementById('email').value;
             const role_type = document.getElementById('role_type').value;
             console.log("Fetching user profile ",email, ' - ', role_type);
             const newpath = "{{ route('roleprofile.update', ['email' => ':email','role_type' => ':role_type' ]) }}"
                             .replace(':email', encodeURIComponent(email))
                             .replace(':role_type', role_type );
-            //alert(newpath);
             return new Promise((resolve, reject) => {
-                //fetch(`/isolatedprofile.mail/${email}`)
                 fetch(`${newpath}`,
-                    { method: 'PUT'
+                    { method: 'PUT',
+                    headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        body: JSON.stringify({ sender_email: sender })
     //                 {
     // method: 'POST',
     // mode: 'cors',

@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    @if (isset($administrator))
+    @if (isset($administrator) )
         <x-mainmenu :administrator="$administrator" :developer="$developer" />
     @elseif (isset($developer))
         <x-mainmenu :developer="$developer" />
@@ -196,10 +196,18 @@
                 <p>Documentación técnica para API de Consulta de Inventarios</p>
             </div>
             <div class="footer-medium-right">
-                <form action="{{ route('api.documentation') }}" method="POST">
-                    @csrf
-                    <button type="button">API DOCUMENTATION</button>  {{-- <button type="submit">API Postman</button>  --}}
-                </form>
+                @if (isset($administrator) or isset($developer) )
+                    <form action="{{ route('documentation.show') }}" method="GET">
+                        @csrf
+                        <button type="submit">API DOCUMENTATION</button>
+                    </form>
+                @else
+                    <form action="{{ route('api.documentation') }}" method="POST">
+                        @csrf
+                        <button type="button">API DOCUMENTATION</button>  {{-- <button type="submit">API Postman</button>  --}}
+                    </form>
+                @endif
+
             </div>
         </div>
         <p class="footer-bottom">El contenido de este sitio, incluyendo textos, imágenes y código, es propiedad de SED
