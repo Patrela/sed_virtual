@@ -65,6 +65,7 @@ class ProfileController extends Controller
                     $user->createToken('api', ['product-import', 'app-validation']);
                     break;
                 case 5: //Support
+                case 6: //Developer
                     $user->createToken('operation', ['product-list', 'product-show', 'product-create', 'product-edit', 'product-delete']);
                     $user->createToken('api', ['product-import', 'app-validation']);
                     break;

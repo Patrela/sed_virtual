@@ -53,7 +53,8 @@
                 2 => 'Staff',
                 3 => 'Trade ',
                 4 => 'Reseller ',
-                5 => 'Support ',]"
+                5 => 'Support ',
+                6 => 'Developer']"
                 :selected="old('role_type')">
             </x-select>
 

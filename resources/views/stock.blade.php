@@ -18,7 +18,9 @@
 
 <body>
     @if (isset($administrator))
-        <x-mainmenu :administrator="$administrator" />
+        <x-mainmenu :administrator="$administrator" :developer="$developer" />
+    @elseif (isset($developer))
+        <x-mainmenu :developer="$developer" />
     @else
         <x-mainmenu />
     @endif
@@ -317,6 +319,13 @@
         </form>
     </div>
 </body>
+
+
+<script type="text/javascript" src="{{ asset('js/viewFunctions.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+</script>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', (event) => {
         const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
@@ -409,11 +418,5 @@
         }
     }
 
-</script>
-
-<script type="text/javascript" src="{{ asset('js/viewFunctions.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 </script>
 </html>

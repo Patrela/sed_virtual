@@ -44,6 +44,7 @@ return [
         'prod' => env('API_PROD_URL'),
         'token_dev' => env('API_DEV_TOKEN'),
         'token_prod' => env('API_PROD_TOKEN'),
+        'token_connect' => env('SESSION_SECRET'),
 
     ],
 ];

@@ -82,6 +82,9 @@ class ConnectController extends Controller
             {
                 $user= $tokenData->tokenable;
                 Auth::login($user);
+                //revoke the token
+                $user = User::where( 'email', "{$email}")->first();
+                $user->tokens()->where('token',"{$token}")->delete();
                 //(Auth::check())? Log::info("Auth check  successful"): Log::info("Auth check  failed");
             }
         } else{
@@ -132,7 +135,17 @@ class ConnectController extends Controller
 
         //session()->regenerate();
         session(['current_user' => $email]);
-        return redirect()->route('stock', ['email' => $email]);
+        session(['SESSION_SECRET' =>config('services.api.token_connect')]);
+
+        return redirect()->route('stock');
     }
 
+    public function showNodeVersion()
+    {
+        // Execute the 'node -v' command
+        $nodeVersion = shell_exec('node -v');
+
+        // Return the version as a response
+        return response()->json(['node_version' => trim($nodeVersion)]);
+    }
 }

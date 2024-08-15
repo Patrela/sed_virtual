@@ -1,0 +1,147 @@
+/* swagger.css */
+:root {
+  --main-dark-color: #000000;
+  --main-color-active: #103DB1;
+  --main-body-color:  #7B7B7B;
+  --main-warning-color:#FF2D20;
+  --main-container-color:#EDEDED;
+}
+
+@font-face {
+  font-family: "DM Sans Condensed";
+  src: url("fonts/DMSans-Medium.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "DM Sans Condensed Italic";
+  src: url("fonts/DMSans-MediumItalic.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "DM Sans Bold";
+  src: url("fonts/DMSans-Bold.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "DM Sans Bold Italic";
+  src: url("fonts/DMSans-BoldItalic.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "DM Sans Regular Italic";
+  src: url("fonts/DMSans-Italic.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "DM Sans Regular";
+  src: url("fonts/DMSans-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+body {
+  font-family: "DM Sans Regular";
+  font-size: larger;
+}
+
+.swagger-ui {
+  color: var(--main-dark-color);
+  font-family: "DM Sans Regular";
+}
+.swagger-ui .btn.authorize {
+  background-color: transparent;
+  border-color: var(--main-warning-color);
+  color: var(--main-warning-color);
+  display: inline;
+  line-height: 1;
+}
+
+.swagger-ui .btn.authorize svg {
+  fill: var(--main-warning-color);
+}
+.swagger-ui .info p {
+  color: var(--main-dark-color);
+  font-family: "DM Sans Bold";
+  font-size: 16px;  
+}
+.swagger-ui .info .title {
+  color: var(--main-dark-color);
+  font-family: "DM Sans Bold";
+  font-size: 32px;
+  margin: 0;
+}
+
+.small {
+  background: var(--main-body-color);
+  border-radius: 57px;
+  color: var(--main-container-color);  
+  display: inline-block;
+  font-size: 10px;
+  margin: 0 0 0 5px;
+  padding: 2px 4px;
+  position: relative;
+  top: -5px;
+  vertical-align: super;
+}
+
+.warning {
+  background-color: var(--main-warning-color);
+}
+.swagger-ui .opblock.opblock-post {
+  background-color: var(--main-container-color);
+  border-color: var(--main-warning-color);
+}
+.swagger-ui .opblock.opblock-post .opblock-summary {
+  border-color: var(--main-warning-color);
+}
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background: var(--main-warning-color);
+}
+.swagger-ui .opblock.opblock-post .tab-header .tab-item.active h4 span::after {
+  background: var(--main-warning-color);
+}
+
+.swagger-ui .opblock .opblock-summary-path {
+  align-items: center;
+  color: var(--main-dark-color);
+  display: flex;
+  font-family: "DM Sans Bold";
+  font-size: 16px;
+  font-weight: 600;
+  word-break: break-word;
+}
+.swagger-ui .opblock .opblock-summary-description {
+  color: var(--main-dark-color);
+  font-family: "DM Sans Regular Italic";
+  font-size: medium;
+  word-break: break-word;
+}
+.swagger-ui .opblock-summary-control button {
+  background-color: var(--main-warning-color) !important;
+  border-color: var(--main-body-color) ;  
+  color: var(--main-container-color);
+}
+.swagger-ui .scheme-container {
+  background-color:var(--main-container-color);
+}
+
+.swagger-ui .response-control-media-type--accept-controller select {
+  border-color: var(--main-warning-color);
+}
+
+.swagger-ui .response-control-media-type__accept-message {
+  color: var(--main-warning-color);
+  font-size: .7em;
+}
+
+.swagger-ui .topbar {
+  background-color: var(--main-warning-color);
+}
+

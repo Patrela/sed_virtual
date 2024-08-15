@@ -13,7 +13,10 @@ use App\Http\Controllers\MailController;
 use App\Http\Controllers\ConnectController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SwaggerController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Auth\RoleProfileController;
+
 
 
 
@@ -58,6 +61,36 @@ Route::middleware('auth')->group(function () {
         return view('stock', $data);
     })->name('refresh');
 });
+
+Route::middleware('auth:sanctum')->group(function () { //middleware('auth:sanctum')
+    Route::get('/api/documentation', [SwaggerController::class, 'show'])->name('doc.document')->middleware('ability:document-read');
+    Route::get('/api/documentation/json/swagger.json', [SwaggerController::class, 'getSwaggerJson'])->name('doc.json')->middleware('ability:document-read');
+    // Route::get('/api/documentation', [SwaggerController::class, 'show'])->name('doc.document')->middleware('ability:document-read');
+    // Route::get('/api/documentation/json/swagger.json', [SwaggerController::class, 'getSwaggerJson'])->name('doc.json')->middleware('ability:document-read');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/roleprofile/new',[RoleProfileController::class,'loadNewProfile'])->name('roleprofile.new');
+    Route::get('/roleprofile/{email}',[RoleProfileController::class,'searchProfileEmail'])->name('roleprofile.mail');
+});
+
+//sanctum abilities and privileges
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    })->name('user');
+
+    Route::get('/post/create', function (Request $request) { //sanctum with ability
+        return response()->json([
+            'id' => 1,
+            'title' => $request->title,
+            'content' => $request->content,
+        ]);
+    })->name('sanctum.post')->middleware('ability:post-create');
+
+});
+
+// Route::put('roleprofile/{email}/{role_type}',[RoleProfileController::class,'updateRoleProfile'])->name('roleprofile.update');
 
 //To Check session -cache - Auth Data
 Route::get('/memory-data', function () {

@@ -17,7 +17,8 @@ class User extends Authenticatable
         'Staff'=> 2,
         'Trade'=> 3,
         'Reseller' => 4,
-        'Support' => 5
+        'Support' => 5,
+        'Developer' => 6
     ];
 
     /**

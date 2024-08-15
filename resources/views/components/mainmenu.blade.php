@@ -1,4 +1,4 @@
-@props(['administrator' => false])
+@props(['administrator' => false, 'developer' => false])
 <header class="mainmenu">
 
     <div class="logo">
@@ -48,12 +48,7 @@
             <x-text-input id="search" type="text" name="search" required autofocus autocomplete="search"/>
         </div>
         <div class="mainmenu-icons-button">
-            {{-- <a href="{{ route('product.search') }}" onclick="searchProduct()"><i
-                    class="fas fa-search  navitem-icon"></i></a>
-            <a href="{{ route('home') }}"><i class="fas fa-home navitem-icon"></i></a> --}}
-            {{-- <form id="homeForm" method="get" action="{{ route('stock') }}" class="mainmenu-icons-text"> --}}
             <form method="GET" action="{{ route('logout') }}" class="mainmenu-icons-text">
-                    @csrf
                 @csrf
                 <button class="navitem" type="button" onclick="searchWilcardProduct()">
                     <i class="fas fa-search  navitem-icon"></i>
@@ -61,19 +56,22 @@
                 @auth
                     <span>{{ Auth::user()->name }}</span>
                     @if ($administrator)
-                        @if (Route::has('register'))
-                            <button class="navitem" type="button"  alt="Create User" onclick="window.location.href = '{{ route('register') }}'">
-                                <i class="fas fa-plus-circle navitem-icon"></i>
-                            </button>
-                        @endif
-                        <button class="navitem" type="button"  alt="Load New Users" onclick="classificationsRoute()">
+                        <button class="navitem" type="button"  alt="Load Classifications" onclick="classificationsRoute()">
                             <i class="fas fa-boxes navitem-icon"></i>
                         </button>
                         <button class="navitem" type="button"  alt="Load New Users" onclick="usersRoute()"> {{-- onclick="window.location.href = '{{ route('sed.users') }}'" --}}
                             <i class="fas fa-user-friends navitem-icon"></i>
                         </button>
+                        <button class="navitem" type="button"  alt="User Profile" onclick="window.location.href = '{{ route('roleprofile.new') }}'">
+                            <i class="fas fa-plus-circle navitem-icon"></i>
+                        </button>
                     @endif
                 @endauth
+                @if ($developer)
+                    <button class="navitem" type="button"  onclick="window.location.href = '{{ route('doc.document') }}'">
+                        <i class="fas fa-atlas navitem-icon"></i>
+                    </button>
+                @endif
                 <button class="navitem" type="button"  onclick="window.location.href = '{{ route('stock') }}'">
                     <i class="fas fa-home navitem-icon"></i>
                 </button>

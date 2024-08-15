@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 
@@ -21,6 +24,16 @@ class CacheController extends Controller
                 return true;
         }
         return  false;
+    }
+    public function hasAbility($email, $ability)
+    {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return false; // Or throw an exception
+        }
+
+        $abilities = $user->tokens->pluck('abilities')->flatten();
+        return $abilities->contains($ability); // 'document-read'
     }
 
 }

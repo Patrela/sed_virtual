@@ -56,8 +56,11 @@ class CategoryController extends Controller
 
         // Check if the user is authenticated
         if (Auth::check()) {
-            if(Auth::user()->role_type == User::ALLROLES["Administrator"])
-            $data['administrator'] = Auth::user()->role_type;
+            if(Auth::user()->role_type == User::ALLROLES["Administrator"]) {
+                $data['administrator'] = Auth::user()->role_type;
+                $data['developer'] = User::ALLROLES["Developer"];
+            }
+            if(Auth::user()->role_type == User::ALLROLES["Developer"])  $data['developer'] =  Auth::user()->role_type;
         }
         //Log::info("Auth Type condition " . Auth::user()->role_type);
         //Log::info($data);
