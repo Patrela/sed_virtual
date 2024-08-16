@@ -65,6 +65,9 @@
                         <button class="navitem" type="button"  alt="User Profile" onclick="window.location.href = '{{ route('roleprofile.new') }}'">
                             <i class="fas fa-plus-circle navitem-icon"></i>
                         </button>
+                        <button class="navitem" type="button"  alt="affinity" onclick="window.location.href = '{{ route('affinity.index') }}'">
+                            <i class="fas fa-bell navitem-icon"></i>
+                        </button>
                     @endif
                 @endauth
                 @if ($developer)

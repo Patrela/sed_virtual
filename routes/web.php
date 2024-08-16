@@ -14,6 +14,7 @@ use App\Http\Controllers\ConnectController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SwaggerController;
+use App\Http\Controllers\AffinityController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Auth\RoleProfileController;
 
@@ -68,9 +69,10 @@ Route::middleware('auth:sanctum')->group(function () { //middleware('auth:sanctu
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/roleprofile/new',[RoleProfileController::class,'loadNewProfile'])->name('roleprofile.new');
-    Route::get('/roleprofile/{email}',[RoleProfileController::class,'searchProfileEmail'])->name('roleprofile.mail');
+    Route::get('/rolesprofile/new',[RoleProfileController::class,'loadNewProfile'])->name('roleprofile.new');
+    Route::get('/rolesprofile/{email}',[RoleProfileController::class,'searchProfileEmail'])->name('roleprofile.mail');
 });
+
 
 //sanctum abilities and privileges
 Route::middleware('auth:sanctum')->group(function () {
@@ -133,6 +135,10 @@ Route::middleware(['auth'])->group(function () {
         return view('stock', $data);
     })->name('search');
 
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/affinities',  [AffinityController::class, 'index'])->name('affinity.index');
+    Route::get('/affinities/{brand}',  [AffinityController::class, 'getAffinities'])->name('affinity.show');
 });
 
 Route::get('/products/mail/{sku}',  [MailController::class, 'sendMail'])->name('product.email');

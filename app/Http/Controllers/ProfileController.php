@@ -109,4 +109,15 @@ class ProfileController extends Controller
         $abilities = $user->tokens()->pluck('abilities'); // Get ability names ; abilities
         return response()->json($abilities, 200); // Return abilities as JSON
     }
+
+    public function hasAbility($email, $ability)
+    {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return false; // Or throw an exception
+        }
+
+        $abilities = $user->tokens->pluck('abilities')->flatten();
+        return $abilities->contains($ability); // 'document-read'
+    }
 }

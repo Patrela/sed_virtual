@@ -13,7 +13,7 @@
                         <header>
                             <header>
                                 <h2 class="text-lg font-medium text-gray-900">
-                                    {{ __('Profile Information') }}
+                                    {{ __('User Role') }}
                                 </h2>
 
                                 <p class="mt-1 text-sm text-gray-600">
@@ -28,9 +28,9 @@
                                     <x-input-label for="email" :value="__('Email')" />
                                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                         :value="old('email', $user->email)" required autocomplete="username" />
+                                    <br />
                                     <x-secondary-button
                                         onclick="searchUserEmailProfile()">{{ __('Search user') }}</x-primary-button>
-
                                 </div>
 
                                 <div>

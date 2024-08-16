@@ -334,6 +334,22 @@ function generateCards(products) {
                 product.price_tax_status;
 
             cardText.appendChild(btnModal);
+
+            // affinity product data
+            if(product.url_affinity !== null) {
+                const btnAffinity = document.createElement("button");
+                btnAffinity.onclick = function () {
+                    openUrlWindowTab(product.url_affinity);
+                };
+                const iconF = document.createElement("i");
+                iconF.classList.add("fas");
+                iconF.classList.add("fa-external-link-alt");
+                iconF.classList.add("navitem-icon");
+
+                btnAffinity.appendChild(iconF);
+
+                cardText.appendChild(btnAffinity);
+            }
             cardText.appendChild(btnMail);
             cardText.appendChild(btnCSV);
 
@@ -376,4 +392,16 @@ function changeFullImage(image) {
     const mainImage = document.getElementById("prod_full_img");
     mainImage.src = image.src;
     mainImage.alt = image.alt;
+}
+
+function openUrlWindowTab(url) {
+    // Open the URL in a new window/tab
+    const newWindow = window.open(url, '_blank');
+
+    // Redirect the browser to the new window/tab
+    if (newWindow) {
+        newWindow.focus();
+    } else {
+        alert('Please allow pop-ups for this website');
+    }
 }

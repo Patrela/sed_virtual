@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Controllers\CacheController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Validation\ValidationException;
 
 class RoleProfileController extends Controller
 {
     public function searchProfileEmail(string $email){
-        if (app(CacheController::class)->hasAbility(Auth::user()->email, 'user-edit')) {
+        if (app(ProfileController::class)->hasAbility(Auth::user()->email, 'user-edit')) {
             $user = User::where( 'email', "{$email}")->first();
             return  $user;
         }
@@ -38,7 +38,7 @@ class RoleProfileController extends Controller
          $userLogged =  $request->input('sender_email'); // Auth::user()->email;
          //Log::info("user logged", ['userLogged' => $userLogged]);
 
-        if (app(CacheController::class)->hasAbility($userLogged, 'user-edit')) {
+        if (app(ProfileController::class)->hasAbility($userLogged, 'user-edit')) {
             Log::info(['email' => $email, 'role_type' => $role_type]);
             $user = User::where( 'email', "{$email}")->first();
             if(!$user) {

@@ -39,7 +39,8 @@ class ProductController extends Controller
         'dimension_weight',
         'image_2',
         'image_3',
-        'image_4'
+        'image_4',
+        'url_affinity'
     ];
 
     /**

@@ -6,6 +6,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SedController;
 use App\Http\Controllers\ConnectController;
+use App\Http\Controllers\AffinityController;
 use App\Http\Controllers\Auth\RoleProfileController;
 
 
@@ -31,7 +32,11 @@ Route::put('/testing/{email}/{role_type}', function (Request $request, string $e
 //     return app(RoleProfileController::class)->updateRoleProfile($request, $email, $role_type);
 // })->name("roleprofile.update");
 
-Route::put('/roleprofile/{email}/{role_type}',[RoleProfileController::class,'updateRoleProfile'])->name('roleprofile.update');
+Route::put('/rolesprofile/{email}/{role_type}',[RoleProfileController::class,'updateRoleProfile'])->name('roleprofile.update');
+
+Route::post('/affinities/{brand}',[AffinityController::class,'createOrUpdateAffinity'])->name('affinity.save');
+
+
 
 Route::get('/sed/clasifications', [SedController::class, 'getProductGroups'])->name('sed.getProviderGroups');
 Route::get('/sed/users', function () {

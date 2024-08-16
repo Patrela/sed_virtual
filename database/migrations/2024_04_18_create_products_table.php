@@ -48,6 +48,7 @@ return new class extends Migration
             $table->boolean('is_discontinued')->defaultFalse()->nullable();
             $table->boolean('is_reviewed')->defaultFalse()->nullable();
             $table->boolean('is_reserved')->defaultFalse()->nullable();
+            $table->string('url_affinity', 180);
             $table->timestamps();
             $table->foreign('id_provider')->references('id_provider')->on('providers')->onDelete('cascade');
 

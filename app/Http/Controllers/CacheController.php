@@ -25,15 +25,5 @@ class CacheController extends Controller
         }
         return  false;
     }
-    public function hasAbility($email, $ability)
-    {
-        $user = User::where('email', $email)->first();
-        if (!$user) {
-            return false; // Or throw an exception
-        }
-
-        $abilities = $user->tokens->pluck('abilities')->flatten();
-        return $abilities->contains($ability); // 'document-read'
-    }
 
 }

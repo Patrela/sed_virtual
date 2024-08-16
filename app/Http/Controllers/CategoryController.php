@@ -112,4 +112,19 @@ class CategoryController extends Controller
             ->get();
         return $group;
     }
+
+    /**
+     * @param string $name. With a code, it retrieves the brand. IF = all THEN RETRIEVES ALL
+     */
+    public function brands(string $name)
+    {
+        $brands = Category::select('id_category', 'name')
+            ->where('group_name', 'marca')
+            ->when($name !== 'all', function ($query) use ($name) {
+                $query->where('name', "{$name}");
+            })
+            ->orderBy('id', 'ASC')
+            ->get();
+        return $brands;
+    }
 }

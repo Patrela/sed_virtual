@@ -160,6 +160,12 @@
                                     <button onclick="ModalData({{ json_encode($product) }})">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
                                     </button>
+                                    @if (!is_null($product['url_affinity']))
+                                        <button class="navitem" type="button"
+                                            onclick="openUrlWindowTab('{{ $product['url_affinity'] }}')">
+                                            <i class="fas fa-external-link-alt navitem-icon"></i>
+                                        </button>
+                                    @endif
                                     <button class="navitem" type="button"
                                         onclick="productMail('{{ $product['sku'] }}')">
                                         <i class="fas fa-envelope navitem-icon"></i>

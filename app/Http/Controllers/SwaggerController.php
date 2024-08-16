@@ -9,13 +9,13 @@ use Symfony\Component\Yaml\Yaml;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\CacheController;
+use App\Http\Controllers\ProfileController;
 
 class SwaggerController extends Controller
 {
     public function show()
     {
-        if (app(CacheController::class)->hasAbility(Auth::user()->email, 'document-read')) {
+        if (app(ProfileController::class)->hasAbility(Auth::user()->email, 'document-read')) {
             //Log::info("document-read ability inside collection");
 
             $swaggerJsonUrl = url('api/documentation/json/swagger.json');
@@ -29,7 +29,7 @@ class SwaggerController extends Controller
 
     public function getSwaggerJson()
     {
-        if (app(CacheController::class)->hasAbility(Auth::user()->email, 'document-read')) {
+        if (app(ProfileController::class)->hasAbility(Auth::user()->email, 'document-read')) {
             $yamlFile = Storage::disk('public')->get('openapi.yaml');
             //dd($yamlFile);
             //Log::info($yamlFile);
