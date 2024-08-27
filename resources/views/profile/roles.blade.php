@@ -144,12 +144,23 @@
                             .replace(':email', encodeURIComponent(email))
                             .replace(':role_type', role_type );
             return new Promise((resolve, reject) => {
-                fetch(`${newpath}`,
-                    { method: 'PUT',
+                fetch(newpath, {
+                    method: 'PUT',
                     headers: {
-                                'Content-Type': 'application/json',
-                            },
-                        body: JSON.stringify({ sender_email: sender })
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ sender_email: sender })
+
+                // fetch(`${newpath}`,
+                //     { method: 'PUT',
+                //     headers: {
+                //                 'Content-Type': 'application/json',
+                //             },
+                //         body: JSON.stringify({ sender_email: sender })
     //                 {
     // method: 'POST',
     // mode: 'cors',
@@ -160,7 +171,6 @@
 
     // },
                     })
-
                     .then(response => response.json())
                     .then(user => {
                         //console.log("1 ",user);

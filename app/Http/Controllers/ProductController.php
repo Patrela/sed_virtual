@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
+
 
 
 class ProductController extends Controller
@@ -39,8 +39,38 @@ class ProductController extends Controller
         'dimension_weight',
         'image_2',
         'image_3',
+        'image_4'
+    ];
+
+    protected $selectJoinFields = [
+        'part_num',
+        'name',
+        'stock_quantity',
+        'regular_price',
+        'price_tax_status',
+        'currency',
+        'image_1',
+        'sku',
+        'unit',
+        'description',
+        'department',
+        'category',
+        'segment',
+        'brand',
+        'attributes',
+        'guarantee',
+        'contact_agent',
+        'contact_unit',
+        'dimension_length',
+        'dimension_width',
+        'dimension_height',
+        'dimension_weight',
+        'image_2',
+        'image_3',
         'image_4',
-        'url_affinity'
+        'program_url',
+        'program_image',
+        'is_program_active'
     ];
 
     /**
@@ -50,16 +80,30 @@ class ProductController extends Controller
     public function getDepartmentProducts($group = "Computadores")
     {
         //Log::info("products GET  " . $group);
-        $products = Product::where('department', "{$group}")
-            ->when($group !== "", function ($query) {
-                    $query->where('is_discontinued', 0);
-                })
-            ->select($this->selectFields)
-            ->orderBy('name', 'ASC')
+/*
+        $productsAffinities = Product::leftJoin('affinities', 'products.brand', '=', 'affinities.brand_name')
+            ->where('products.department', "{$group}")
+            ->where('products.is_discontinued', 0)
+           // ->where('affinities.is_program_active', 1)
+            ->select($this->selectJoinFields)
+            ->orderBy('products.name', 'ASC')
+            ->get();
             //->cacheTags(['products'])
             //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
+*/
+
+            $productsAffinities = Product::leftJoin('affinities', function ($join) {
+                $join->on('products.brand', '=', 'affinities.brand_name')
+                     ->where('affinities.is_program_active', '=', '1');
+            })
+            ->where('products.department', "{$group}")
+            ->where('products.is_discontinued', 0)
+           // ->where('affinities.is_program_active', 1)
+            ->select($this->selectJoinFields)
+            ->orderBy('products.name', 'ASC')
             ->get();
-        return $products;
+
+        return $productsAffinities;
     }
 
 /*
@@ -203,32 +247,6 @@ class ProductController extends Controller
         return 30;
     }
     */
-
-    /*
-    public function toExcel($sku)
-    {
-        return Excel::download(new ProductsExport($sku), 'product_' . $sku . '.xlsx');
-    }
-    */
-
-    public function toCsv(Request $request)
-    {
-        try {
-            $sku = ($request->has('sku')) ? $request->input('sku') : '';
-            $full_path = ($request->has('filepath')) ? $request->input('filepath') : '';
-            //$token = $request->bearerToken();
-            Log::error("CSV.  final file = " . $full_path . " sku: " . $sku);
-            return response()->json([
-                'result' => 'It works!',
-                'code' => 200,
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ], 403);
-        }
-    }
 
     public function abilities(Request $request)
     {

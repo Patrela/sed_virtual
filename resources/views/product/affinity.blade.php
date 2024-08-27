@@ -25,8 +25,8 @@
                                 @method('POST')
                                 <input type="hidden"  id="sender_email" name="sender_email" value="{{ Auth::user()->email }}" />
                                 <div class="mb-3">
-                                    <x-input-label for="brand" :value="__('Brand')" />
-                                    <select id="brand" name="brand" class="mt-1 block w-full border border-gray-100 rounded-md" >
+                                    <x-input-label for="brand_name" :value="__('Brand')" />
+                                    <select id="brand_name" name="brand_name" class="mt-1 block w-full border border-gray-100 rounded-md" >
                                       <option value=""> --- brand selector --- </option>
                                       @foreach ($brands as $key => $item) {
                                         <option value="{{ $item['name'] }}">{{ $item['name'] }}</option>
@@ -38,30 +38,37 @@
                                 </div>
 
                                 <div>
-                                    <x-input-label for="name" :value="__('Affinity Name')" />
-                                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" />
+                                    <x-input-label for="program" :value="__('Affinity Program')" />
+                                    <x-text-input id="program" name="program" type="text" class="mt-1 block w-full" />
 
                                 </div>
 
                                 <div>
-                                    <x-input-label for="url" :value="__('Url')" />
-                                    <x-text-input id="url" name="url" type="text" class="mt-1 block w-full" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('url')" />
+                                    <x-input-label for="program_url" :value="__('Url')" />
+                                    <x-text-input id="program_url" name="program_url" type="text" class="mt-1 block w-full" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('program_url')" />
                                 </div>
 
                                 <div>
-                                    {{-- <x-input-label for="is_active" :value="__('Active')" />
-                                    <x-text-input id="is_active" name="is_active" type="text" class="mt-1 block w-full" /> --}}
+                                    <x-input-label for="program_image" :value="__('Image')" />
+                                    <x-text-input id="program_image" name="program_image" type="text" class="mt-1 block w-full" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('program_image')" />
+                                </div>
+
+                                <div>
+                                    {{-- <x-input-label for="is_program_active" :value="__('Active')" />
+                                    <x-text-input id="is_program_active" name="is_program_active" type="text" class="mt-1 block w-full" /> --}}
 
                                     <div class="filter-checkbox">
                                         <div class="filter-checkbox-input">
-                                            <input id="is_active" name="is_active"  type="checkbox" checked />
+                                            <input id="is_program_active" name="is_program_active"  type="checkbox" checked />
 
                                         </div>
-                                        <div class="filter-checkbox-label" for="is_active"> Affinity Active
+                                        <div class="filter-checkbox-label" for="is_program_active"> Affinity Active
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div class="flex items-center gap-4">
                                     <x-primary-button>{{ __('Save') }}</x-primary-button>
@@ -85,12 +92,12 @@
                 <div class="card">
                     <div class="card-body">
 
-                        <h6 class="card-title">{{ $affinity['name'] }}</h6>
-                        <h6 class="card-title">{{ $affinity['brand'] }}</h6>
+                        <h6 class="card-title">{{ $affinity['program'] }}</h6>
+                        <h6 class="card-title">{{ $affinity['brand_name'] }}</h6>
                     </div>
                     <div class="card-body-text">
-                        <p class="card-text">{{ $affinity['url'] }}</p>
-                        <p class="card-text"> Active : {{ $affinity['is_active'] }}</p>
+                        <p class="card-text">{{ $affinity['program_url'] }}</p>
+                        <p class="card-text"> Active : {{ $affinity['is_program_active'] }}</p>
                     </div>
                 </div>
 
@@ -106,13 +113,13 @@
             fetchPostAffinity(event); // Pass the event to fetchPostAffinity
         });
 
-        const brands = document.getElementById("brand");
+        const brands = document.getElementById("brand_name");
         brands.addEventListener('change', () => searchAffinity());
     });
 
 
     function searchAffinity() {
-            let brand = document.getElementById('brand').value;
+            let brand = document.getElementById('brand_name').value;
             brand = brand.trim();
             if (brand.length > 0) {
                 fetchGetAffinity(brand)
@@ -125,28 +132,32 @@
 
         function loadAffinity(affinity) {
             //console.log(affinity);
-            console.log("2  name ", affinity.name, " url ", affinity.url);
-            let item = document.getElementById('name');
-            item.value = affinity.name;
-            item = document.getElementById('url');
-            item.value = affinity.url;
-            item = document.getElementById('is_active');
-            item.checked = (affinity.is_active == 1) ? true : false;
-            //item.value = affinity.is_active;
+            //console.log("2  name ", affinity.program, " url ", affinity.program_url);
+            let item = document.getElementById('program');
+            item.value = affinity.program;
+            item = document.getElementById('program_url');
+            item.value = affinity.program_url;
+            item = document.getElementById('program_image');
+            item.value = affinity.program_image;
+            item = document.getElementById('is_program_active');
+            item.checked = (affinity.is_program_active == 1) ? true : false;
+            //item.value = affinity.is_program_active;
         }
 
         function clearAffinity() {
-            let item = document.getElementById('name');
+            let item = document.getElementById('program');
             item.value = "";
-            // item = document.getElementById('brand');
+            // item = document.getElementById('brand_name');
             // item.value = "";
-            item = document.getElementById('url');
+            item = document.getElementById('program_url');
             item.value = "";
-            item = document.getElementById('is_active');
+            item = document.getElementById('program_image');
+            item.value = "";
+            item = document.getElementById('is_program_active');
             item.checked =  true;
             item.value = "1";
         }
-        // fetch products by brand
+        // fetch products by brand_name
         function fetchGetAffinity(brand) {
             const newpath = "{{ route('affinity.show', ['brand' => ':brand']) }}".replace(':brand', encodeURIComponent(brand));
             return new Promise((resolve, reject) => {
@@ -158,7 +169,7 @@
                         resolve(affinities[0]);
                     })
                     .catch(error => {
-                        console.error('Error fetching affinity by brand:', error);
+                        console.error('Error fetching affinity by brand_name:', error);
                         reject(error); // Pass error to the calling function
                     });
 
@@ -169,10 +180,11 @@
             event.preventDefault(); // Prevent the default form submission including GET method
 
             const sender_email = document.getElementById('sender_email').value;
-            const brand = document.getElementById('brand').value;
-            const name = document.getElementById('name').value;
-            const is_active = document.getElementById('is_active').checked ? 1 : 0;
-            const url = document.getElementById('url').value;
+            const brand = document.getElementById('brand_name').value;
+            const program = document.getElementById('program').value;
+            const image = document.getElementById('program_image').value;
+            const is_active = document.getElementById('is_program_active').checked ? 1 : 0;
+            const url = document.getElementById('program_url').value;
 
             const newpath = "{{ route('affinity.save', ['brand' => ':brand' ]) }}"
                             .replace(':brand', encodeURIComponent(brand));
@@ -190,9 +202,10 @@
                 credentials: 'same-origin',
                 body: JSON.stringify({
                     sender_email: sender_email,
-                    name: name,
-                    url: url,
-                    is_active: is_active
+                    program: program,
+                    program_image: image,
+                    program_url: url,
+                    is_program_active: is_active
                 })
             })
             .then(response => {

@@ -39,10 +39,10 @@ class AffinityController extends Controller
                 $affinities = Affinity::all();
                 break;
             case 'active':
-                $affinities = Affinity::where( 'is_active', '1')->get();
+                $affinities = Affinity::where( 'is_program_active', '1')->get();
                 break;
             default:
-                $affinities = Affinity::where( 'brand', "{$brand}")->get();
+                $affinities = Affinity::where( 'brand_name', "{$brand}")->get();
                 break;
         }
 
@@ -58,10 +58,11 @@ class AffinityController extends Controller
     public function createOrUpdateAffinity(Request $request, string $brand){
         $userLogged =  $request->input('sender_email');
         if (app(ProfileController::class)->hasAbility($userLogged, 'user-edit')) {
-            $name =  $request->input('name');
-            $url =  $request->input('url');
-            $is_active =  $request->input('is_active')?? 1;
-            Log::info("affinity createOrUpdateAffinity ", ['name' => $name, 'url' => $url, 'is_active' => $is_active]);
+            $name =  $request->input('program');
+            $image =  $request->input('program_image');
+            $url =  $request->input('program_url');
+            $is_active =  $request->input('is_program_active')?? 1;
+            //Log::info("affinity createOrUpdateAffinity ", ['name' => $name, 'url' => $url, 'is_active' => $is_active]);
             if(!$brand || !$name || !$url ){
                 return response()->json([
                     'message' => 'invalid affinity data',
@@ -69,7 +70,7 @@ class AffinityController extends Controller
                 ], 500);
             }
             $brands = app(CategoryController::class)->brands($brand);
-            Log::info($brands);
+            //Log::info($brands);
             if (count($brands) == 0) {
                 return response()->json([
                     'message' => "Error Brand not found {$brand}",
@@ -78,22 +79,24 @@ class AffinityController extends Controller
             }
 
             $message = "Affinity ";
-            $affinity = Affinity::where( 'brand', "{$brand}")->first();
+            $affinity = Affinity::where( 'brand_name', "{$brand}")->first();
 
             if (!$affinity){
                 $affinity = Affinity::create([
-                    'brand' => $brands[0]['name'],
-                    'name' => $name,
-                    'url' => $url,
-                    'is_active' => $is_active,
+                    'brand_name' => $brands[0]['name'],
+                    'program' => $name,
+                    'program_image' => $image,
+                    'program_url' => $url,
+                    'is_program_active' => $is_active,
                 ]);
                 $message = $message .$affinity['name'] ." created.";
             } else {
-                $affinity['name'] = $name;
-                $affinity['url'] = $url;
-                $affinity['is_active'] = $is_active;
+                $affinity['program'] = $name;
+                $affinity['program_image'] = $image;
+                $affinity['program_url'] = $url;
+                $affinity['is_program_active'] = $is_active;
                 $affinity->save();
-                $message = $message .$affinity['name'] ." updated.";
+                $message = $message .$affinity['program'] ." updated.";
             }
             return response()->json([
                 'message' => $message,

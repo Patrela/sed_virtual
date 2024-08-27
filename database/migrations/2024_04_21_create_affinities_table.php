@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('brand', 32);
             $table->string('name', 80);
             $table->string('url', 180);
+            $table->string('image', 60);
             $table->boolean('is_active')->defaultFalse()->nullable();
             $table->timestamps();
         });

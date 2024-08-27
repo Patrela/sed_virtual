@@ -46,8 +46,7 @@ class Product extends Model
         'is_sold',
         'is_discontinued',
         'is_reviewed',
-        'is_reserved',
-        'url_affinity'
+        'is_reserved'
     ];
     protected $hidden = [ 'created_at', 'updated_at' ];
     public function Provider() {

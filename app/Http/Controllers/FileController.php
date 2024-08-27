@@ -2,41 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
 use League\Csv\Writer;
+use Illuminate\Http\Request;
 use League\Csv\CannotInsertRecord;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+
 
 class FileController extends Controller
 {
-    public function guardarCarpeta()
+    public function saveVtexImagesFileName()
     {
-        $directoryUrl = 'https://sedcolombia.com.co/Imagenes_Vtex/';
+        $directoryUrl = 'https://sedcolombia.com.co/stockimages/';
 
         try {
             // Obtener el contenido del directorio remoto
             $response = Http::get($directoryUrl);
 
             if ($response->successful()) {
-                $fileNames = $this->parseDirectoryListing($response->body());
+                $fileNameList = $this->parseDirectoryListing($response->body());
 
-                // Guardar los nombres de archivo en un archivo CSV
-                $this->saveToCsv($fileNames);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Archivo CSV creado exitosamente.',
-                ], 200);
+                $result= $this->saveCsv($fileNameList, "vtex_images.csv");
+                if (!is_array($result) || !isset($result['code']) || !isset($result['message'])) {
+                    return response()->json([
+                        'message' => 'Internal Server Error - Invalid response from saveCsv method.',
+                        'code' => 500,
+                    ], 500);
+                }
+                return response()->json($result, $result['code']);
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error al obtener el contenido del directorio remoto.',
+                    'message' => 'Error fetching the directory',
                 ], $response->status());
             }
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Error al procesar la solicitud.',
+                'message' => 'Internal Server Error',
+                'code' => 500,
             ], 500);
         }
     }
@@ -61,18 +67,57 @@ class FileController extends Controller
         return $fileNames;
     }
 
-    private function saveToCsv($fileNames)
-    {
-        $csv = Writer::createFromPath(storage_path('app/files/directory_files.csv'), 'w+');
-        $csv->insertOne(['Nombre de Archivo']);
 
-        try {
-            foreach ($fileNames as $fileName) {
-                $csv->insertOne([$fileName]);
-            }
-        } catch (CannotInsertRecord $e) {
-            // Manejar cualquier error al insertar el registro en el archivo CSV
-            throw new \Exception("Error al insertar registros en el archivo CSV.");
+    public function exportCsv(Request $request, string $name)
+    {
+
+        if(!$name){
+            return response()->json([
+                'message' => 'Unauthorized - Access is denied due to invalid credentials.',
+                'code' => 401,
+            ], 401);
         }
+        $name = preg_split('/\s+/', trim($name))[0];
+        $fileName =  trim($name) ."000.csv";
+        $csvData = $request->input('prod_csv_text');
+        if (strpos($csvData, "\n") === false) {
+            $csvData= str_replace("dimension_weight", "dimension_weight\r\n", $csvData);
+            //Log::info("Enter excluded");
+        }
+        $result = $this->saveCsv($csvData, $fileName);
+        if (!is_array($result) || !isset($result['code']) || !isset($result['message'])) {
+            return response()->json([
+                'message' => 'Internal Server Error - Invalid response from saveCsv method.',
+                'code' => 500,
+            ], 500);
+        }
+        return response()->json($result, $result['code']);
     }
+
+
+    private function saveCsv($csvData, $fileName){
+        if(!$csvData || !$fileName){
+            return [
+                'message' => "Error Data or Filename not found",
+                'code' => 404,
+            ];
+        }
+        $standardPath = "files";
+        if (!File::exists(public_path( $standardPath))) {
+            File::makeDirectory(public_path( $standardPath), 0755, true);
+        }
+        $standardPath =  $standardPath . "/";
+        $filePath = public_path( $standardPath . $fileName);
+
+        $csvData = mb_convert_encoding($csvData, 'UTF-8', 'auto');
+        File::put($filePath, $csvData);
+
+        $fileUrl = asset($standardPath . $fileName);
+        return [
+            'message' => "Successfully CSV creation. ¡Download it! ",
+            'download_url' => $fileUrl,
+            'code' => 200,
+        ];
+    }
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Affinity;
 use App\Models\User;
 use App\Models\Category;
 use Illuminate\Support\Facades\Log;
@@ -46,7 +47,7 @@ class CategoryController extends Controller
             'departments' => $departments,
             'brands' => $brands,
             'categories' => CategoryController::childGroups('categoria', $maingroup),
-            'searchText' => $searchText,
+            'searchText' => $searchText?? '',
 
             //'segments' => $segments, //revoked
             //   'perPage' => $perPage,

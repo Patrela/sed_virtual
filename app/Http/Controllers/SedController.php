@@ -297,6 +297,7 @@ class SedController extends Controller
                     $products = $jsonResponse['products']['products'];
                     $productData = [];
                     $itemsKey= "|";
+                    $counter = 0;
                     ProductImported::truncate();
                     foreach ($products as $product) {
                         $key = "{$product['part_num']}";
@@ -336,28 +337,29 @@ class SedController extends Controller
                                 'contact_email' => "{$product['contact_email']}",
                                 'is_new' =>0,
                             ];
-
+                            $counter+=1;
                             // Insert in batches of 100
-                            if (count($productData) === 100) {
+                            if ($counter === 100) { //count($productData)
                                 //Log::info($itemsKey);
                                 //Log::info($productData);
                                 ProductImported::insert($productData);
                                 //Log::info("SED API Product Imported = " .ProductImported::all()->count() ." data =" .count($productData) );
                                 $productData = [];
+                                $counter = 0;
                             }
 
                         }
                     }
 
                     // Insert any remaining records
-                    if (!empty($productData)) {
+                    if ($counter > 0) { //!empty($productData)
                         //Log::info($itemsKey);
                         //Log::info($productData);
                         ProductImported::insert($productData);
                         //Log::info("SED API Product Imported = " .ProductImported::all()->count() ." data =" .count($productData) );
                     }
-                    DB::select("CALL sp_import_products()");
 
+                    DB::select("CALL sp_import_products()");
                     if (app(CacheController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
                     return response()->json([

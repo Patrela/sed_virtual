@@ -14,6 +14,15 @@ use Illuminate\Validation\ValidationException;
 
 class RoleProfileController extends Controller
 {
+    public function index(){
+        $user = new User(); // Assuming User is your model
+        $user->name = "";
+        $user->email = "";
+        $user->trade_id= 0;
+        $user->role_type= 0;
+        return view('profile.roles', ['user' => $user]);
+    }
+
     public function searchProfileEmail(string $email){
         if (app(ProfileController::class)->hasAbility(Auth::user()->email, 'user-edit')) {
             $user = User::where( 'email', "{$email}")->first();
@@ -25,21 +34,12 @@ class RoleProfileController extends Controller
         ], 401);
     }
 
-    public function loadNewProfile(){
-        $user = new User(); // Assuming User is your model
-        $user->name = "";
-        $user->email = "";
-        $user->trade_id= 0;
-        $user->role_type= 0;
-        return view('profile.roles', ['user' => $user]);
-    }
-
     public function updateRoleProfile(Request $request, string $email, string $role_type){
          $userLogged =  $request->input('sender_email'); // Auth::user()->email;
          //Log::info("user logged", ['userLogged' => $userLogged]);
 
         if (app(ProfileController::class)->hasAbility($userLogged, 'user-edit')) {
-            Log::info(['email' => $email, 'role_type' => $role_type]);
+            //Log::info(['email' => $email, 'role_type' => $role_type]);
             $user = User::where( 'email', "{$email}")->first();
             if(!$user) {
                 return response()->json([

@@ -103,7 +103,9 @@ function isEmpty(str) {
 }
 
 function getString(text) {
-    return '"' + text + '",';
+   //return '"' + text + '",';
+   if (text.indexOf('\"', 1) >-1 ) text = text.replace('\"', '\'');
+   return '"' + text + '",';
 }
 
 function getNumber(numeric) {
@@ -144,12 +146,15 @@ function productFormCSV(product) {
         product.dimension_weight;
 
     var csvData = document.getElementById("prod_csv");
-    csvData.innerText =
+        csvData.innerText =
         "prod_name,prod_sku,prod_stock,prod_price,prod_tax_status,prod_img_1,prod_img_2,prod_img_3,prod_img_4, " +
         "prod_currency,prod_description,prod_unit,prod_department,prod_category,prod_brand,prod_segment,prod_attributes,prod_guarantee, " +
         "prod_contact,prod_contact_unit,dimension_length,dimension_width,dimension_height,dimension_weight" +
         "\r\n" +
         csvFormat.innerHTML;
+        var csvDataHide = document.getElementById("prod_csv_text");
+        csvDataHide.value = csvData.innerText;
+
 
     description.innerText = "";
     modal.style.display = "block";
@@ -336,20 +341,20 @@ function generateCards(products) {
             cardText.appendChild(btnModal);
 
             // affinity product data
-            if(product.url_affinity !== null) {
+            if(product.program_url !== null) {
                 const btnAffinity = document.createElement("button");
                 btnAffinity.onclick = function () {
-                    openUrlWindowTab(product.url_affinity);
+                    openUrlWindowTab(product.program_url);
                 };
-                const iconF = document.createElement("i");
-                iconF.classList.add("fas");
-                iconF.classList.add("fa-external-link-alt");
-                iconF.classList.add("navitem-icon");
 
-                btnAffinity.appendChild(iconF);
+                const imageAffinity = document.createElement("img");
+                imageAffinity.src = product.program_image;
+                imageAffinity.alt = product.brand;
+                btnAffinity.appendChild(imageAffinity);
 
                 cardText.appendChild(btnAffinity);
             }
+
             cardText.appendChild(btnMail);
             cardText.appendChild(btnCSV);
 

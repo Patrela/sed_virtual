@@ -14,16 +14,43 @@
     <script type="text/javascript">
         let allProducts = @json($products); // Global variable to store all products
     </script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
 </head>
 
 <body>
     @if (isset($administrator) )
         <x-mainmenu :administrator="$administrator" :developer="$developer" />
+        <script>
+            // tooltips for buttons
+            tippy('#btnClassifications', {
+              content: 'Updating Groups, Brands and Categories from Epicor',
+            });
+            tippy('#btnUsers', {
+                    content: 'Updating Staff and Trades',
+            });
+            tippy('#btnProfiles', {
+                    content: 'Updating Users Profile',
+            });
+            tippy('#btnAffinity', {
+                    content: 'Record the Brand Affinities Programs',
+            });
+            tippy('#btnDocumentation', {
+                    content: 'API Documentation for retrieving SED Stock',
+            });
+        </script>
     @elseif (isset($developer))
         <x-mainmenu :developer="$developer" />
+        <script>
+            tippy('#btnDocumentation', {
+                    content: 'API Documentation for retrieving SED Stock',
+            });
+        </script>
+
     @else
         <x-mainmenu />
     @endif
+
     {{-- <x-mainmenu /> --}}
     <main> <!--class="mt-6" -->
         <aside>
@@ -99,7 +126,7 @@
                     <div class="centered">
                         <form action="{{ route('refresh') }}" method="GET">
                             @csrf
-                            <button type="submit">Cargar Ahora</button>
+                            <button id="btnUpdateStock" type="submit">Cargar Ahora</button>
                         </form>
                     </div>
                 </div>
@@ -160,10 +187,10 @@
                                     <button onclick="ModalData({{ json_encode($product) }})">
                                         {{ $product['sku'] }} / {{ $product['brand'] }}
                                     </button>
-                                    @if (!is_null($product['url_affinity']))
+                                    @if (!is_null($product['program_url']))
                                         <button class="navitem" type="button"
-                                            onclick="openUrlWindowTab('{{ $product['url_affinity'] }}')">
-                                            <i class="fas fa-external-link-alt navitem-icon"></i>
+                                            onclick="openUrlWindowTab('{{ $product['program_url'] }}')">
+                                            <img src="{{ $product['program_image'] }}" alt="{{ $product['brand'] }}" >
                                         </button>
                                     @endif
                                     <button class="navitem" type="button"
@@ -205,12 +232,12 @@
                 @if (isset($administrator) or isset($developer) )
                     <form action="{{ route('documentation.show') }}" method="GET">
                         @csrf
-                        <button type="submit">API DOCUMENTATION</button>
+                        <button id="btnAPIDocs" type="submit">API DOCUMENTATION</button>
                     </form>
                 @else
                     <form action="{{ route('api.documentation') }}" method="POST">
                         @csrf
-                        <button type="button">API DOCUMENTATION</button>  {{-- <button type="submit">API Postman</button>  --}}
+                        <button id="btnAPIDocs"  type="button">API DOCUMENTATION</button>  {{-- <button type="submit">API Postman</button>  --}}
                     </form>
                 @endif
 
@@ -222,8 +249,7 @@
 
 
     <div id="window-csv" class="modal">
-
-        <form id="form-csv" class="modal-container" method="get" action="#" class="p-6">
+        <form id="form-csv" class="modal-container p-6" method="post" action="{{ route('csv.export', ['name' => Auth::user()->name]) }}" enctype="multipart/form-data">
             @csrf
             <h1 class="footer-title">CSV - Copiar a Excel TEXTO EN COLUMNA: Delimitado (,) Texto(")</h1>
             <div id="product_csv_desc" name="product_csv_desc" class="modal-card-item-container">
@@ -234,6 +260,7 @@
             <div id="product_csv" name="product_csv" class="modal-card-item-container">
                 {{-- <textarea class="modal-card-item" id="prod_csv" cols="30" rows="10"> --}}
                 <div class="modal-card-item" id="prod_csv"></div>
+                <input type="hidden" id="prod_csv_text" name="prod_csv_text"/>
             </div>
             <h3 class="modal-card-item-title">CSV datos</h3>
             <div id="product_csv_noheader" name="product_csv_noheader" class="modal-card-item-container">
@@ -241,6 +268,7 @@
             </div>
             <div class="filter-container-one-column centered distance-top">
                 <div class="modal-card-item-division">
+                    <button type="submit">Guardar CSV</button>
                     <button onclick="closeModal('window-csv')">Cerrar</button>
                 </div>
             </div>
@@ -341,6 +369,19 @@
     axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 </script>
 <script type="text/javascript">
+    // tooltips for buttons
+    tippy('#btnSearch', {
+        content: 'Search Product by SKU / brand + group / special characteristic',
+    });
+    tippy('#btnLogout', {
+        content: 'Exit program and user',
+    });
+    tippy('#btnAPIDocs', {
+        content: 'Documentation. SED Stock API description',
+    });
+    tippy('#btnUpdateStock', {
+        content: 'Realtime Stock products',
+    });
     document.addEventListener('DOMContentLoaded', (event) => {
         const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
         const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');
@@ -382,6 +423,12 @@
         productTitle.textContent = groupName;
         //window.location.href = '/products/' + groupName;
         window.location.href = "{{ route('product.index', ['group' => ':group']) }}".replace(':group', groupName);
+    }
+
+    function csvRoute(name) {
+        temporalIndicator();
+        name = name.split(' ')[0];
+        window.location.href = "{{ route('csv.export', ['name' => ':name']) }}".replace(':name', name);
     }
     function usersRoute() {
         temporalIndicator();

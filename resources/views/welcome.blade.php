@@ -44,8 +44,8 @@
                                         Profile
                                     </a>
                                 @endif
-                                @if (Route::has('refresh'))
-                                    <a href="{{ route('refresh') }}" class="navitem">
+                                @if (Route::has('product.refresh'))
+                                    <a href="{{ route('product.refresh') }}" class="navitem">
                                         Products
                                     </a>
                                 @endif

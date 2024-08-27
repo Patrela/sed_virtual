@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
         session(['current_user' =>  Auth::user()->email]);
         session(['SESSION_SECRET' =>config('services.api.token_connect')]);
         //Log::info("session user email.  " .session('current_user'));
-        return redirect()->intended(route('stock', absolute: false));
+        return redirect()->intended(route('product.index', absolute: false));
     }
 
     /**

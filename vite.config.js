@@ -12,21 +12,9 @@ export default defineConfig({
                 'resources/js/viewFunctions.js',
                 // 'resources/js/bootstrap.js',
             ],
+            //buildDirectory: 'demo_online_stock/build',
             refresh: true,
         }),
     ],
 });
 
-/*
-export default defineConfig({
-    plugins: [
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-            ],
-            refresh: true,
-        }),
-    ],
-});
-*/
