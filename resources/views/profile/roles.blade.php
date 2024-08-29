@@ -1,9 +1,8 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
+
+@extends('layouts.page')
+
+@section('title', 'Profile Role')
+@section('content')
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -63,11 +62,8 @@
 
                                 <div class="flex items-center gap-4">
                                     <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-                                    @if (session('status') === 'profile-updated')
-                                        <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                                            class="text-sm text-gray-600">{{ __('Saved.') }}</p>
-                                    @endif
+                                </div>
+                                <div id = "save_message" class="flex items-center gap-4 mt-1 text-lg font-medium text-gray-900">
                                 </div>
                             </form>
                     </section>
@@ -103,6 +99,8 @@
             item.value = user.trade_id;
             item = document.getElementById('role_type');
             item.value = user.role_type;
+            item = document.getElementById('save_message');
+            item.innerText = "";
         }
 
         function clearUserCard() {
@@ -114,6 +112,9 @@
             item.value = "";
             item = document.getElementById('role_type');
             item.value = "";
+            item = document.getElementById('save_message');
+            item.innerText = "";
+
         }
         // fetch products by brand
         function fetchGetUserProfile(email) {
@@ -154,26 +155,12 @@
                     cache: 'no-cache',
                     credentials: 'same-origin',
                     body: JSON.stringify({ sender_email: sender })
-
-                // fetch(`${newpath}`,
-                //     { method: 'PUT',
-                //     headers: {
-                //                 'Content-Type': 'application/json',
-                //             },
-                //         body: JSON.stringify({ sender_email: sender })
-    //                 {
-    // method: 'POST',
-    // mode: 'cors',
-    // cache: 'no-cache',
-    // credentials: 'same-origin',
-    // headers: {
-    //   'Content-Type': 'application/json'
-
-    // },
                     })
                     .then(response => response.json())
                     .then(user => {
                         //console.log("1 ",user);
+                        let item = document.getElementById('save_message');
+                        item.innerText = "Profile Updated!";
                         resolve(user);
                     })
                     .catch(error => {
@@ -187,4 +174,4 @@
 
     </script>
 
-</x-app-layout>
+@endsection

@@ -37,9 +37,9 @@
                         <i class="fas fa-atlas navitem-icon"></i>
                     </button>
                 @endif
-                {{-- <button class="navitem" type="button" id="btnStock" onclick="window.location.href = '{{ route('product.index') }}'">
+                <button class="navitem" type="button" id="btnStock" onclick="window.location.href = '{{ route('home') }}'">
                     <i class="fas fa-home navitem-icon"></i>
-                </button> --}}
+                </button>
                 <button class="navitem"  id="btnLogout" type="submit">
                     <i class="fas fa-sign-out-alt navitem-icon"></i>
                 </button>
