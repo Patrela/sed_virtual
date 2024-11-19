@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('slug', 32);
             $table->string('group_name', 16)->index()->nullable();
             $table->integer('parent_id')->index()->nullable();
+            $table->string('item_like', 32);
             $table->timestamps();
         });
     }

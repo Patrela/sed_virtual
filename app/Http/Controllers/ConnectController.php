@@ -137,7 +137,7 @@ class ConnectController extends Controller
         session(['current_user' => $email]);
         session(['SESSION_SECRET' =>config('services.api.token_connect')]);
 
-        return redirect()->route('product.index');
+        return redirect()->route('products.index');
     }
 
     public function showNodeVersion()

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 
 
@@ -21,6 +23,7 @@ class ProductController extends Controller
         'regular_price',
         'price_tax_status',
         'currency',
+        'regular_price_cop',
         'image_1',
         'sku',
         'unit',
@@ -49,6 +52,7 @@ class ProductController extends Controller
         'regular_price',
         'price_tax_status',
         'currency',
+        'regular_price_cop',
         'image_1',
         'sku',
         'unit',
@@ -80,7 +84,7 @@ class ProductController extends Controller
     public function getDepartmentProducts($group = "Computadores")
     {
         //Log::info("products GET  " . $group);
-/*
+        /*
         $productsAffinities = Product::leftJoin('affinities', 'products.brand', '=', 'affinities.brand_name')
             ->where('products.department', "{$group}")
             ->where('products.is_discontinued', 0)
@@ -92,13 +96,13 @@ class ProductController extends Controller
             //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
 */
 
-            $productsAffinities = Product::leftJoin('affinities', function ($join) {
-                $join->on('products.brand', '=', 'affinities.brand_name')
-                     ->where('affinities.is_program_active', '=', '1');
-            })
+        $productsAffinities = Product::leftJoin('affinities', function ($join) {
+            $join->on('products.brand', '=', 'affinities.brand_name')
+                ->where('affinities.is_program_active', '=', '1');
+        })
             ->where('products.department', "{$group}")
             ->where('products.is_discontinued', 0)
-           // ->where('affinities.is_program_active', 1)
+            // ->where('affinities.is_program_active', 1)
             ->select($this->selectJoinFields)
             ->orderBy('products.name', 'ASC')
             ->get();
@@ -106,7 +110,83 @@ class ProductController extends Controller
         return $productsAffinities;
     }
 
-/*
+
+    public function getWrongUrlImageProducts()
+    {
+
+        // Control default process time
+        app(FileController::class)->setExecutionTime(7000);
+
+
+        $productsAvailable = Product::select('sku', 'department', 'category', 'brand', 'name', 'image_1', 'image_2', 'image_3', 'image_4')
+            ->where('products.is_discontinued', 0)
+            //->where('sku', '43HT3WJ-B.AWC') //WT13DPBK.ASFECOL
+           // ->where('brand', 'LG')
+            //->orderBy('products.name', 'ASC')
+            ->get();
+
+        $invalidUrlRecords = [];
+        //$attributes = [];
+        $attributes = array_keys($productsAvailable->first()->getAttributes());
+        $attributes[]= 'correct_images';
+
+        $headers = ['sku', 'department', 'category', 'brand', 'name'];
+        $images = ['image_1', 'image_2', 'image_3', 'image_4'];
+
+        foreach ($productsAvailable as $product) {
+            $invalidImages = [];
+            $imagesOk= 0;
+            Log::info($product->sku); //Log::info("sku {$product->sku}");
+            foreach ($headers as $field) {
+                $invalidImages[$field] = "{$product->{$field}}";
+            }
+
+            foreach ($images as $field) {
+
+                $url = $product->{$field};
+
+                // Skip if the field is null or empty
+                if (empty($url)) {
+                    $invalidImages[$field] = 'null';
+                    continue;
+                }
+
+                // Validate URL by checking response status
+                try {
+                    $response = Http::timeout(1)->head($url);
+                    $invalidImages[$field] = $response->ok() ? '' : $url;
+                } catch (\Exception $e) {
+                    $invalidImages[$field] = $url; // URL is invalid or not reachable
+                }
+
+                if ($invalidImages[$field] === ''){
+                    $imagesOk++;
+                }
+            }
+
+            if (str_contains($product->name, "\""))
+            {
+                $invalidImages['name']=  str_replace("\"", '\'', $product->name);
+            }
+
+            $invalidImages['correct_images'] = $imagesOk;
+            $invalidUrlRecords[] = $invalidImages;
+            //Log::info($product->sku,$invalidImages);
+        }
+
+        // Control default process time restored
+        app(FileController::class)->setExecutionTime();
+
+        //return $attributes;
+        //return array_merge($attributes, $invalidUrlRecords);
+
+
+        return app(FileController::class)->saveArrayToCSV($attributes, $invalidUrlRecords, 'products_image_url.csv');
+
+
+    }
+
+    /*
     public function getSegmentProducts($group)
     {
         // Build the query for searching by multiple brands
@@ -175,7 +255,7 @@ class ProductController extends Controller
         //read PART_NUM
         if (count($words) == 1 && strlen($words[0]) > 4) {
             $word = $words[0];
-            $product=  $this->searchProductBySku( $word);
+            $product =  $this->searchProductBySku($word);
             if ($product) return $product;
         }
 
@@ -255,17 +335,16 @@ class ProductController extends Controller
         return response()->json($abilities);
     }
 
-    public function searchProductBySku( string $sku = '' )
+    public function searchProductBySku(string $sku = '')
     {
-        if($sku == '')
-        {
+        if ($sku == '') {
             return collect(); // null;
         }
         $product = Product::select($this->selectFields)
             ->when($sku !== "", function ($query) use ($sku) {
                 $query->where("part_num",  "{$sku}");
             })
-            -> get(); //first()
+            ->get(); //first()
 
         if (count($product) == 0) {
             $product = Product::select($this->selectFields)
@@ -276,7 +355,4 @@ class ProductController extends Controller
         }
         return $product;
     }
-
 }
-
-

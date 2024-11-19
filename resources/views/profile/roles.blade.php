@@ -118,7 +118,7 @@
         }
         // fetch products by brand
         function fetchGetUserProfile(email) {
-            const newpath = "{{ route('roleprofile.mail', ['email' => ':email']) }}".replace(':email', encodeURIComponent(email));
+            const newpath = "{{ route('rolesprofile.mail', ['email' => ':email']) }}".replace(':email', encodeURIComponent(email));
             //alert(newpath);
             return new Promise((resolve, reject) => {
                 //fetch(`/isolatedprofile.mail/${email}`)
@@ -141,7 +141,7 @@
             const email= document.getElementById('email').value;
             const role_type = document.getElementById('role_type').value;
             console.log("Fetching user profile ",email, ' - ', role_type);
-            const newpath = "{{ route('roleprofile.update', ['email' => ':email','role_type' => ':role_type' ]) }}"
+            const newpath = "{{ route('rolesprofile.update', ['email' => ':email','role_type' => ':role_type' ]) }}"
                             .replace(':email', encodeURIComponent(email))
                             .replace(':role_type', role_type );
             return new Promise((resolve, reject) => {

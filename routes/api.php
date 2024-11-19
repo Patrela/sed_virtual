@@ -12,19 +12,15 @@ Route::post('/tokens/create', function (Request $request) {
     return ['token' => $token->plainTextToken];
 })->name('sanctum.token');
 
-Route::prefix('connect')->group(function () {
-    Route::post('/{username}', [ConnectController::class, 'connectValidation'])->name('connect.validation');
-    Route::get('/node', [ConnectController::class, 'showNodeVersion'])->name('connect.node');
+Route::prefix('connect')->controller(ConnectController::class)->group(function () {
+    Route::post('/{username}', 'connectValidation')->name('connect.validation');
+    Route::get('/node', 'showNodeVersion')->name('connect.node');
 });
 
-Route::post('/documentation/postman', function () {
-    return redirect()->away('https://sed-stock.postman.co/collection/32783257-26376ef5-562b-4b9a-b99f-181038bb6fe3?source=rip_html');
-})->name('api.documentation');
-
-Route::prefix('sed')->group(function () {
-    Route::get('/clasifications', [SedController::class, 'getProductGroups'])->name('sed.getProviderGroups');
-    Route::get('/staff', [SedController::class, 'getStaffUsers'])->name('sed.staff');
-    Route::post('/customers/auth', [SedController::class, 'validateCustomerUser'])->name('sed.CustomerUser');
+Route::prefix('sed')->controller(SedController::class)->group(function () {
+    Route::get('/clasifications', 'getProductGroups')->name('sed.getProviderGroups');
+    Route::get('/staff', 'getStaffUsers')->name('sed.staff');
+    Route::post('/customers/auth', 'validateCustomerUser')->name('sed.CustomerUser');
     Route::get('/users', function () {
         CreateNewUsers::dispatchAfterResponse();
         return response()->json([

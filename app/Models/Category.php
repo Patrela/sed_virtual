@@ -11,7 +11,8 @@ class Category extends Model
         'name',
         'slug',
         'group_name',
-        'parent_id'
+        'parent_id',
+        'item_like'
     ];
     protected $hidden = [
         'id_category',

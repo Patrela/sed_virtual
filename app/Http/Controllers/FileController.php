@@ -16,7 +16,7 @@ class FileController extends Controller
 {
     public function saveVtexImagesFileName()
     {
-        $directoryUrl = 'https://sedcolombia.com.co/stockimages/';
+        $directoryUrl = 'https://sedvirtual.sedcolombia.com.co/stockimages/';
 
         try {
             // Obtener el contenido del directorio remoto
@@ -25,10 +25,10 @@ class FileController extends Controller
             if ($response->successful()) {
                 $fileNameList = $this->parseDirectoryListing($response->body());
 
-                $result= $this->saveCsv($fileNameList, "vtex_images.csv");
+                $result= $this->saveFile($fileNameList, "vtex_images.csv");
                 if (!is_array($result) || !isset($result['code']) || !isset($result['message'])) {
                     return response()->json([
-                        'message' => 'Internal Server Error - Invalid response from saveCsv method.',
+                        'message' => 'Internal Server Error - Invalid response from saveFile method.',
                         'code' => 500,
                     ], 500);
                 }
@@ -84,37 +84,103 @@ class FileController extends Controller
             $csvData= str_replace("dimension_weight", "dimension_weight\r\n", $csvData);
             //Log::info("Enter excluded");
         }
-        $result = $this->saveCsv($csvData, $fileName);
+        $result = $this->saveFile($csvData, $fileName);
         if (!is_array($result) || !isset($result['code']) || !isset($result['message'])) {
             return response()->json([
-                'message' => 'Internal Server Error - Invalid response from saveCsv method.',
+                'message' => 'Internal Server Error - Invalid response from saveFile method.',
                 'code' => 500,
             ], 500);
         }
         return response()->json($result, $result['code']);
     }
 
-
-    private function saveCsv($csvData, $fileName){
+    public function saveFile($csvData, $fileName){
         if(!$csvData || !$fileName){
             return [
-                'message' => "Error Data or Filename not found",
+                'message' => "Error: Data or Filename not found",
                 'code' => 404,
             ];
         }
+
         $standardPath = "files";
-        if (!File::exists(public_path( $standardPath))) {
-            File::makeDirectory(public_path( $standardPath), 0755, true);
+        $fileDirectory = base_path("public/{$standardPath}");
+        // Create the directory if it doesn't exist, or, redirect to /public_html
+        if (!File::exists($fileDirectory)) {
+             ////$fileDirectory =public_path( $standardPath);
+            $fileDirectory = base_path();
+            $startRoot= strrpos($fileDirectory,"/");
+            $fileDirectory =  substr($fileDirectory,0,$startRoot) . "/public_html/{$standardPath}";
+            //File::makeDirectory($fileDirectory, 0755, true);
         }
-        $standardPath =  $standardPath . "/";
-        $filePath = public_path( $standardPath . $fileName);
+        Log::info("paths...", ["fileDirectory= ",$fileDirectory, " base_path= ", base_path(), " storage_path= ", storage_path(), " app_path= ", app_path(), " public_path= ", public_path() , " resource_path= ", resource_path()]);
+
+        $filePath = "{$fileDirectory}/{$fileName}";
 
         $csvData = mb_convert_encoding($csvData, 'UTF-8', 'auto');
+
         File::put($filePath, $csvData);
 
-        $fileUrl = asset($standardPath . $fileName);
+        // Generate the URL for accessing the file
+        $fileUrl = asset("{$standardPath}/{$fileName}");
+
         return [
-            'message' => "Successfully CSV creation. ¡Download it! ",
+            'message' => "Successfully file creation. Download it!",
+            'download_url' => $fileUrl,
+            'code' => 200,
+        ];
+    }
+
+    public function setExecutionTime($default_time = 60){
+        ini_set('max_execution_time', $default_time);
+    }
+
+    public function saveArrayToCSV($csvFields, $csvDataArray, $fileName){
+        if(!$csvDataArray || !$fileName){
+            return [
+                'message' => "Error: Data or Filename not found",
+                'code' => 404,
+            ];
+        }
+
+        // Control default process time
+        $this->setExecutionTime(7000);
+
+
+        $standardPath = "files";
+        $fileDirectory = base_path("public/{$standardPath}");
+        // Create the directory if it doesn't exist, or, redirect to /public_html
+        if (!File::exists($fileDirectory)) {
+             ////$fileDirectory =public_path( $standardPath);
+            $fileDirectory = base_path();
+            $startRoot= strrpos($fileDirectory,"/");
+            $fileDirectory =  substr($fileDirectory,0,$startRoot) . "/public_html/{$standardPath}";
+            //File::makeDirectory($fileDirectory, 0755, true);
+        }
+        Log::info("paths...", ["fileDirectory= ",$fileDirectory, " base_path= ", base_path(), " storage_path= ", storage_path(), " app_path= ", app_path(), " public_path= ", public_path() , " resource_path= ", resource_path()]);
+
+        $filePath = "{$fileDirectory}/{$fileName}";
+
+        //$csvDataArray = mb_convert_encoding($csvDataArray, 'UTF-8', 'auto');
+
+        //File::put($filePath, $csvDataArray);
+
+        $fp = fopen($filePath, 'w');
+
+        fputcsv($fp, $csvFields);
+        foreach ($csvDataArray as $fields) {
+            fputcsv($fp, $fields);
+        }
+
+        fclose($fp);
+
+        // Generate the URL for accessing the file
+        $fileUrl = asset("{$standardPath}/{$fileName}");
+
+        // Control default process time restored
+        $this->setExecutionTime();
+
+        return [
+            'message' => "Successfully CSV creation. Download it!",
             'download_url' => $fileUrl,
             'code' => 200,
         ];

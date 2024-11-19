@@ -24,7 +24,7 @@
         <script>
             // tooltips for buttons
             tippy('#btnClassifications', {
-              content: 'Updating Groups, Brands and Categories from Epicor',
+              content: 'Clear Memory and Updating Groups-Brands-Categories from Epicor',
             });
             tippy('#btnUsers', {
                     content: 'Updating Staff and Trades',
@@ -124,7 +124,7 @@
                         <strong>{{ session()->has('lastUpdated') ? session('lastUpdated') : date('d/m/Y H:i:s') }}</strong>
                     </div>
                     <div class="centered">
-                        <form action="{{ route('product.refresh') }}" method="GET">
+                        <form action="{{ route('products.refresh') }}" method="GET">
                             @csrf
                             <button id="btnUpdateStock" type="submit">Cargar Ahora</button>
                         </form>
@@ -414,7 +414,7 @@
     function searchWilcardProduct() {
         let searchText = document.getElementById('search').value;
         searchText = searchText.trim();
-        if (searchText !== '') window.location.href = "{{ route('product.search', ['searchText' => ':searchText']) }}".replace(
+        if (searchText !== '') window.location.href = "{{ route('products.search', ['searchText' => ':searchText']) }}".replace(
             ':searchText', searchText);
     }
 
@@ -423,7 +423,7 @@
         const productTitle = document.getElementById('product-title');
         productTitle.textContent = groupName;
         //window.location.href = '/products/' + groupName;
-        window.location.href = "{{ route('product.department', ['group' => ':group']) }}".replace(':group', groupName);
+        window.location.href = "{{ route('products.department', ['group' => ':group']) }}".replace(':group', groupName);
     }
 
     function csvRoute(name) {
@@ -452,7 +452,7 @@
         let receiver = prompt("Correo del destinatario:");
 
         if (receiver.indexOf("@") !== -1) {
-            const urlpath = "{{ route('product.email', ['sku' => ':sku']) }}".replace(":sku", sku);
+            const urlpath = "{{ route('products.email', ['sku' => ':sku']) }}".replace(":sku", sku);
             console.log(urlpath);
 
             fetch(urlpath, {

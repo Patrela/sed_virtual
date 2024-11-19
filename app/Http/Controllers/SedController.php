@@ -6,6 +6,9 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\UserImported;
 use App\Models\ProductImported;
+use App\Models\CategoryImported;
+
+use App\Http\Controllers\MaintenanceController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
+
 class SedController extends Controller
 {
     /**
@@ -21,6 +25,8 @@ class SedController extends Controller
      */
     public function getProductGroups()
     {
+        // Clear and Update cache
+        app(MaintenanceController::class)->clearCache();
         if (!Cache::has('clasifications')) {
             // 4 SED clasification groups
             $groups = [
@@ -30,18 +36,29 @@ class SedController extends Controller
                 'brands' => 'marca'
             ];
 
+            // $groups = [
+            //     'departments' => 'departamento'
+            // ];
+
             foreach ($groups as $key => $group) {
                 // execute the API with SED clasification group
                 try {
-                    $response = Http::connector()->post('/' . $key . '/', ['item' => '',]);
+                    $response = Http::connector()
+                    // delete next 2 lines when SSL certified just works
+                        ->withoutVerifying()
+                        ->withOptions(["verify" => false])
+
+                        ->post('/' . $key . '/', ['item' => '',]);
                     if ($response->successful()) {
+                        //Log::info("Exec SED group = " . $group );
                         $jsonResponse = $response->json();
                         $clasifications = $jsonResponse[$key][$key];
                         //only insertion from new clasisifications
-                        $this->CreateGroups($clasifications);
+                        // $this->CreateGroups($clasifications);
+                        $this->UpdateClassifications($clasifications, $group);
                     } else {
                         // Handle non-successful response (e.g., 4xx or 5xx status codes)
-                        Log::error("Error during API Import Products " . $key . " request");
+                        Log::error("Error during API Import clasifications " . $key . " request");
                         // return response()->json([
                         //     'error' => "Error during API " . $key . " request:",
                         //     'code' => config('services.api.dev') . "/" .$key ."/ " .$response->status(),
@@ -61,13 +78,18 @@ class SedController extends Controller
                     ], 403);
                 }
             }
-
-            if (app(CacheController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
-
-            return response()->json([
-                'message' => "Successfully Product Groups and Categories imported. ",
-                'code' => 200,
-            ], 200);
+            if ($response->successful()) {
+                if (app(MaintenanceController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
+                return response()->json([
+                    'message' => "Successfully Product Groups and Categories imported. ",
+                    'code' => 200,
+                ], 200);
+            } else {
+                return response()->json([
+                    'error' => "Error during API  request. " . json_encode($response->json()),
+                    'code' => $response->status(),
+                ], 403);
+            }
         } else {
             return response()->json([
                 'state' => 'Product Groups and Categories in cache',
@@ -102,6 +124,45 @@ class SedController extends Controller
         }
     }
 
+    private function UpdateClassifications($groupItems, $maingroup)
+    {
+        // use temporal table to update classifications
+        //$maingroup = $groupItems[0]['group_name'];
+        $itemData = [];
+        CategoryImported::truncate();
+
+        foreach ($groupItems as $classification) {
+
+            $itemData[] = [
+                'id' => $classification["id"],
+                'name' => $classification["name"],
+                'slug' => $classification["slug"],
+                'group_name' => $maingroup,
+                'parent_id' => $classification["parent_id"],
+                'is_active' => $classification["is_active"],
+                'item_like' => $classification["item_like"],
+                'is_new' => 0,
+            ];
+            // Insert in batches of 100
+            if (count($itemData) === 100) {
+                CategoryImported::insert($itemData);
+                //Log::info("Exec SED API Classifications Imported = " . CategoryImported::all()->count() ." data =" .count($itemData) );
+                $itemData = [];
+            }
+        }
+
+        // Insert any remaining records
+        if (!empty($itemData)) {
+            CategoryImported::insert($itemData);
+            //Log::info("Exec SED API Classification Imported = " . CategoryImported::all()->count() . " group ="  . $maingroup);
+            //dd($itemData);
+        }
+        DB::select("CALL sp_categories_update(?)", ["{$maingroup}"]);
+        return response()->json([
+            'message' => 'SED Classification updated',
+            'code' => 200,
+        ], 200);
+    }
 
     public function validateCustomerUser(Request $request)
     {
@@ -111,7 +172,7 @@ class SedController extends Controller
             $useremail = $request->header('x-api-user');
             //$token = $request->bearerToken();
             $name = $request->query('name');
-            $response = Http::connector()->post('/authentication/?name=' .$name, [
+            $response = Http::connector()->post('/authentication/?name=' . $name, [
                 'nit' => $company,
                 'email' =>  $useremail,
             ]);
@@ -135,9 +196,10 @@ class SedController extends Controller
     public function updateNewUsers()
     {
         //Log::info("Starting Authentication update");
+        //Log::stack(['single', 'slack'])->info('Starting Authentication update!');
         try {
-            $newUsers = User::where('password','')->get();
-            foreach($newUsers as $user) {
+            $newUsers = User::where('password', '')->get();
+            foreach ($newUsers as $user) {
                 $user['password'] = Hash::make($user['user_id']);
                 //$user['remember_token'] = Hash::make($user['name']);
                 $user->save();
@@ -150,36 +212,35 @@ class SedController extends Controller
         } catch (\Exception $e) {
             Log::error("Error during API Staff New Users register: {$e->getMessage()}");
             return response()->json([
-                'message' => 'error ' .$e->getMessage(),
+                'message' => 'error ' . $e->getMessage(),
                 'code' => $e->getCode(),
             ], 401);
         }
-
     }
 
     public function getStaffUsers()
     {
         try {
-            $response = Http::connector()->post('/staff/', [ 'email' => '',]);
+            $response = Http::connector()->post('/staff/', ['email' => '',]);
             if ($response->successful()) {
                 //return $response->json();
                 $jsonResponse = $response->json();
                 $staff = $jsonResponse['staff']['staff'];
                 //Log::info($customers);
 
-                $itemsKey= "|";
+                $itemsKey = "|";
                 $staffData = [];
                 UserImported::truncate();
                 foreach ($staff as $customer) {
                     //Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
                     $key = "{$customer['contact_email']}";
-                    if(!strpos($itemsKey, "|" .$key ."|" )) {
-                        $itemsKey = $itemsKey .$key  ."|";
+                    if (!strpos($itemsKey, "|" . $key . "|")) {
+                        $itemsKey = $itemsKey . $key  . "|";
                         $staffData[] = [
                             'name' => $customer["contact_name"],
                             'email' => $key,
                             'role_type' => User::ALLROLES["Staff"],
-                    ];
+                        ];
                         // Insert in batches of 100
                         if (count($staffData) === 100) {
                             //Log::info($itemsKey);
@@ -193,16 +254,16 @@ class SedController extends Controller
                 if (!empty($staffData)) {
                     //Log::info($itemsKey);
                     UserImported::insert($staffData);
-                    Log::info("Exec SED API Staff Users Imported = " .UserImported::all()->count() ." data =" .count($staffData) );
+                    Log::info("Exec SED API Staff Users Imported = " . UserImported::all()->count() . " data =" . count($staffData));
                 }
-                DB::select("CALL sp_import_users(?)",[User::ALLROLES["Staff"] ]);
+                DB::select("CALL sp_import_users(?)", [User::ALLROLES["Staff"]]);
                 return response()->json([
                     'message' => 'SED Staff Users updated',
                     'code' => 200,
                 ], 200);
             } else {
                 return response()->json([
-                    'message' => 'error ' .json_encode($response->json()),
+                    'message' => 'error ' . json_encode($response->json()),
                     'code' => $response->status(),
                 ], $response->status());
             }
@@ -218,21 +279,21 @@ class SedController extends Controller
     public function getTradeUsers()
     {
         try {
-            $response = Http::connector()->post('/authentication/', [ 'nit' => '',]);
+            $response = Http::connector()->post('/authentication/', ['nit' => '',]);
             if ($response->successful()) {
                 //return $response->json();
                 $jsonResponse = $response->json();
                 $tradesusers = $jsonResponse['customers']['customers'];
                 //Log::info($customers);
 
-                $itemsKey= "|";
+                $itemsKey = "|";
                 $tradesData = [];
                 UserImported::truncate();
                 foreach ($tradesusers as $customer) {
                     //Log::info("customer nit.  " . $customer["customer_nit"] . " email " . $customer["contact_email"]);
                     $key = "{$customer['contact_email']}";
-                    if(!strpos($itemsKey, "|" .$key ."|" )) {
-                        $itemsKey = $itemsKey .$key  ."|";
+                    if (!strpos($itemsKey, "|" . $key . "|")) {
+                        $itemsKey = $itemsKey . $key  . "|";
                         $tradesData[] = [
                             'trade_name' => $customer["customer_name"],
                             'trade_nit' => $customer["customer_nit"],
@@ -249,26 +310,24 @@ class SedController extends Controller
                             $tradesData = [];
                         }
                     }
-
                 }
                 // Insert any remaining records
                 if (!empty($tradesData)) {
                     //Log::info($itemsKey);
                     UserImported::insert($tradesData);
-                    Log::info("Exec SED API Trade Users Imported = " .UserImported::all()->count() ." data =" .count($tradesData) );
+                    Log::info("Exec SED API Trade Users Imported = " . UserImported::all()->count() . " data =" . count($tradesData));
                 }
-                DB::select("CALL sp_import_users(?)",[User::ALLROLES["Trade"] ]);
+                DB::select("CALL sp_import_users(?)", [User::ALLROLES["Trade"]]);
                 return response()->json([
                     'message' => 'SED Trade Users updated',
                     'code' => 200,
                 ], 200);
             } else {
                 return response()->json([
-                    'message' => 'error ' .json_encode($response->json()),
+                    'message' => 'error ' . json_encode($response->json()),
                     'code' =>  $response->status(),
                 ], $response->status());
             }
-
         } catch (\Exception $e) {
             Log::error("Error during API  Trade Users request: {$e->getMessage()}");
             return response()->json([
@@ -276,12 +335,11 @@ class SedController extends Controller
                 'code' => $e->getCode(),
             ], 401);
         }
-
     }
 
     public function getProviderProducts($idProvider = 1)
     {
-        if (!Cache::has('sync_products') ){
+        if (!Cache::has('sync_products')) {
             //$Provider = Provider::where('nit', '8300361083')->first(); //SED_PROVIDER
             //$idProvider = ($Provider) ? $Provider->id : 1;
             session(['lastUpdated' =>  date('d/m/Y H:i:s')]);
@@ -296,14 +354,13 @@ class SedController extends Controller
                     $jsonResponse = $response->json();
                     $products = $jsonResponse['products']['products'];
                     $productData = [];
-                    $itemsKey= "|";
+                    $itemsKey = "|";
                     $counter = 0;
                     ProductImported::truncate();
                     foreach ($products as $product) {
                         $key = "{$product['part_num']}";
-                        if(!strpos($itemsKey, "|" .$key ."|" ))
-                        {
-                            $itemsKey = $itemsKey .$key  ."|";
+                        if (!strpos($itemsKey, "|" . $key . "|")) {
+                            $itemsKey = $itemsKey . $key  . "|";
                             $productData[] = [
                                 'id_provider' => $idProvider,
                                 'sku' => $key,
@@ -335,9 +392,9 @@ class SedController extends Controller
                                 'contact_unit' => "{$product['contact_unit']}",
                                 'contact_agent' => "{$product['contact_agent']}",
                                 'contact_email' => "{$product['contact_email']}",
-                                'is_new' =>0,
+                                'is_new' => 0,
                             ];
-                            $counter+=1;
+                            $counter += 1;
                             // Insert in batches of 100
                             if ($counter === 100) { //count($productData)
                                 //Log::info($itemsKey);
@@ -347,7 +404,6 @@ class SedController extends Controller
                                 $productData = [];
                                 $counter = 0;
                             }
-
                         }
                     }
 
@@ -360,7 +416,7 @@ class SedController extends Controller
                     }
 
                     DB::select("CALL sp_import_products()");
-                    if (app(CacheController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
+                    if (app(MaintenanceController::class)->isCache()) Cache::put('sync_products', $response->status(), now()->addMinutes(30));
 
                     return response()->json([
                         'message' => 'Imported Succcessfully',
@@ -368,14 +424,14 @@ class SedController extends Controller
                     ], 200);
                 } else {
                     return response()->json([
-                        'message' => 'error ' .json_encode($response->json()),
+                        'message' => 'error ' . json_encode($response->json()),
                         'code' =>  $response->status(),
                     ], $response->status());
                 }
             } catch (\Exception $e) {
                 Log::error("Error during API request: {$e->getMessage()}");
                 return response()->json([
-                    'message' => 'error ' .$e->getMessage(),
+                    'message' => 'error ' . $e->getMessage(),
                     'code' => $e->getCode(),
                 ], 401);
             }

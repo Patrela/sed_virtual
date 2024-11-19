@@ -333,8 +333,8 @@ function generateCards(products) {
                 intlRound(product.regular_price, 2) +
                 " " +
                 product.currency +
-                " / " +
-                product.unit +
+                // " / " +
+                // product.unit +
                 " " +
                 product.price_tax_status;
 

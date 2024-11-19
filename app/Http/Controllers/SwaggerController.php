@@ -18,7 +18,7 @@ class SwaggerController extends Controller
         if (app(ProfileController::class)->hasAbility(Auth::user()->email, 'document-read')) {
             //Log::info("document-read ability inside collection");
 
-            $swaggerJsonUrl = url('api/documentation/json/swagger.json');
+            $swaggerJsonUrl = route('documentation.json'); // url('documentation/json/swagger.json');
             return view('documentation.swagger-ui', ['swaggerJsonUrl' => $swaggerJsonUrl]);
         }
         return response()->json([
