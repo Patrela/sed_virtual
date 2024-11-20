@@ -90,6 +90,7 @@ class CategoryController extends Controller
 
         $departments = Category::select('id', 'name', 'slug', 'group_name', 'parent_id')
             ->where('group_name', "departamento")
+            ->where('is_active', 1)
             ->when($idgroup !== 0, function ($query) use ($idgroup) {
                 $query->where('id', "{$idgroup}");
             })
@@ -106,6 +107,7 @@ class CategoryController extends Controller
     public function childGroups(string $groupname = 'categoria', int $parentid = 0)
     {
         $group = Category::where('group_name', "{$groupname}")
+            ->where('is_active', 1)
             ->when($parentid !== 0, function ($query) use ($parentid) {
                 $query->where('parent_id', $parentid);
             })
@@ -121,6 +123,7 @@ class CategoryController extends Controller
     {
         $brands = Category::select('id_category', 'name')
             ->where('group_name', 'marca')
+            ->where('is_active', 1)
             ->when($name !== 'all', function ($query) use ($name) {
                 $query->where('name', "{$name}");
             })

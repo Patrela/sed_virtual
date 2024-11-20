@@ -79,6 +79,8 @@ class SedController extends Controller
                 }
             }
             if ($response->successful()) {
+                // update the status code is_active in reference to the current stock
+                DB::select("CALL sp_insert_categories_from_products()");
                 if (app(MaintenanceController::class)->isCache()) Cache::put("clasifications", "ok", now()->addDays(7));
                 return response()->json([
                     'message' => "Successfully Product Groups and Categories imported. ",
@@ -158,6 +160,7 @@ class SedController extends Controller
             //dd($itemData);
         }
         DB::select("CALL sp_categories_update(?)", ["{$maingroup}"]);
+
         return response()->json([
             'message' => 'SED Classification updated',
             'code' => 200,

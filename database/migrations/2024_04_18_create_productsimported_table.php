@@ -43,6 +43,7 @@ return new class extends Migration
             $table->string('contact_unit',30)->nullable();
             $table->string('contact_agent',70)->nullable();
             $table->string('contact_email',125)->nullable();
+            $table->boolean('is_permanent_stock')->defaultFalse()->nullable();
             $table->boolean('is_new')->default(0)->nullable()->index();
         });
     }

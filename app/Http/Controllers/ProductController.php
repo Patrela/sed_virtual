@@ -42,7 +42,8 @@ class ProductController extends Controller
         'dimension_weight',
         'image_2',
         'image_3',
-        'image_4'
+        'image_4',
+        'is_permanent_stock'
     ];
 
     protected $selectJoinFields = [
@@ -74,35 +75,25 @@ class ProductController extends Controller
         'image_4',
         'program_url',
         'program_image',
-        'is_program_active'
+        'is_program_active',
+        'is_permanent_stock'
     ];
 
     /**
      * Display a listing of the products by department
      * @group string. main group clasification
      */
+
     public function getDepartmentProducts($group = "Computadores")
     {
         //Log::info("products GET  " . $group);
-        /*
-        $productsAffinities = Product::leftJoin('affinities', 'products.brand', '=', 'affinities.brand_name')
-            ->where('products.department', "{$group}")
-            ->where('products.is_discontinued', 0)
-           // ->where('affinities.is_program_active', 1)
-            ->select($this->selectJoinFields)
-            ->orderBy('products.name', 'ASC')
-            ->get();
-            //->cacheTags(['products'])
-            //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
-*/
 
         $productsAffinities = Product::leftJoin('affinities', function ($join) {
             $join->on('products.brand', '=', 'affinities.brand_name')
                 ->where('affinities.is_program_active', '=', '1');
         })
             ->where('products.department', "{$group}")
-            ->where('products.is_discontinued', 0)
-            // ->where('affinities.is_program_active', 1)
+            ->where('products.is_active', 1)
             ->select($this->selectJoinFields)
             ->orderBy('products.name', 'ASC')
             ->get();
@@ -119,14 +110,14 @@ class ProductController extends Controller
 
 
         $productsAvailable = Product::select('sku', 'department', 'category', 'brand', 'name', 'image_1', 'image_2', 'image_3', 'image_4')
-            ->where('products.is_discontinued', 0)
+            ->where('products.is_active', 1)
             //->where('sku', '43HT3WJ-B.AWC') //WT13DPBK.ASFECOL
            // ->where('brand', 'LG')
             //->orderBy('products.name', 'ASC')
             ->get();
 
         $invalidUrlRecords = [];
-        //$attributes = [];
+
         $attributes = array_keys($productsAvailable->first()->getAttributes());
         $attributes[]= 'correct_images';
 
@@ -180,10 +171,121 @@ class ProductController extends Controller
         //return $attributes;
         //return array_merge($attributes, $invalidUrlRecords);
 
-
         return app(FileController::class)->saveArrayToCSV($attributes, $invalidUrlRecords, 'products_image_url.csv');
 
 
+    }
+
+    // All products searching
+    public function getSearchProducts(string $searchText)
+    {
+
+        // Convert query to lowercase for case-insensitive search
+        $lowercaseQuery = strtolower($searchText);
+
+        // Split the query into words, filtering out common words
+        $words = array_filter(preg_split('/\s+/', $lowercaseQuery), function ($word) {
+            return !$this->isCommonWord($word);
+        });
+
+        $results = collect();
+        //read PART_NUM
+        if (count($words) == 1 && strlen($words[0]) > 4) {
+            $word = $words[0];
+            $product =  $this->searchProductBySku($word);
+            if ($product) return $product;
+        }
+
+        foreach ($words as $word) {
+            // Build LIKE query with case-insensitive search using `LOWER` function
+            /*
+            $productQuery = Product::select($this->selectFields)
+                ->when($word !== "", function ($query) use ($word) {
+                    $query->whereRaw("LOWER(name) LIKE ?", ["%{$word}%"]);
+                })
+                ->when($words !== "", function ($query) {
+                    $query->where('is_active', 1);
+                });
+            */
+
+                $productQuery = Product::leftJoin('affinities', function ($join) {
+                    $join->on('products.brand', '=', 'affinities.brand_name')
+                        ->where('affinities.is_program_active', '=', '1');
+                })
+                ->when($word !== "", function ($query) use ($word) {
+                    $query->whereRaw("LOWER(name) LIKE ?", ["%{$word}%"]);
+                })
+                ->when($words !== "", function ($query) {
+                    $query->where('is_active', 1);
+                })
+                    ->select($this->selectJoinFields)
+                    ->orderBy('products.name', 'ASC');
+                    //->get();
+
+
+            // Execute the query and merge results
+            $wordResults = $productQuery->get();
+            $results = $results->merge($wordResults);
+            //Log::error("search  " . $word . " Cant. " . count($wordResults) . " Total. " . count($results) );
+        }
+
+        // Remove duplicates , maintain order, and extract the index key. Return only values array
+        $products =  $results->unique(); // $products =  $results;
+        $products =  $products->values();
+
+        // Log::error(" Total unique " . count($results) );
+        return $products;
+    }
+
+
+    // Método para verificar si una palabra es común
+    private function isCommonWord($word)
+    {
+        $commonWords = ['el', 'la', 'los', 'las'];
+        return in_array(Str::lower($word), $commonWords);
+    }
+
+    public function searchProductBySku(string $sku = '')
+    {
+        if ($sku == '') {
+            return collect(); // null;
+        }
+        /*
+        $product = Product::select($this->selectFields)
+            ->when($sku !== "", function ($query) use ($sku) {
+                $query->where("part_num",  "{$sku}");
+            })
+            ->get(); //first()
+        */
+            $product = Product::leftJoin('affinities', function ($join) {
+                $join->on('products.brand', '=', 'affinities.brand_name')
+                    ->where('affinities.is_program_active', '=', '1');
+                })
+                ->select($this->selectJoinFields)
+                ->when($sku !== "", function ($query) use ($sku) {
+                    $query->where("part_num",  "{$sku}");
+                })
+                ->get(); //->first();
+        if (count($product) == 0) {
+            /*
+            $product = Product::select($this->selectFields)
+                ->when($sku !== "", function ($query) use ($sku) {
+                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$sku}%"]);
+                })
+                ->get(); //->first();
+            */
+            $product = Product::leftJoin('affinities', function ($join) {
+                $join->on('products.brand', '=', 'affinities.brand_name')
+                    ->where('affinities.is_program_active', '=', '1');
+                })
+                ->select($this->selectJoinFields)
+                ->when($sku !== "", function ($query) use ($sku) {
+                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$sku}%"]);
+                })
+                ->get(); //->first();
+
+        }
+        return $product;
     }
 
     /*
@@ -192,7 +294,7 @@ class ProductController extends Controller
         // Build the query for searching by multiple brands
         $query = Product::where('segment', $group)
                         ->when($group !== "", function ($query) {
-                            $query->where('is_discontinued', 0);
+                            $query->where('is_active', 1);
                         });
 
         $products = $query->select($this->selectFields)
@@ -201,13 +303,12 @@ class ProductController extends Controller
             //->cacheTags(['products'])
             //->skip(($this->CurrentPage()-1) * $this->PerPage())->take($this->PerPage())
             ->when($group !== "", function ($query) {
-                $query->where('is_discontinued', 0);
+                $query->where('is_active', 1);
             })->get();
 
         return $products;
     }
-*/
-
+    */
     /*
     public function getOrderProducts(string $group, string $order = "")
     {
@@ -238,58 +339,6 @@ class ProductController extends Controller
         }
     }
     */
-
-    // All products searching
-    public function getSearchProducts(string $searchText)
-    {
-
-        // Convert query to lowercase for case-insensitive search
-        $lowercaseQuery = strtolower($searchText);
-
-        // Split the query into words, filtering out common words
-        $words = array_filter(preg_split('/\s+/', $lowercaseQuery), function ($word) {
-            return !$this->isCommonWord($word);
-        });
-
-        $results = collect();
-        //read PART_NUM
-        if (count($words) == 1 && strlen($words[0]) > 4) {
-            $word = $words[0];
-            $product =  $this->searchProductBySku($word);
-            if ($product) return $product;
-        }
-
-        foreach ($words as $word) {
-            // Build LIKE query with case-insensitive search using `LOWER` function
-            $productQuery = Product::select($this->selectFields)
-                ->when($word !== "", function ($query) use ($word) {
-                    $query->whereRaw("LOWER(name) LIKE ?", ["%{$word}%"]);
-                })
-                ->when($words !== "", function ($query) {
-                    $query->where('is_discontinued', 0);
-                });
-
-            // Execute the query and merge results
-            $wordResults = $productQuery->get();
-            $results = $results->merge($wordResults);
-            //Log::error("search  " . $word . " Cant. " . count($wordResults) . " Total. " . count($results) );
-        }
-
-        // Remove duplicates , maintain order, and extract the index key. Return only values array
-        $products =  $results->unique(); // $products =  $results;
-        $products =  $products->values();
-
-        // Log::error(" Total unique " . count($results) );
-        return $products;
-    }
-
-
-    // Método para verificar si una palabra es común
-    private function isCommonWord($word)
-    {
-        $commonWords = ['el', 'la', 'los', 'las'];
-        return in_array(Str::lower($word), $commonWords);
-    }
     /*
     public function loadMore()
     {
@@ -328,31 +377,5 @@ class ProductController extends Controller
     }
     */
 
-    public function abilities(Request $request)
-    {
 
-        $abilities = $request->user()->tokens()->pluck('abilities'); // Get ability names ;
-        return response()->json($abilities);
-    }
-
-    public function searchProductBySku(string $sku = '')
-    {
-        if ($sku == '') {
-            return collect(); // null;
-        }
-        $product = Product::select($this->selectFields)
-            ->when($sku !== "", function ($query) use ($sku) {
-                $query->where("part_num",  "{$sku}");
-            })
-            ->get(); //first()
-
-        if (count($product) == 0) {
-            $product = Product::select($this->selectFields)
-                ->when($sku !== "", function ($query) use ($sku) {
-                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$sku}%"]);
-                })
-                ->get(); //->first();
-        }
-        return $product;
-    }
 }
