@@ -27,6 +27,7 @@ Route::get('/', function () {
         return redirect()->route('login');
     }
     //return view('welcome');
+    return redirect()->route('login');
 })->name('home');
 
 Route::get('/dashboard', function () {
