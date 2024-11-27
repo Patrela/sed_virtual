@@ -32,6 +32,7 @@ return new class extends Migration
             $table->decimal('sale_price', 12, 2)->nullable();
             $table->string('price_tax_status', 30)->nullable();
             $table->string('currency', 16)->nullable();
+            $table->decimal('regular_price_cop', 14, 4)->nullable();
             $table->decimal('dimension_length', 8, 2)->nullable();
             $table->decimal('dimension_width', 8, 2)->nullable();
             $table->decimal('dimension_height', 8, 2)->nullable();
@@ -44,12 +45,8 @@ return new class extends Migration
             $table->string('contact_agent',70)->nullable();
             $table->string('contact_email',125)->nullable();
             $table->boolean('is_permanent_stock')->defaultFalse()->nullable();
-            $table->boolean('is_insale')->defaultFalse()->nullable();
-            $table->boolean('is_sold')->defaultFalse()->nullable();
             $table->boolean('is_active')->defaultTrue()->nullable();
-            $table->boolean('is_reviewed')->defaultFalse()->nullable();
-            $table->boolean('is_reserved')->defaultFalse()->nullable();
-            $table->string('url_affinity', 180);
+            $table->boolean('is_insale')->defaultFalse()->nullable();
             $table->timestamps();
             $table->foreign('id_provider')->references('id_provider')->on('providers')->onDelete('cascade');
 

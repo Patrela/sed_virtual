@@ -43,11 +43,8 @@ class Product extends Model
         'contact_agent',
         'contact_email',
         'is_permanent_stock',
-        'is_insale',
-        'is_sold',
         'is_active',
-        'is_reviewed',
-        'is_reserved'
+        'is_insale'
     ];
     protected $hidden = [ 'created_at', 'updated_at' ];
     public function Provider() {

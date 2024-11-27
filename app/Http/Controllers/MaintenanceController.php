@@ -26,6 +26,9 @@ class MaintenanceController extends Controller
     public function clearCache()
     {
         if($this->isCache()){
+
+            $this->setExecutionTime(2000);
+
             Artisan::call('config:clear');
 
             Artisan::call('cache:clear');
@@ -36,6 +39,7 @@ class MaintenanceController extends Controller
 
             Artisan::call('config:cache');
 
+            $this->setExecutionTime();
             Log::info("Cache cleared!!!");
 
             return response()->json([
@@ -49,4 +53,9 @@ class MaintenanceController extends Controller
             'message' => 'Application cache not found.'
         ], 404);
     }
+
+    public function setExecutionTime($default_time = 60){
+        ini_set('max_execution_time', $default_time);
+    }
+
 }

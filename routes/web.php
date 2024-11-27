@@ -134,6 +134,7 @@ Route::prefix('/files')->controller(FileController::class)->group(function () {
     Route::get('/vtex-imagesnames', 'saveVtexImagesFileName')->name('file.vtex-imagesnames');
     Route::post('/export-csv/{name}', 'exportCsv')->name('file.csv-export');
     Route::get('/export-wrong-product-url-images', [ProductController::class, 'getWrongUrlImageProducts'])->name('file.getWrongUrlImageProducts');
+    Route::get('/paths', 'standardPaths')->name('file.paths');
 })->middleware('auth');
 
 //To Check session -cache - Auth Data
@@ -149,6 +150,7 @@ Route::prefix('maintenance')->middleware(['auth'])->group(function () {
     })->name('data');
 
     Route::get('/clear-cache', [MaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');
+
 });
 
 Route::get('/local/login', [ConnectController::class, 'connectLogin'])->name('local.login');

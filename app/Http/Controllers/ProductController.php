@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -106,7 +107,7 @@ class ProductController extends Controller
     {
 
         // Control default process time
-        app(FileController::class)->setExecutionTime(7000);
+        app(MaintenanceController::class)->setExecutionTime(7000);
 
 
         $productsAvailable = Product::select('sku', 'department', 'category', 'brand', 'name', 'image_1', 'image_2', 'image_3', 'image_4')
@@ -166,7 +167,7 @@ class ProductController extends Controller
         }
 
         // Control default process time restored
-        app(FileController::class)->setExecutionTime();
+        app(MaintenanceController::class)->setExecutionTime();
 
         //return $attributes;
         //return array_merge($attributes, $invalidUrlRecords);
