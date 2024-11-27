@@ -1,0 +1,251 @@
+[33mcommit f15b652b8df9d55372042d9baf38b27f1846e02a[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m)[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Nov 27 15:49:18 2024 -0500
+
+    gitignore
+
+[33mcommit 0ede8139879b8e6e30ab4d52da98187257e07238[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon Nov 25 22:45:23 2024 -0500
+
+    .env.example excluded
+
+[33mcommit 33934b853f615e79ac9823d6cd47f5890d3e6447[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon Nov 25 22:39:11 2024 -0500
+
+    Production file path handle
+
+[33mcommit e0d46d22b0312ed35f0fa8da432fb724a7b744f1[m[33m ([m[1;31morigin/dev[m[33m)[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon Nov 25 09:01:10 2024 -0500
+
+    unify endpoints
+
+[33mcommit 6af387733cd0176c84826ba70ec91f52eb4b54e1[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Nov 20 14:08:09 2024 -0500
+
+    product.is_permanent_stock = 1 for drop shipping or intangibles
+
+[33mcommit 6c077c4557429752b8293646991d821d22e6690b[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon Nov 18 23:31:46 2024 -0500
+
+    Classifications adds is_active and item_like fields
+
+[33mcommit 3afbc05ee96d790adc2c95445edcacc436a953b7[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Aug 28 19:33:40 2024 -0500
+
+    Add Home Page Icon
+
+[33mcommit 9e2a20d3108ed9b3f78183da90abf2f7220a66ba[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Aug 27 18:04:36 2024 -0500
+
+    CSS to File - Protected URLs - Quotes fixed
+
+[33mcommit 85bc3dc9d4926b274f2e1ba05846d229afb351c6[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri Aug 16 02:12:48 2024 -0500
+
+    Product url_affinity to open brand affinity web
+
+[33mcommit 6427f013c771d56524bb10d584dedc2459e13195[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Aug 14 23:03:00 2024 -0500
+
+    Handle role_type profile
+
+[33mcommit 6ca8838dc8e616325e3061768f4470b77898fbee[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Aug 14 19:28:49 2024 -0500
+
+    Swagger documentation
+
+[33mcommit f2923b4750c1dfcd05a7a20f35955bd2fd14f867[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 23 18:11:47 2024 -0500
+
+    Favicon implementation
+
+[33mcommit 6eaf5ec72686a97ecacdd813e95bb5084164bb27[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon Jul 22 10:44:18 2024 -0500
+
+    Mail user review -delete unit property
+
+[33mcommit 81b163ca517e6c1a09d528e7123dab86ed7ce209[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon Jul 15 19:56:52 2024 -0500
+
+    New email format
+
+[33mcommit 35cdfc81bd095b6b961269f71bf1752e2197d1b4[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Jul 10 11:48:20 2024 -0500
+
+    Unify Messaging
+
+[33mcommit 2c02f07068897cfe274360c8dc7a3927e9e3f182[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 9 20:42:23 2024 -0500
+
+    Routes Authentication
+
+[33mcommit b78c04b34752a02a86755a22c77a348f4e026eaa[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 9 20:23:46 2024 -0500
+
+    Ruotes with Authentication
+
+[33mcommit bdd37f26be425436e43f0f37a9a03e0a7d2a05ff[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 9 15:30:55 2024 -0500
+
+    Config security
+
+[33mcommit 8e6fc41daf92deefd477d80b6638b513358c02e9[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 9 15:11:36 2024 -0500
+
+    .gitignore updates
+
+[33mcommit 7b9bd9b6097a29aa0d44054e5d3e7da08426d939[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 9 02:05:41 2024 -0500
+
+    Handle Middleware to preserve Authentication
+
+[33mcommit ac109d96f64c9b510322a484fa995fefda77e92a[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 9 02:04:35 2024 -0500
+
+    HandleCorsSanctum emulate Sanctum CORS
+
+[33mcommit 28de4cffebea431d0ea2c07ae4345bdb1c40ff7e[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Thu Jul 4 05:14:01 2024 -0500
+
+    Update https Routes and Prod Data
+
+[33mcommit a5d4a2555c2531eda41c809e1883f37405e4ab09[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue Jul 2 19:15:29 2024 -0500
+
+    Replace Js functions arguments by Product Object
+
+[33mcommit 39dfe73c05de0478c4fc15a70d1d6db23c282f01[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Jun 26 16:00:56 2024 -0500
+
+    Update email by jobs
+
+[33mcommit 400eb6f808f890853bf68d345a6ea76027f3d440[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Sun Jun 23 23:14:04 2024 -0500
+
+    Optimization: Store Procedures and Users Import
+
+[33mcommit 79112c3e2f98d08bae5689fee3ff192df36df58f[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed Jun 12 09:53:24 2024 -0500
+
+    Production Deployment
+
+[33mcommit eb10d126952e9b433ce4d0670fb421ba360493a7[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Sat Jun 8 19:29:15 2024 -0500
+
+    read SED customers and staff
+
+[33mcommit f78aaa638cd32f30bc7f3a776f315bdf470d71e7[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Thu Jun 6 17:51:13 2024 -0500
+
+    Async Mail and SED Products API. Scrpit in js/viewFunctions
+
+[33mcommit cfc676a186ee9ef7d439bae2d60a4f8da92dcdee[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri May 31 21:54:53 2024 -0500
+
+    Jobs for asyncronous tasks- External JS Blade Script
+
+[33mcommit 1435523baffcabd7528a565632dd8697a13d53f3[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Thu May 30 14:24:54 2024 -0500
+
+    CSV with / without header
+
+[33mcommit 5b881d4b95bb53deb960dec567db75f287dfb806[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Wed May 29 23:21:51 2024 -0500
+
+    Product mailing and CSV
+
+[33mcommit 8a6f4706f8fc95d9400fa91713aa5029cc03fac7[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri May 24 13:41:06 2024 -0500
+
+    Tax data included
+
+[33mcommit 58e52fd9e3bb4f903e84bd73f2f8d4c487b2894b[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue May 21 11:45:23 2024 -0500
+
+    Seacrh Text with sku
+
+[33mcommit f7a68b219ad82a90863c2927ca7eddb617ad812b[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Tue May 21 11:43:58 2024 -0500
+
+    Search SKU
+
+[33mcommit 1414263948a5298965bd75bc6bbd404ed97c3cf2[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Mon May 20 18:27:29 2024 -0500
+
+    Responsive design
+
+[33mcommit da5cbbf7af56d573b9a0fbfba3ad310fcda3619b[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Sat May 18 22:00:59 2024 -0500
+
+    Eliminate not used libraries
+
+[33mcommit 49e920ec3d4f0b8c20a71515795a299c4292bb13[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Sat May 18 20:45:18 2024 -0500
+
+    HTTP\middleware y HTTP\kernel for handle hosting routes with Public dir
+
+[33mcommit 47a60e5aebacbf3a5155af3d07677d086cc1e8eb[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Sat May 18 20:38:45 2024 -0500
+
+    Midlleware RedirectIfNoPublic. Change href to routes
+
+[33mcommit dad119635c25bfee7354550f4c95f88ac4034840[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri May 17 18:44:44 2024 -0500
+
+    Clean Cache - Sed Authentication API
+
+[33mcommit 344b2507d00c18362c8a7472fed72d83c9aef20d[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri May 17 09:41:55 2024 -0500
+
+    User version. Optimize search. Associate filters to product
+
+[33mcommit 25a871494c186d0dda3fca60f3620a68dc785a18[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri May 17 09:30:49 2024 -0500
+
+    Tech version before users review
+
+[33mcommit e9298a3ad52fa5ea589c43dbec02bc8804f59ab9[m
+Author: Paty Varela <patrela@hotmail.com>
+Date:   Fri May 17 09:25:08 2024 -0500
+
+    Tech version
