@@ -42,6 +42,8 @@ return [
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
+            'files_path' => env('APP_STORAGE_URL',public_path()),
+            'public_url' => env('APP_URL',''),
         ],
 
         's3' => [
@@ -71,6 +73,8 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+
     ],
+
 
 ];
