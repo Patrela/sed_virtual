@@ -43,9 +43,10 @@ return new class extends Migration
             $table->string('contact_unit',30)->nullable();
             $table->string('contact_agent',70)->nullable();
             $table->string('contact_email',125)->nullable();
+            $table->boolean('is_permanent_stock')->defaultFalse()->nullable();
             $table->boolean('is_insale')->defaultFalse()->nullable();
             $table->boolean('is_sold')->defaultFalse()->nullable();
-            $table->boolean('is_discontinued')->defaultFalse()->nullable();
+            $table->boolean('is_active')->defaultTrue()->nullable();
             $table->boolean('is_reviewed')->defaultFalse()->nullable();
             $table->boolean('is_reserved')->defaultFalse()->nullable();
             $table->string('url_affinity', 180);

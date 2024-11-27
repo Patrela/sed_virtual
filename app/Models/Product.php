@@ -42,9 +42,10 @@ class Product extends Model
         'contact_unit',
         'contact_agent',
         'contact_email',
+        'is_permanent_stock',
         'is_insale',
         'is_sold',
-        'is_discontinued',
+        'is_active',
         'is_reviewed',
         'is_reserved'
     ];

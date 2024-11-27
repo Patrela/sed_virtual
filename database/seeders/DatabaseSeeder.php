@@ -79,6 +79,7 @@ class DatabaseSeeder extends Seeder
             'sku' => '_001',
             'id_provider' => '1',
             'stock_quantity' => 0,
+            'is_active' => 0,
         ]);
         //Import SED Categories Groups and the Excel Original Staff- Prevents load views errors
         ImportProductGroups::dispatchAfterResponse();
