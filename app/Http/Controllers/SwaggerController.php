@@ -30,7 +30,7 @@ class SwaggerController extends Controller
     public function getSwaggerJson()
     {
         if (app(ProfileController::class)->hasAbility(Auth::user()->email, 'document-read')) {
-            $yamlFile = Storage::disk('public')->get('openapi.yaml');
+            $yamlFile = Storage::disk('public')->get('openapistock.yaml');
             //dd($yamlFile);
             //Log::info($yamlFile);
 

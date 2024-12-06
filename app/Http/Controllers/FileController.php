@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\MaintenanceController;
+
 
 
 
@@ -196,10 +196,11 @@ class FileController extends Controller
 
 
         $standardPath = "files";
-        $fileDirectory = $this->currentFileDirectory($standardPath);
+        $file_data = $this->currentFileDirectory($standardPath);
+        $fileDirectory = $file_data['directory'];
 
         $filePath = "{$fileDirectory}/{$fileName}";
-
+        //Log::info('file_data ', $file_data);
         //$csvDataArray = mb_convert_encoding($csvDataArray, 'UTF-8', 'auto');
 
         //File::put($filePath, $csvDataArray);
@@ -214,7 +215,7 @@ class FileController extends Controller
         fclose($fp);
 
         // Generate the URL for accessing the file
-        $fileUrl = asset("{$standardPath}/{$fileName}");
+        $fileUrl = "{$file_data['app_url']}/{$standardPath}/{$fileName}" ; //asset("{$standardPath}/{$fileName}");
 
         // Control default process time restored
 

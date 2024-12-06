@@ -122,7 +122,7 @@ return [
                 'address' => env('MAIL_FROM_ADDRESS'),
                 'name' => env('MAIL_FROM_NAME'),
             ],
-],
+        ],
 
     ],
 
@@ -142,6 +142,9 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    'to' => [
+        'order_address' => env('MAIL_ORDER_ADDRESS', 'hello@example.com'),
+    ],
     'markdown' => [
         'theme' => 'default',
         'paths' => [

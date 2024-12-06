@@ -21,3 +21,4 @@ yarn-error.log
 _clean_laravel.bat
 _clean_prod_laravel.bat
 storage/logs/laravel.log
+public/files/exit.json

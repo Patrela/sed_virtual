@@ -2,22 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\ItemMail;
-use App\Jobs\SendEmail;
-use App\Http\Controllers\ProductController;
+use App\Models\User;
+use App\Models\Order;
+use App\Models\Trade;
+//use Illuminate\Support\Facades\Mail;
+//use App\Mail\QuoteMail;
+use App\Jobs\SendOrderEmail;
+use App\Jobs\SendQuoteEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\ProductController;
+use Ramsey\Uuid\Type\Integer;
 
 class MailController extends Controller
 {
-    public function sendMail(Request $request, string $sku) //Request $request
+    public function sendSkuMail(Request $request, string $sku) //Request $request
     {
         // $sender = ($request->has('user')) ? $request->user()->email :
         //         ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
-        $sender = env('MAIL_FROM_ADDRESS');
-        $owner = ((Auth::check()) ? Auth::user()->email : env('MAIL_FROM_ADDRESS'));
+        $sender =  config('mail.from.address'); // env('MAIL_FROM_ADDRESS')
+        $owner = ((Auth::check()) ? Auth::user()->email : $sender);
         $email = $request->header('x-api-receiver');
 
         //Log::info("user.  " . $sender . " sku " . $sku);
@@ -41,14 +46,14 @@ class MailController extends Controller
             'product' => $product,
         ];
 
-        //Mail::mailer('msgraph')->to($dispatchData['to'])->send(new ItemMail($dispatchData));
+        //Mail::mailer('msgraph')->to($dispatchData['to'])->send(new QuoteMail($dispatchData));
 
-        SendEmail::dispatchAfterResponse($dispatchData);
+        SendQuoteEmail::dispatchAfterResponse($dispatchData);
 
         /*
         Mail::to($$email)
             ->cc($sender)
-            ->send(new ItemMail($sender, $product), function ($message, $sender,$product) {
+            ->send(new QuoteMail($sender, $product), function ($message, $sender,$product) {
                 $message->subject('SED: ' .$product->name);
                 $message->from($sender);
                 $message->setContentType('text/html'); // Set Content-Type header
@@ -61,6 +66,62 @@ class MailController extends Controller
             'result' => 'Email sending successful: ' . $email .' sku= ' . $sku,
             'code' => 200,
         ], 200);
+        //return redirect('/');
+    }
+
+    public function sendOrderMail(string $emailTrade, int $ordernumber) //Request $request
+    {
+        $sender =  config('mail.from.address');
+        $emailTo =  config('mail.to.order_address'); // env('MAIL_ORDER_ADDRESS')
+       // $email = $request->header('x-api-receiver');
+        // send mail just for trades in production environments
+        $responseCode= 200;
+        if (!app()->isProduction() || !str_contains($emailTrade, "@sedint") ) $responseCode= 422;
+        if ( $responseCode= 200 ){
+
+            $trade=  Trade::where('email', "{$emailTrade}")->first();
+            if(!$trade) {
+                $responseCode= 404;
+            }
+            else {
+                $order = Order::where('order_number', $ordernumber)
+                        ->where('trade_nit', $trade->nit)
+                        ->first();
+                if(!$order) {
+                    $responseCode= 404;
+                }
+            }
+
+        }
+        //Log::info("user.  " . $sender . " order " . $order->order);
+
+
+        if ($responseCode !== 200) {
+            return response()->json([
+                'message' => "Error recovering Order",
+                'code' => $responseCode,
+            ], $responseCode);
+        }
+
+        $dispatchData = [
+            'subject' => 'SED Order from ' .$trade->name,
+            'mail_to' => $emailTo,
+            'owner' =>  $sender,
+            'from' => $sender,
+            'message' => "Approval the request...",
+            'customer' => $trade->name,
+            'customer_mail' => $emailTrade,
+            'nit' => $trade->nit,
+            'order' => $order
+        ];
+
+        //Log::info("MAILCONTROLLER.SendOrderMail email data  ", $dispatchData);
+        SendOrderEmail::dispatchAfterResponse($dispatchData);
+
+        return response()->json([
+            'result' => 'Email sending successful: ' . $emailTrade .' Order = ' . $order->order,
+            'code' => $responseCode,
+        ],  $responseCode);
         //return redirect('/');
     }
 

@@ -87,6 +87,18 @@
     padding-left: 0.25em;
     padding-right: 0.75em;
 }
+
+.container{
+    max-width: 90%;
+    display: flex !important;
+    /* justify-content: space-between; */
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.container-title{
+    font-weight: bold;
+}
 .product-list {
     display: grid;
     grid-template-columns: 4fr 2fr;

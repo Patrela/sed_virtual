@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 //use Illuminate\Mail\Mailables\Address;
-class ItemMail extends Mailable
+class OrderMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -37,8 +37,8 @@ class ItemMail extends Mailable
     {
         return new Content(
             //view: 'emails.product',
-            view: 'emails.quote',
-            with: ['product' =>$this->mailData['product'], 'sender' => $this->mailData['owner']],
+            view: 'emails.order',
+            with: ['order' =>$this->mailData['order'], 'customer_mail'=> $this->mailData['customer_mail'], 'customer' => $this->mailData['customer'], 'nit' => $this->mailData['nit']],
         );
     }
 

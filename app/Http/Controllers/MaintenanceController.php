@@ -53,9 +53,21 @@ class MaintenanceController extends Controller
             'message' => 'Application cache not found.'
         ], 404);
     }
+    public function object_to_array($object) {
+        return collect($object)->map(function ($item) { return (array) $item; })->toArray();
+    }
 
     public function setExecutionTime($default_time = 60){
         ini_set('max_execution_time', $default_time);
+    }
+
+    public function showNodeVersion()
+    {
+        // Execute the 'node -v' command
+        $nodeVersion = shell_exec('node -v');
+
+        // Return the version as a response
+        return response()->json(['node_version' => trim($nodeVersion)]);
     }
 
 }

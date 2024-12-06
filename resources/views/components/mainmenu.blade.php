@@ -27,8 +27,12 @@
                         <button class="navitem" type="button" id="btnProfiles"  alt="User Profile" onclick="window.location.href = '{{ route('rolesprofile.index') }}'">
                             <i class="fas fa-plus-circle navitem-icon"></i>
                         </button>
+
                         <button class="navitem" type="button" id="btnAffinity" alt="affinity" onclick="window.location.href = '{{ route('affinity.index') }}'">
                             <i class="fas fa-bell navitem-icon"></i>
+                        </button>
+                        <button class="navitem" type="button" id="btnVisits"  alt="Visitors" onclick="window.location.href = '{{ route('visits.index') }}'">
+                            <i class="fas fa-globe navitem-icon"></i>
                         </button>
                     @endif
                 @endauth

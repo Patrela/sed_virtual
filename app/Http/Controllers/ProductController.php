@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -87,7 +86,7 @@ class ProductController extends Controller
 
     public function getDepartmentProducts($group = "Computadores")
     {
-        //Log::info("products GET  " . $group);
+
 
         $productsAffinities = Product::leftJoin('affinities', function ($join) {
             $join->on('products.brand', '=', 'affinities.brand_name')
@@ -98,7 +97,7 @@ class ProductController extends Controller
             ->select($this->selectJoinFields)
             ->orderBy('products.name', 'ASC')
             ->get();
-
+    //Log::info("productsAffinities  " . $productsAffinities);
         return $productsAffinities;
     }
 
@@ -112,9 +111,9 @@ class ProductController extends Controller
 
         $productsAvailable = Product::select('sku', 'department', 'category', 'brand', 'name', 'image_1', 'image_2', 'image_3', 'image_4')
             ->where('products.is_active', 1)
-            //->where('sku', '43HT3WJ-B.AWC') //WT13DPBK.ASFECOL
-           // ->where('brand', 'LG')
-            //->orderBy('products.name', 'ASC')
+            // ->where('category', 'Pequeños Electrodomésticos')
+            // ->where('sku', '43HT3WJ-B.AWC') //WT13DPBK.ASFECOL
+            // ->orderBy('products.name', 'ASC')
             ->get();
 
         $invalidUrlRecords = [];
@@ -128,7 +127,7 @@ class ProductController extends Controller
         foreach ($productsAvailable as $product) {
             $invalidImages = [];
             $imagesOk= 0;
-            Log::info($product->sku); //Log::info("sku {$product->sku}");
+            //Log::info($product->sku); //Log::info("sku {$product->sku}");
             foreach ($headers as $field) {
                 $invalidImages[$field] = "{$product->{$field}}";
             }

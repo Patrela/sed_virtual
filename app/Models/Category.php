@@ -19,15 +19,5 @@ class Category extends Model
         'created_at',
         'updated_at'
     ];
-
-    // public function scopeDepartment(Builder $builder): void
-    // {
-    //     $builder->where('group_name','departamento');
-    // }
-    // public function scopeDepartmentCategories(Builder $builder): void
-    // {
-    //     $builder->where('group_name','categoria')
-    //             ->where('parent_id',$this->id);
-    // }
 }
 

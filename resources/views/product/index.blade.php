@@ -38,6 +38,10 @@
             tippy('#btnDocumentation', {
                     content: 'API Documentation for retrieving SED Stock',
             });
+            tippy('#btnVisits', {
+                    content: 'Visitors by Trades',
+            });
+
         </script>
     @elseif (isset($developer))
         <x-mainmenu :developer="$developer" />
@@ -194,7 +198,7 @@
                                         </button>
                                     @endif
                                     <button class="navitem" type="button"
-                                        onclick="productMail('{{ $product['sku'] }}')">
+                                        onclick="productMail('{{ $product['sku'] }}', '{{ Auth::user()->email}}')">
                                         <i class="fas fa-envelope navitem-icon"></i>
                                     </button>
                                     <button class="navitem" type="button"
@@ -444,12 +448,17 @@
         window.location.href = "{{route('api.documentation') }}";
     }
 
-    function productMail(sku) {
+    function productMail(sku, email) {
+        let receiver = "";
         if (sku === "") {
             sku = document.getElementById("prod_sku").textContent;
         }
-
-        let receiver = prompt("Correo del destinatario:");
+        if (email.includes("@sedint")){
+            receiver = prompt("Correo del destinatario:");
+        }
+        else {
+            receiver = email;
+        }
 
         if (receiver.indexOf("@") !== -1) {
             const urlpath = "{{ route('products.email', ['sku' => ':sku']) }}".replace(":sku", sku);

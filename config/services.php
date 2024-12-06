@@ -45,6 +45,8 @@ return [
         'token_dev' => env('API_DEV_TOKEN'),
         'token_prod' => env('API_PROD_TOKEN'),
         'token_connect' => env('SESSION_SECRET'),
-
+        'standard_user' => env('AUTH_STANDARD_USER'),
+        'standard_password' => env('AUTH_STANDARD_PASSWORD'),
+        'standard_key' => env('AUTH_STANDARD_KEY'),
     ],
 ];

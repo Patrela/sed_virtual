@@ -13,17 +13,18 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->integer('order')->index();
+            $table->bigInteger('order_number')->index();
             $table->tinyInteger('item');
-            $table->string('part_num', 20);
-            $table->string('name', 180);
+            $table->string('part_num', 30);
+            $table->string('product_name', 180);
             $table->integer('quantity')->nullable();
-            $table->decimal('unit_price', 12, 2)->nullable();
-            $table->decimal('total_price', 16, 2)->nullable();
+            $table->decimal('unit_price', 14, 4)->nullable();
+            $table->decimal('total_price', 18, 4)->nullable();
+            $table->decimal('tax_value', 14, 4)->nullable();
+            $table->string('currency', 5)->default("COP");
             $table->timestamps();
-            $table->foreign('order')->references('order')->on('orders')->onDelete('cascade');
+            $table->foreign('order_number')->references('order_number')->on('orders')->onDelete('cascade');
             $table->foreign('part_num')->references('part_num')->on('products')->onDelete('cascade');
-
         });
     }
 

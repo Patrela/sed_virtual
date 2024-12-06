@@ -10,12 +10,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
 
     public const ALLROLES = [
-        'Administrator'=> 1,
-        'Staff'=> 2,
-        'Trade'=> 3,
+        'Administrator' => 1,
+        'Staff' => 2,
+        'Trade' => 3,
         'Reseller' => 4,
         'Support' => 5,
         'Developer' => 6
@@ -42,6 +42,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
+        'id',
         'password',
         'remember_token',
     ];
@@ -57,5 +58,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function getId()
+    {
+        return $this->id;
     }
 }

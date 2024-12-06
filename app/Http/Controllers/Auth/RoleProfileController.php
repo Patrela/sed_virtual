@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
+use App\Models\Trade;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 class RoleProfileController extends Controller
 {
     public function index(){
-        $user = new User(); // Assuming User is your model
+        $user = new User();
         $user->name = "";
         $user->email = "";
         $user->trade_id= 0;
@@ -50,10 +51,20 @@ class RoleProfileController extends Controller
             if($user['role_type'] !== $role_type) {
                 switch ($role_type) {
                     case User::ALLROLES["Administrator"]:
-                            $user->createToken('profile', ['user-list','user-create','user-edit', 'user-show', 'user-delete']);
-                        case User::ALLROLES["Developer"]:
-                            $user->createToken('api', ['product-import', 'app-validation','document-read']);
-                            break;
+                        $user->createToken('profile', ['user-list','user-create','user-edit', 'user-show', 'user-delete']);
+                        $user->createToken('api', ['product-import', 'app-validation','document-read']);
+                        break;
+                    case User::ALLROLES["Developer"]:
+                        $user->createToken('api', ['product-import', 'app-validation','document-read']);
+                        // update user email for trade developer profile
+                        if($user->trade_id >1){
+                            $trade= Trade::where('trade_id', "{$user->trade_id}")->first();
+                            if($trade !== false){
+                                $trade->email = $user->email;
+                                $trade->save();
+                            }
+                        }
+                        break;
                 }
                 $user['role_type'] = $role_type;
                 $user->save();

@@ -8,8 +8,6 @@ use App\Models\UserImported;
 use App\Models\ProductImported;
 use App\Models\CategoryImported;
 
-use App\Http\Controllers\MaintenanceController;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -44,9 +42,6 @@ class SedController extends Controller
                 // execute the API with SED clasification group
                 try {
                     $response = Http::connector()
-                    // delete next 2 lines when SSL certified just works
-                        ->withoutVerifying()
-                        ->withOptions(["verify" => false])
 
                         ->post('/' . $key . '/', ['item' => '',]);
                     if ($response->successful()) {
@@ -101,31 +96,6 @@ class SedController extends Controller
     }
 
 
-
-    /**
-     * Read ordered clasification, if is higger than current, then insert new clasificacion
-     */
-    private function CreateGroups($groups)
-    {
-        $maingroup = $groups[0]['group_name'];
-        $parentid =  "X"; // $groups[0]['parent_id'];
-        $maxgroup = -1; //
-        foreach ($groups as $group) {
-            if ($parentid != $group['parent_id']) {
-                $parentid = $group['parent_id'];
-                //read the newest id for ignoring the rest of ids
-                $maxgroup = Category::where([['group_name', "{$maingroup}"], ['parent_id', $parentid]])
-                    ->max('id') ?? 0;
-                //Log::error("grupo " .$maingroup . " parent " .$parentid ." max " .$maxgroup);
-            }
-            if ($group['id'] > $maxgroup) {
-                //Log::error("cat id " . $group['id'] . "  name " . $group['name'] . "  parent " . $group['parent_id'] . "  group_name " . $group['group_name'] . "  slug " . $group['slug']);
-                $group['parent_id'] = $parentid;
-                Category::create($group);
-            }
-        }
-    }
-
     private function UpdateClassifications($groupItems, $maingroup)
     {
         // use temporal table to update classifications
@@ -173,7 +143,6 @@ class SedController extends Controller
 
             $company = $request->header('x-api-company');
             $useremail = $request->header('x-api-user');
-            //$token = $request->bearerToken();
             $name = $request->query('name');
             $response = Http::connector()->post('/authentication/?name=' . $name, [
                 'nit' => $company,
@@ -200,6 +169,7 @@ class SedController extends Controller
     {
         //Log::info("Starting Authentication update");
         //Log::stack(['single', 'slack'])->info('Starting Authentication update!');
+        app(MaintenanceController::class)->setExecutionTime(7000);
         try {
             $newUsers = User::where('password', '')->get();
             foreach ($newUsers as $user) {
@@ -219,8 +189,35 @@ class SedController extends Controller
                 'code' => $e->getCode(),
             ], 401);
         }
+        finally{
+            app(MaintenanceController::class)->setExecutionTime();
+        }
     }
+    public function updateStaffUsers()
+    {
+        //Log::info("Starting Authentication update");
+        //Log::stack(['single', 'slack'])->info('Starting Authentication update!');
+        app(MaintenanceController::class)->setExecutionTime(7000);
+        try {
+            $staff= User::ALLROLES["Staff"];
+            DB::select("CALL sp_import_users({$staff})");
 
+            //Log::info("Ending Authentication update");
+            return response()->json([
+                'message' => 'SED Staff Users updated',
+                'code' => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error("Error during API Staff Users update: {$e->getMessage()}");
+            return response()->json([
+                'message' => 'error ' . $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 401);
+        }
+        finally{
+            app(MaintenanceController::class)->setExecutionTime();
+        }
+    }
     public function getStaffUsers()
     {
         try {
@@ -281,6 +278,7 @@ class SedController extends Controller
 
     public function getTradeUsers()
     {
+        app(MaintenanceController::class)->setExecutionTime(7000);
         try {
             $response = Http::connector()->post('/authentication/', ['nit' => '',]);
             if ($response->successful()) {
@@ -337,6 +335,9 @@ class SedController extends Controller
                 'message' => 'error ' . $e->getMessage(),
                 'code' => $e->getCode(),
             ], 401);
+        }
+        finally{
+            app(MaintenanceController::class)->setExecutionTime();
         }
     }
 

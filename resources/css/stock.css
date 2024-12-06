@@ -88,16 +88,16 @@ label {
 
 main {
     display: flex;
-    flex-direction:row;
+    flex-direction: row;
     justify-content: space-between;
-    align-items:flex-start;
+    align-items: flex-start;
     gap: 10px;
     padding: 10px 20px;
     background-color: #ffff;
 }
 
 main aside {
-    flex:1;
+    flex: 1;
 
 }
 
@@ -169,14 +169,14 @@ span {
 }
 .error-container > span {
 	display: inline-block;
-    font-size:inherit;
+    font-size: inherit;
 	line-height: 0.7;
 	position: relative;
 	color: #FFB485;
 }
 .error-container > span > span {
 	display: inline-block;
-    font-size:inherit;
+    font-size: inherit;
 	position: relative;
 }
 
@@ -303,7 +303,7 @@ margin-right: 0.175rem;
 }
 
 .footer-bottom{
-    color:var(--main-body-color);
+    color: var(--main-body-color);
     text-align: center;
     padding: 0.5rem 3rem 0.5rem 3rem;
 }
@@ -311,13 +311,13 @@ margin-right: 0.175rem;
     background-color: var(--main-dark-color);
     color: #fff;
     display: flex;
-    flex-direction:row;
+    flex-direction: row;
     gap: 10px;
     text-align: left;
 }
 
 .footer-medium-left {
-    flex:3;
+    flex: 3;
     padding-left: 3em;
 }
 
@@ -350,17 +350,38 @@ margin-right: 0.175rem;
 .footer-top{
     padding: 0 3rem 0.5rem 3rem;
     text-align: center;
-    color:var(--main-dark-color);
+    color: var(--main-dark-color);
 }
 .form-center{
     width: 50%;
     margin-left: auto;
     margin-right: auto;
 }
+
+.list-text {
+    width: 10em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+}
+.list-text-large {
+    width: 45em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+}
+.list-text-title {
+    width: 10em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+}
+
 .main-button{
     line-height: 1.5rem !important;
     background-color: var(--main-body-color)  !important;
-    color:#fff  !important;
+    color: #fff  !important;
 
 }
 .mainmenu {
@@ -393,13 +414,13 @@ margin-right: 0.175rem;
 .mainmenu-icons-large {
     display: flex;
     flex-direction: row;
-    align-items:center;
+    align-items: center;
     gap: 3px;
 }
 .mainmenu-icons-text {
     flex: 3;
     display: flex;
-    align-items:center;
+    align-items: center;
     gap: 3px;
 }
 .mainmenu-icons-button {
@@ -473,7 +494,7 @@ margin-right: 0.175rem;
   .modal-card-image img {
     /* position: relative; */
     /* min-height: 220px; */
-    margin:0;
+    margin: 0;
     object-fit: cover;
     /* border: 1px solid blue; */
   }
@@ -524,20 +545,20 @@ margin-right: 0.175rem;
   }
 #prod_full_img {
     padding: 0.125rem;
-    border:1px solid var(--main-body-color);
+    border: 1px solid var(--main-body-color);
 }
 .modal-thumb-bar {
     display: flex;
     flex-direction: row;
     height: 150px;
     width: inherit;
-    gap:0;
+    gap: 0;
 }
 
   .modal-thumb-bar img {
     /*display: block; */
     width: 25%;
-    height:inherit;
+    height: inherit;
     /*float: left; */
     cursor: pointer;
     /* border:1px solid var(--main-body-color); */
@@ -598,7 +619,7 @@ margin-right: 0.175rem;
   }
 
   .navitem:hover {
-    color:var(--main-warning-color);
+    color: var(--main-warning-color);
   }
 
   /* .navitem:focus {
@@ -649,7 +670,7 @@ margin-right: 0.175rem;
       .modal-card-image img {
         /* position: relative; */
         /* min-height: 220px; */
-        margin:0;
+        margin: 0;
         object-fit: cover;
         /* border: 1px solid blue; */
       }
@@ -672,11 +693,11 @@ margin-right: 0.175rem;
         flex-direction: column;
         gap: 0.175rem;
        /* justify-content: space-between; */
-        align-items:baseline;
+        align-items: baseline;
         padding:  0.175rem;
         background-color: #ffff;
         border-bottom-style: solid;
-        border-bottom-color:var(--main-body-color);
+        border-bottom-color: var(--main-body-color);
         border-bottom-width: 0.175em;
         }
     main aside {
@@ -757,16 +778,16 @@ margin-right: 0.175rem;
     }
 
     .mainmenu-icons {
-        flex:3;
+        flex: 3;
         display: flex;
         flex-direction: row;
-        align-items:center;
+        align-items: center;
         gap: 3px;
     }
     .mainmenu-icons-text {
         flex: 4;
         display: flex;
-        align-items:center;
+        align-items: center;
         gap: 3px;
     }
     .mainmenu-icons-button {

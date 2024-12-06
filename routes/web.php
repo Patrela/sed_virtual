@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\ImportProducts;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\TradeController;
 use App\Http\Controllers\ConnectController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -15,7 +17,9 @@ use App\Http\Controllers\SwaggerController;
 use App\Http\Controllers\AffinityController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\UserVisitLogController;
 use App\Http\Controllers\Auth\RoleProfileController;
+use App\Jobs\ImportProducts;
 
 
 Route::get('/', function () {
@@ -70,7 +74,6 @@ Route::prefix('rolesprofile')->controller(RoleProfileController::class)->group(f
     Route::put('/{email}/{role_type}','updateRoleProfile')->name('rolesprofile.update');
 })->middleware('auth');
 
-
 Route::prefix('products')->middleware(['auth'])->group(function () {
 
     // Shared logic to get products and data
@@ -115,13 +118,39 @@ Route::prefix('products')->middleware(['auth'])->group(function () {
     })->name('products.search');
 
     // send product email by sku
-    Route::get('/mail/{sku}', [MailController::class, 'sendMail'])->name('products.email');
+    Route::get('/mail/{sku}', [MailController::class, 'sendSkuMail'])->name('products.email');
 });
 
 Route::prefix('/affinities')->controller(AffinityController::class)->group(function () {
     Route::get('/','index')->name('affinity.index');
     Route::get('/{brand}', 'getAffinities')->name('affinity.show');
     Route::post('/{brand}', 'createOrUpdateAffinity')->name('affinity.save');
+})->middleware(['auth']);
+
+Route::prefix('/orders')->controller(OrderController::class)->group(function () {
+    Route::get('/','index')->name('order.index');
+    Route::get('/trade/{trade}/{year}/{month}', 'getTradePeriodOrders')->name('order.trade');
+    Route::get('/{order}', 'show')->name('order.show');
+})->middleware(['auth']);
+
+Route::prefix('/trades')->controller(TradeController::class)->group(function () {
+    Route::get('/','index')->name('trade.index');
+    Route::get('/{trade}', 'show')->name('trade.show');
+})->middleware(['auth']);
+
+Route::prefix('/visits')->controller(UserVisitLogController::class)->group(function () {
+    Route::get('/', function (Request $request) {
+        $title = "Visitors ";
+        $visits = app(UserVisitLogController::class)->getVisitLogs($request);
+        return view('auth.uservisitlog', ['visits'=> $visits, 'title'=> $title]); //['visits'=> $visits->toArray(), 'title'=> $title]
+    })->name('visits.index');
+    Route::get('/{item}', function (Request $request, string $item) {
+        $title = "Detail {$item}";
+        $visits = app(UserVisitLogController::class)->getVisitLogs($request, $item);
+        return view('auth.uservisitlog', ['visits'=> $visits, 'title'=> $title]); //['visits'=> $visits->toArray(), 'title'=> $title]
+        //return $visits;
+    })->name('visits.show');
+
 })->middleware(['auth']);
 
 Route::prefix('/categories')->controller(CategoryController::class)->group(function () {
