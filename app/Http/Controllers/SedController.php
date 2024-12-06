@@ -137,41 +137,15 @@ class SedController extends Controller
         ], 200);
     }
 
-    public function validateCustomerUser(Request $request)
-    {
-        try {
-
-            $company = $request->header('x-api-company');
-            $useremail = $request->header('x-api-user');
-            $name = $request->query('name');
-            $response = Http::connector()->post('/authentication/?name=' . $name, [
-                'nit' => $company,
-                'email' =>  $useremail,
-            ]);
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                return response()->json([
-                    'error' => 'Api SED Customer User',
-                    'code' => $response->status(),
-                ], 403);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ], 403);
-        }
-    }
-
-
     public function updateNewUsers()
     {
-        //Log::info("Starting Authentication update");
+        Log::info("Starting updateNewUsers");
         //Log::stack(['single', 'slack'])->info('Starting Authentication update!');
         app(MaintenanceController::class)->setExecutionTime(7000);
         try {
-            $newUsers = User::where('password', '')->get();
+            //$newUsers = User::where('password', '')->get();
+            $newUsers = User::whereRaw('LENGTH(password) = 0')->get();
+            Log::info("updateNewUsers processed = ". count($newUsers));
             foreach ($newUsers as $user) {
                 $user['password'] = Hash::make($user['user_id']);
                 //$user['remember_token'] = Hash::make($user['name']);
@@ -180,6 +154,7 @@ class SedController extends Controller
             //Log::info("Ending Authentication update");
             return response()->json([
                 'message' => 'SED New Users updated',
+                'total_users' =>count($newUsers),
                 'code' => 200,
             ], 200);
         } catch (\Exception $e) {

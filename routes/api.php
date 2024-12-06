@@ -23,7 +23,7 @@ Route::prefix('connect')->controller(ConnectController::class)->group(function (
 Route::prefix('sed')->controller(SedController::class)->group(function () {
     Route::get('/clasifications', 'getProductGroups')->name('sed.getProviderGroups');
     Route::get('/staff', 'getStaffUsers')->name('sed.staff');
-    Route::post('/customers/auth', 'validateCustomerUser')->name('sed.CustomerUser');
+    Route::get('/staff/new-users', 'updateNewUsers')->name('sed.newUser');
     Route::get('/users', function () {
         CreateNewUsers::dispatchAfterResponse();
         return response()->json([

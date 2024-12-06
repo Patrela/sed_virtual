@@ -1,6 +1,7 @@
 <?php
 
-
+use App\Models\Provider;
+use App\Jobs\ImportProducts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -19,9 +20,12 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\UserVisitLogController;
 use App\Http\Controllers\Auth\RoleProfileController;
-use App\Jobs\ImportProducts;
 
 
+Route::get('/testing', function(){
+    $providers = Provider::all()->toArray();
+    return $providers;
+})->name('testing');
 Route::get('/', function () {
     if (session()->has('current_user')) {
         return redirect()->route('products.index');
@@ -180,9 +184,10 @@ Route::prefix('maintenance')->middleware(['auth'])->group(function () {
         return view('memory-data', ['session' => Session::all(), 'user' => Auth::user(), 'cacheData' => $cacheData])->name('maintenance.memory-data');
     })->name('data');
 
-    Route::get('/clear-cache', [MaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');
 
 });
+
+Route::get('/maintenance/clear-cache', [MaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');
 
 Route::get('/local/login', [ConnectController::class, 'connectLogin'])->name('local.login');
 

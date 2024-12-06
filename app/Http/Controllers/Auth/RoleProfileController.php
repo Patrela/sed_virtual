@@ -21,7 +21,8 @@ class RoleProfileController extends Controller
         $user->email = "";
         $user->trade_id= 0;
         $user->role_type= 0;
-        return view('profile.roles', ['user' => $user]);
+        $users = User::where( 'role_type', User::ALLROLES["Developer"])->get()->toArray();
+        return view('profile.roles', ['user' => $user, 'users' => $users]);
     }
 
     public function searchProfileEmail(string $email){

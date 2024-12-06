@@ -41,6 +41,10 @@
             tippy('#btnDocumentationLocal', {
                     content: 'API Documentation for sales',
             });
+
+            tippy('#btnBrokenAnchors', {
+                    content: 'Broken Anchors',
+            });
             tippy('#btnVisits', {
                     content: 'Visitors by Trades',
             });
