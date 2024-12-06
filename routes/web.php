@@ -63,6 +63,8 @@ Route::prefix('/profile')->controller(ProfileController::class)->group(function 
 Route::prefix('/documentation')->controller(SwaggerController::class)->group(function () {
     Route::get('/', 'show')->name('documentation.show');
     Route::get('/json/swagger.json', 'getSwaggerJson')->name('documentation.json');
+    Route::get('/json/{source}', 'getSwaggerJsonSource')->name('documentation.source');
+    Route::get('/doc/{source}', 'getSwaggerDocumentationSource')->name('documentation.dynamic');
     Route::post('/postman', function () {
         return redirect()->away('https://sed-stock.postman.co/collection/32783257-26376ef5-562b-4b9a-b99f-181038bb6fe3?source=rip_html');
     })->name('api.documentation');

@@ -38,6 +38,9 @@
             tippy('#btnDocumentation', {
                     content: 'API Documentation for retrieving SED Stock',
             });
+            tippy('#btnDocumentationLocal', {
+                    content: 'API Documentation for sales',
+            });
             tippy('#btnVisits', {
                     content: 'Visitors by Trades',
             });

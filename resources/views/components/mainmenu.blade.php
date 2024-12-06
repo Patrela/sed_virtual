@@ -37,9 +37,14 @@
                     @endif
                 @endauth
                 @if ($developer)
-                    <button class="navitem" type="button"  id="btnDocumentation" onclick="window.location.href = '{{ route('documentation.show') }}'">
+                    {{-- <button class="navitem" type="button"  id="btnDocumentation" onclick="window.location.href = '{{ route('documentation.show') }}'"> --}}
+                        <button class="navitem" type="button"  id="btnDocumentation" onclick="window.location.href = '{{  route('documentation.dynamic',['source' => '1']) }}'">
                         <i class="fas fa-atlas navitem-icon"></i>
                     </button>
+                    <button class="navitem" type="button"  id="btnDocumentationLocal" onclick="window.location.href = '{{ route('documentation.dynamic',['source' => '2']) }}'">
+                        <i class="fas fa-book-open navitem-icon"></i>
+                    </button>
+
                 @endif
                 <button class="navitem" type="button" id="btnStock" onclick="window.location.href = '{{ route('home') }}'">
                     <i class="fas fa-home navitem-icon"></i>
