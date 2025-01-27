@@ -15,9 +15,11 @@ Route::post('/tokens/create', function (Request $request) {
 
 Route::prefix('connect')->controller(ConnectController::class)->group(function () {
     Route::post('/', 'connectValidation')->name('connect.validation');
+    Route::post('/{username}', 'connectValidation')->name('connect.validation');
+});
+Route::prefix('connection')->controller(ConnectController::class)->group(function () {
     Route::post('/order', [OrderController::class, 'createOrUpdateOrder'])->name('connect.createOrUpdateOrder');
     Route::post('/trade', 'validateTradeBasicAuthentication')->name('connect.validateBasicAuthentication');
-    Route::get('/node', 'showNodeVersion')->name('connect.node');
 });
 
 Route::prefix('sed')->controller(SedController::class)->group(function () {

@@ -14,12 +14,14 @@ class OrderItem extends Model
         'order_number',
         'item',
         'part_num',
+        'trade_part_num',
         'product_name',
         'brand',
         'quantity',
-        'unit_price',
-        'total_price',
-        'tax_value',
+        'sed_unit_price',
+        'sed_total_price',
+        'sed_tax_value',
+        'is_tax_applied',
         'currency'
     ];
     public function order() {

@@ -172,22 +172,19 @@ Route::prefix('/files')->controller(FileController::class)->group(function () {
     Route::get('/paths', 'standardPaths')->name('file.paths');
 })->middleware('auth');
 
-//To Check session -cache - Auth Data
-Route::prefix('maintenance')->middleware(['auth'])->group(function () {
+Route::prefix('maintenance')->controller(MaintenanceController::class)->group(function () {
+    Route::get('/clear-cache', 'clearCache')->name('maintenance.clear-cache');
+    Route::get('/node', 'showNodeVersion')->name('maintenance.node');
     Route::get('/memory-data', function () {
         $cacheKeys = ['clasifications', 'sync_products','query', 'email','token'];
         $cacheData = [];
-
         foreach ($cacheKeys as $key) {
             $cacheData[$key] = Cache::has($key)? Cache::get($key) : "";
         }
         return view('memory-data', ['session' => Session::all(), 'user' => Auth::user(), 'cacheData' => $cacheData])->name('maintenance.memory-data');
-    })->name('data');
-
-
+    })->middleware(['auth'])->name('maintenance.data');
 });
 
-Route::get('/maintenance/clear-cache', [MaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');
 
 Route::get('/local/login', [ConnectController::class, 'connectLogin'])->name('local.login');
 

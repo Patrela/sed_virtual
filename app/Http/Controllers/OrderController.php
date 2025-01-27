@@ -82,12 +82,14 @@ class OrderController extends Controller
                 'items' => 'required|array',
                 'items.*.item' => 'required|integer',
                 'items.*.part_num' => 'required|string',
+                'items.*.trade_part_num' => 'required|string',
                 'items.*.product_name' => 'required|string',
-                'items.*.brand' => 'required|string',
+                'items.*.brand' => 'nullable|string',
                 'items.*.quantity' => 'required|integer',
-                'items.*.unit_price' => 'required|numeric',
-                'items.*.total_price' => 'required|numeric',
-                'items.*.tax_value' => 'required|numeric',
+                'items.*.sed_unit_price' => 'required|numeric',
+                'items.*.sed_total_price' => 'required|numeric',
+                'items.*.sed_tax_value' => 'nullable|numeric',
+                'items.*.is_tax_applied' => 'nullable|numeric',
                 'items.*.currency' => 'required|string',
             ]
         );

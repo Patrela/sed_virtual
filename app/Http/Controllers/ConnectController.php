@@ -18,7 +18,7 @@ class ConnectController extends Controller
 {
 
 
-    public function connectValidation(Request $request)
+    public function connectValidation(Request $request, string $username = "standard")
     { {
             try {
                 $corsHeaders = [
@@ -57,7 +57,7 @@ class ConnectController extends Controller
                 //Log::info("Login ok createToken ");
 
                 return response()->json([
-                    'name' =>  $user->name,
+                    'name' => $username,
                     'redirect_url' => route('local.login') . "?email={$email}&token={$token}",
                     'message' => 'Login successful',
                     'code' => 200,
@@ -83,7 +83,7 @@ class ConnectController extends Controller
         $user = false;
         if ($token !== "") {
             $tokenData = PersonalAccessToken::findToken($token);
-            //Log::info("tokenData");
+            Log::info("tokenData");
             //Log::info($tokenData->tokenable);
             if ($tokenData && $tokenData->tokenable->email == $email) {
                 $user = $tokenData->tokenable;
@@ -95,6 +95,7 @@ class ConnectController extends Controller
             }
         } else {
             $password  = substr($email, 0, strpos($email, "@"));
+            Log::info("email = " . $email . " password = ". $password);
             $inputs = array('email' => "{$email}", 'password' => "{$password}");
             $rules = array('email' => 'required|email', 'password' => 'required');
             $user = User::where('email', "{$email}")->first();

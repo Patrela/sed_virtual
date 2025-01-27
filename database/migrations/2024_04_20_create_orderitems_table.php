@@ -15,12 +15,14 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('order_number')->index();
             $table->tinyInteger('item');
-            $table->string('part_num', 30);
+            $table->string('part_num', 30)->index();
+            $table->string('trade_part_num', 40);
             $table->string('product_name', 180);
             $table->integer('quantity')->nullable();
-            $table->decimal('unit_price', 14, 4)->nullable();
-            $table->decimal('total_price', 18, 4)->nullable();
-            $table->decimal('tax_value', 14, 4)->nullable();
+            $table->decimal('sed_unit_price', 14, 4)->nullable();
+            $table->decimal('sed_total_price', 18, 4)->nullable();
+            $table->decimal('sed_tax_value', 14, 4)->nullable();
+            $table->boolean('is_tax_applied')->default(0)->nullable();
             $table->string('currency', 5)->default("COP");
             $table->timestamps();
             $table->foreign('order_number')->references('order_number')->on('orders')->onDelete('cascade');
