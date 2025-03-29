@@ -20,6 +20,7 @@ class OrderController extends Controller
     public function index()
     {
         $orders_object = DB::table('view_orders')
+                            ->limit(80) // last 80 orders
                             ->get();
         $orders = app(MaintenanceController::class)->object_to_array($orders_object);
         return view('order.list', ['orders' => $orders,  'profile_list' => array_flip(User::ALLROLES) , 'rolevalue' => User::ALLROLES["OrderManager"]]);
@@ -207,29 +208,31 @@ class OrderController extends Controller
 
     public function getTradePeriodOrders(string $trade, string $start, string $end)
     {
+        log::info( "trade: " . $trade  ." start: " .$start ." end: ".$end);
         if (!$trade) {
             return response()->json([
                 'message' => 'Invalid order data',
                 'code' => 500,
             ], 500);
         }
+        // $orders_object = DB::table('view_orders')
+        // ->where('trade',  "{$trade}")
+        // ->where('transaction_date_time', '>=', "{$start}")
+        // ->where('transaction_date_time', '<=', "{$end}")    
+        // ->get();
+
+        $orders_object = DB::table('view_orders')
+        ->where('nit', "{$trade}")
+        ->where('transaction_date_time', '>=', DB::raw("CAST('{$start}' AS DATE)"))
+        ->where('transaction_date_time', '<', DB::raw("CAST('{$end}' AS DATE) + INTERVAL 1 DAY"))
+        ->get();
     
-        // Fetch orders based on the conditions
-        $orders = Order::where('trade_nit', $trade)
-            ->when(!empty($start), function ($query) use ($start) {
-                $query->whereDate('transaction_date_time', '>=', $start); // Filter from the start date
-            })
-            ->when(!empty($end), function ($query) use ($end) {
-                $query->whereDate('transaction_date_time', '<=', $end); // Filter up to the end date
-            })
-            ->with('items')
-            ->orderBy('order_number', 'DESC')
-            ->get();
-    
+        $orders = app(MaintenanceController::class)->object_to_array($orders_object); 
+        log::info("orders = ". count($orders));
         // Check if no orders were found
-        if ($orders->isEmpty()) {
+        if (count($orders) == 0) {
             return response()->json([
-                'message' => 'Error: Order not found',
+                'message' => 'Error: Trade Orders not found',
                 'code' => 404,
             ], 404);
         }

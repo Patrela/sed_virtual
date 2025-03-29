@@ -45,13 +45,13 @@
                                             <div>
                                                 <x-input-label for="start" :value="__('Start Date')" />
                                                 <x-date-input id="start" name="start" type="date" class="mt-1 block w-full"
-                                                    autocomplete="start date" />
+                                                value="{{ date('Y') }}-01-01" autocomplete="start date" />
                                             </div>
 
                                             <div>
                                                 <x-input-label for="end" :value="__('End Date')" />
                                                 <x-date-input id="end" name="end" type="date" class="mt-1 block w-full"
-                                                    autocomplete="end date" />
+                                                value="{{ date('Y-m-d') }}" autocomplete="end date" />
                                             </div>
 
 
@@ -72,24 +72,22 @@
 
         </aside>
         <section class="main-section" name="main_group" id="main_group">
-            <div class="table-row" id="developer-container">
+            <div class="table-row" id="titles-container">
 
                 <div class="modal-card-item-division">
-                    <!-- <div class="list-text-large"><strong>Order</strong>
-                                            </div> -->
                     <div class="list-text-title">Date
                     </div>
                     <div class="list-text-title">Order
                     </div>
-                </div>
-                <div class="list-text-medium-title">Trade
-                </div>
-                <div class="list-text-regular-title">Sku
-                </div>
-                <div class="list-text-little-title">Quantity
-                </div>
-                <div class="list-text-regular-title">Value
-                </div>               
+                    <div class="list-text-medium-title">Trade
+                    </div>
+                    <div class="list-text-regular-title">Sku
+                    </div>
+                    <div class="list-text-little-title">Quantity
+                    </div>
+                    <div class="list-text-regular-title">Value
+                    </div>   
+                </div>            
             </div> 
              
             @foreach ($orders as $key => $order)
@@ -120,18 +118,29 @@
 
     </main>
     <script type="text/javascript">
+
         document.getElementById('orderForm').onsubmit = function (event) {
             event.preventDefault(); // Prevent the default form submission
 
-            fetchOrders();
-        };
+            const orderValue = document.getElementById('order').value.trim();
+            const tradeNitValue = document.getElementById('trade_nit').value.trim();
 
+            if (orderValue){
+                fetchOrderNumber(orderValue);
+            } else if (tradeNitValue) {
+                const startdate = document.getElementById('start').value.trim();
+                const enddate = document.getElementById('end').value.trim();                
+                fetchTradeOrder(tradeNitValue, startdate, enddate);
+            } else {
+                alert("Please enter a value for either Order or Trade NIT.");
+            }
+        };
 
         function clearOrderCard() {
             let item = document.getElementById('start');
-            item.value = "";
+            item.value = "{{ date('Y') }}-01-01";
             item = document.getElementById('end');
-            item.value = "";
+            item.value = "{{ date('Y-m-d') }}";
             item = document.getElementById('order');
             item.value = "";
             item = document.getElementById('trade_nit');
@@ -141,52 +150,75 @@
 
         }
 
-        function fetchOrders() {
-            sender = "{{ Auth::user()->email}}";
-            const ordernumber = document.getElementById('order').value.trim();
-            const startdate = document.getElementById('start').value.trim();
-            const enddate = document.getElementById('end').value.trim();
-            const trade = document.getElementById('trade_nit').value.trim();
-
-            if (ordernumber.length > 0) {
-                fetchOrderNumber(ordernumber)
-
-                // } else if (trade.length > 0 ) {
-                //     fetchTradeOrder(trade, startdate, enddate);
-                // }
-                // else  if (startdate.length === 0 && enddate.length === 0) {
-                //     let item = document.getElementById('save_message');
-                //     item.innerText = "Please enter a valid order!";
-                //     return;
-                // }
-                // else {
-                //     fetchOrderDate(startdate, enddate);
-            }
+        // fetch oders by number
+        function fetchTradeOrder(trade, start, end) {
+            const newpath = "{{ route('order.trade', ['trade' => ':trade', 'start' => ':start', 'end' => ':end']) }}"
+                    .replace(':trade', encodeURIComponent(trade))
+                    .replace(':start', encodeURIComponent(start))
+                    .replace(':end', encodeURIComponent(end));
+            console.log("newpath ", newpath);
+            fetch(newpath, {
+                method: 'GET', // Specify the GET method explicitly
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    writeOrdersList(orders);
+                    clearOrderCard();
+                })
+                .catch(error => {
+                    console.error('Error fetching order by NUMBER:', error);
+                });
         }
 
-/*
-        // fetch products by brand
-        function fetchOrderNumber(ordernumber) {
-            //alert('order ' + ordernumber);
-            const newpath = "{{ route('order.show', ['order' => ':order']) }}".replace(':order', encodeURIComponent(ordernumber));
-            alert(newpath);
-            console.log("Fetching order ", ordernumber);
-            return new Promise((resolve, reject) => {
-                //fetch(`/isolatedprofile.mail/${email}`)
-                fetch(`${newpath}`)
-                    .then(response => response.json())
-                    .then(order => {
-                        //console.log("1 ",user);
-                        resolve(order);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching order by NUMBER:', error);
-                        reject(error); // Pass error to the calling function
-                    });
+        function writeOrdersList(orders) {
+            const mainGroup = document.getElementById('main_group');
+            mainGroup.innerHTML = ''; // Clear existing content
 
+            // Start with order-level details
+            let ordersContent = `
+            <div class="table-row" id="titles-container">
+                <div class="modal-card-item-division">
+                    <div class="list-text-title">Date
+                    </div>
+                    <div class="list-text-title">Order
+                    </div>
+                    <div class="list-text-medium-title">Trade
+                    </div>
+                    <div class="list-text-regular-title">Sku
+                    </div>
+                    <div class="list-text-little-title">Quantity
+                    </div>
+                    <div class="list-text-regular-title">Value
+                    </div>   
+                </div>            
+            </div>             
+            `;
+
+            // Append each order's details
+            orders.forEach(item => {
+                ordersContent += `
+                    <div class="table-row">
+                        <div class="list-text">${item.transaction_date_time}</div>
+                        <div class="list-text">${item.n_order} | ${item.trade_request}</div>
+                        <div class="list-text-medium">${item.trade}</div>
+                        <div class="list-text-regular">${item.sku}</div>
+                        <div class="list-text-little">${item.quantity}</div>
+                        <div class="list-text-regular">${number_format(item.unit_price, 2, ',', '.')}</div>
+                    </div>
+                `;
             });
+            // Write the final content to the main group
+            mainGroup.innerHTML = ordersContent;
         }
-*/
+
         // fetch oders by number
         function fetchOrderNumber(ordernumber) {
             const newpath = "{{ route('order.show', ['order' => ':order']) }}".replace(':order', encodeURIComponent(ordernumber));
@@ -205,6 +237,7 @@
                 })
                 .then(order => {
                     writeOrder(order);
+                    clearOrderCard();
                 })
                 .catch(error => {
                     console.error('Error fetching order by NUMBER:', error);
@@ -223,7 +256,7 @@
                     <div class="list-text-little-title">nit</div>
                     <div class="list-text-little-title">status</div>
                     <div class="list-text-title">buyer</div>
-                    <div class="list-text-regular-title">CUS</div>
+                    <div class="list-text-title">CUS</div>
                 </div>            
                 <div class="table-row">
                     <div class="list-text">${order.transaction_date_time}</div>
@@ -231,7 +264,7 @@
                     <div class="list-text-little">${order.trade_nit}</div>
                     <div class="list-text-little">${order.request_status}</div>
                     <div class="list-text">${order.buyer_name}</div>
-                    <div class="list-text-regular">${order.transaction_cus}</div>
+                    <div class="list-text">${order.transaction_cus}</div>
                 </div>
                 <br/>
                 <div class="table-row">
@@ -262,6 +295,7 @@
             // Write the final content to the main group
             mainGroup.innerHTML = orderContent;
         }
+
         function number_format(number, decimals, dec_point, thousands_sep) {
             number = parseFloat(number).toFixed(decimals);
             const parts = number.split('.');
