@@ -1,4 +1,4 @@
-@extends('layouts.page')
+@extends('layouts.page',  ['profile_list' =>  $profile_list, 'rolevalue' => $rolevalue])
 
 @section('title', 'Visits')
 @section('content')

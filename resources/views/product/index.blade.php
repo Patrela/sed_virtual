@@ -14,50 +14,11 @@
     <script type="text/javascript">
         let allProducts = @json($products); // Global variable to store all products
     </script>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
 </head>
 
 <body>
-    @if (isset($administrator) )
-        <x-mainmenu :administrator="$administrator" :developer="$developer" />
-        <script>
-            // tooltips for buttons
-            tippy('#btnClassifications', {
-              content: 'Clear Memory and Updating Groups-Brands-Categories from Epicor',
-            });
-            tippy('#btnUsers', {
-                    content: 'Updating Staff and Trades',
-            });
-            tippy('#btnProfiles', {
-                    content: 'Updating Users Profile',
-            });
-            tippy('#btnAffinity', {
-                    content: 'Record the Brand Affinities Programs',
-            });
-            tippy('#btnDocumentation', {
-                    content: 'API Documentation for retrieving SED Stock',
-            });
-            tippy('#btnDocumentationLocal', {
-                    content: 'API Documentation for sales',
-            });
-
-            tippy('#btnBrokenAnchors', {
-                    content: 'Broken Anchors',
-            });
-            tippy('#btnVisits', {
-                    content: 'Visitors by Trades',
-            });
-
-        </script>
-    @elseif (isset($developer))
-        <x-mainmenu :developer="$developer" />
-        <script>
-            tippy('#btnDocumentation', {
-                    content: 'API Documentation for retrieving SED Stock',
-            });
-        </script>
-
+    @if (isset($rolevalue) )
+        <x-mainmenu :rolevalue="$rolevalue" :administrator="1" :developer="6" :profile_list="$profile_list" />
     @else
         <x-mainmenu />
     @endif
@@ -240,7 +201,8 @@
                 <p>Documentación técnica para API de Consulta de Inventarios</p>
             </div>
             <div class="footer-medium-right">
-                @if (isset($administrator) or isset($developer) )
+                <!--  #isset($administrator) or isset($developer) -->
+                @if (isset($rolevalue) and ($profile_list[$rolevalue]  =="Administrator" or $profile_list[$rolevalue] == "Developer")  )
                     <form action="{{ route('documentation.show') }}" method="GET">
                         @csrf
                         <button id="btnAPIDocs" type="submit">API DOCUMENTATION</button>
@@ -381,19 +343,6 @@
     axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 </script>
 <script type="text/javascript">
-    // tooltips for buttons
-    tippy('#btnSearch', {
-        content: 'Search Product by SKU / brand + group / special characteristic',
-    });
-    tippy('#btnLogout', {
-        content: 'Exit program and user',
-    });
-    tippy('#btnAPIDocs', {
-        content: 'Documentation. SED Stock API description',
-    });
-    tippy('#btnUpdateStock', {
-        content: 'Realtime Stock products',
-    });
     document.addEventListener('DOMContentLoaded', (event) => {
         const categoryCheckboxes = document.querySelectorAll('input[name="cat-array"]');
         const brandCheckboxes = document.querySelectorAll('input[name="brand-array"]');

@@ -15,6 +15,9 @@ class Trade extends Model
         'trade_id',
         'nit',
         'email',
+        'token_production',
+        'token_stage',
+        'usd_sales_goal',
         'is_active',
     ];
 }

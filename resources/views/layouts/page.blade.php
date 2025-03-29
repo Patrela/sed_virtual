@@ -13,7 +13,7 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            <x-mainmenu />
+            <x-mainmenu :rolevalue="$rolevalue" :administrator="1" :developer="6" :profile_list="$profile_list" />
             <!-- Page Content -->
             <main>
                 @yield('content')

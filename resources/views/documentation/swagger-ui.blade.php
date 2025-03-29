@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <link rel="stylesheet" href="{{ asset('css/product.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
 </head>
 <body>
     <header class="mainmenu">
@@ -35,6 +37,15 @@
     <div id="swagger-ui"></div>
     <script src="{{ asset('swagger-ui/swagger-ui-bundle.js') }}"></script>
     <script src="{{ asset('swagger-ui/swagger-ui-standalone-preset.js') }}"></script>
+    <script>
+        // tooltips for buttons
+        tippy('#btnStock', {
+            content: 'Stock',
+        });
+        tippy('#btnLogout', {
+            content: 'Exit program and user',
+        });   
+    </script>
 
     <script>
         window.onload = function() {

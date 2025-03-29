@@ -62,13 +62,9 @@
 
             <div>
                 <x-input-label for="role_type" :value="__('Role Type')" />
-                <x-select name="role_type" :options="[
-                    1 => 'Administrator',
-                    2 => 'Staff',
-                    3 => 'Trade ',
-                    4 => 'Reseller ',
-                    5 => 'Support ',
-                    6 => 'Developer']"
+                <x-select 
+                    name="role_type" 
+                    :options="$profile_list" 
                     :selected="old('role_type', $user->role_type)">
                 </x-select>
             </div>

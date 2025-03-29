@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Affinity;
+use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
@@ -20,7 +21,7 @@ class AffinityController extends Controller
         $brands = app(CategoryController::class)->childGroups('marca',0);
         //Log::info($affinities);
         //Log::info($brands);
-        return view('product.affinity',['affinities'=>$affinities,'brands'=>$brands]);
+        return view('product.affinity',['affinities'=>$affinities,'brands'=>$brands, 'profile_list' => array_flip(User::ALLROLES) , 'rolevalue' => User::ALLROLES["Administrator"]]);
     }
 
 

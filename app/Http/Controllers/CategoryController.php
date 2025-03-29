@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
+
 class CategoryController extends Controller
 {
     /**
@@ -41,7 +42,7 @@ class CategoryController extends Controller
 
 
         $data = [
-            'products' => $products,
+
             'maingroup' => $maingroup,
             'maingroupName' => $maingroupName,
             'departments' => $departments,
@@ -57,14 +58,21 @@ class CategoryController extends Controller
 
         // Check if the user is authenticated
         if (Auth::check()) {
+            $data['rolevalue'] = Auth::user()->role_type;
             if(Auth::user()->role_type == User::ALLROLES["Administrator"]) {
                 $data['administrator'] = Auth::user()->role_type;
                 $data['developer'] = User::ALLROLES["Developer"];
+                $data['ordermanager'] = User::ALLROLES["OrderManager"];
             }
             if(Auth::user()->role_type == User::ALLROLES["Developer"])  $data['developer'] =  Auth::user()->role_type;
+            if(Auth::user()->role_type == User::ALLROLES["OrderManager"])  $data['ordermanager'] =  Auth::user()->role_type;
         }
         //Log::info("Auth Type condition " . Auth::user()->role_type);
-        //Log::info($data);
+
+        $data['profile_list'] = array_flip(User::ALLROLES); // User::ALLROLES
+        //Log::info($data);        
+        $data['products'] = $products;
+        
         return $data;
 
     }
@@ -82,7 +90,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * @return the main category = department
+     * @return $departments main category = department
      */
     public static function departments(int $idgroup = 0)
     {
@@ -101,7 +109,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * @return Categories from a parent group. The default parent group is Computadores = 6
+     * @return $group Categories from a parent group. The default parent group is Computadores = 6
      * @param int $parentid the parent group identifier
      */
     public function childGroups(string $groupname = 'categoria', int $parentid = 0)

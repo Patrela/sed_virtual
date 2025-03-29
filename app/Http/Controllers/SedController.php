@@ -327,11 +327,15 @@ class SedController extends Controller
                 $response = Http::connector()->post('/products/', [
                     'department' => '',
                 ]);
+                // $curlInfo = $response->handlerStats();
+                // Log::info("cURL Info: ", $curlInfo);
 
                 // Check if the response was successful (status code 2xx)
                 if ($response->successful()) {
+                    //log::info("getProviderProducts successful");
                     $jsonResponse = $response->json();
                     $products = $jsonResponse['products']['products'];
+                    //Log::info('# $products: ' . count($products));
                     $productData = [];
                     $itemsKey = "|";
                     $counter = 0;

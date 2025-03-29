@@ -19,7 +19,7 @@ class User extends Authenticatable
         'Reseller' => 4,
         'Support' => 5,
         'Developer' => 6,
-        'Order Manager' => 7
+        'OrderManager' => 7
     ];
 
     /**

@@ -21,6 +21,7 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+            'profile_list' => array_flip(User::ALLROLES) // User::ALLROLES
         ]);
     }
 
@@ -69,6 +70,10 @@ class ProfileController extends Controller
                     $user->createToken('operation', ['product-list', 'product-show', 'product-create', 'product-edit', 'product-delete']);
                     $user->createToken('api', ['product-import', 'app-validation']);
                     break;
+                case 7: //OrderManager
+                    $user->createToken('order', ['order-list', 'order-show', 'order-create', 'order-edit', 'order-delete']);
+                    $user->createToken('api', ['product-import', 'app-validation']);
+                    break;                    
             }
         } else {
             Log::error("new user email not found " . $email);

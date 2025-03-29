@@ -47,4 +47,21 @@ class TradeController extends Controller
         }
         return response()->json($trades->toArray(), 200);
     }
+
+    public function getTradeByEmail(string $email, string $trade_token) 
+    {
+        if (!$email || !$trade_token) {
+            return null;
+        }
+        //log::info("getTradeByEmail: {$email} {$trade_token} PRODUCTION: " . app()->isProduction());
+        $trade = Trade::where('email', "{$email}")
+            ->when(app()->isProduction(), function ($query) use ($trade_token) {
+                $query->where('token_production', "{$trade_token}");
+            })
+            ->when(!app()->isProduction(), function ($query) use ($trade_token) {
+                $query->where('token_stage', "{$trade_token}");
+            })
+            ->first();
+        return $trade;        
+    }
 }

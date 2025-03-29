@@ -58,17 +58,17 @@
             <x-text-input id="user_id" name="user_id" type="text" class="mt-1 block w-full" :value="old('user_id', $user->user_id)" required autofocus autocomplete="user_id" />
             <x-input-error class="mt-2" :messages="$errors->get('user_id')" />
         </div>
+
         <div>
             <x-input-label for="role_type" :value="__('Role Type')" />
-            <x-select name="role_type" :options="[
-                1 => 'Administrator',
-                2 => 'Staff',
-                3 => 'Trade ',
-                4 => 'Reseller ',
-                5 => 'Support ',]"
+            <x-select 
+                name="role_type" 
+                :options="$profile_list" 
                 :selected="old('role_type', $user->role_type)">
             </x-select>
-        </div>
+        </div>        
+
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

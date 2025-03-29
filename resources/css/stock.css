@@ -361,18 +361,59 @@ span {
     display: flex;
     flex-direction: column;
 }
+.list-text-little {
+    width: 5em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+}
+.list-text-little-title {
+    width: 5em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+}
+.list-text-regular {
+    width: 7em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+}
+.list-text-regular-title {
+    width: 7em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+}
+
 .list-text-large {
     width: 45em;
     margin: 0.25em;
     display: flex;
     flex-direction: column;
 }
-
-.list-text-medium {
-    width: 25em;
+.list-text-large-title {
+    width: 18em;
     margin: 0.25em;
     display: flex;
     flex-direction: column;
+    font-weight: bold;
+}
+
+.list-text-medium {
+    width: 18em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+}
+.list-text-medium-title {
+    width: 18em;
+    margin: 0.25em;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
 }
 .list-text-title {
     width: 10em;

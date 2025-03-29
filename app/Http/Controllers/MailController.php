@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Trade;
-//use Illuminate\Support\Facades\Mail;
+
+
 //use App\Mail\QuoteMail;
 use App\Jobs\SendOrderEmail;
 use App\Jobs\SendQuoteEmail;
@@ -48,6 +49,8 @@ class MailController extends Controller
 
         //Mail::mailer('msgraph')->to($dispatchData['to'])->send(new QuoteMail($dispatchData));
 
+
+        
         SendQuoteEmail::dispatchAfterResponse($dispatchData);
 
         /*
@@ -69,49 +72,24 @@ class MailController extends Controller
         //return redirect('/');
     }
 
-    public function sendOrderMail(string $emailTrade, int $ordernumber) //Request $request
+    //public function sendOrderMail(string $emailTrade, int $ordernumber) //Request $request
+    public function sendOrderMail(array $tradeData, object $order) //Request $request
+    
     {
         $sender =  config('mail.from.address');
         $emailTo =  config('mail.to.order_address'); // env('MAIL_ORDER_ADDRESS')
-       // $email = $request->header('x-api-receiver');
-        // send mail just for trades in production environments
-        $responseCode= 200;
-        if (!app()->isProduction() || !str_contains($emailTrade, "@sedint") ) $responseCode= 422;
-        if ( $responseCode= 200 ){
 
-            $trade=  Trade::where('email', "{$emailTrade}")->first();
-            if(!$trade) {
-                $responseCode= 404;
-            }
-            else {
-                $order = Order::where('order_number', $ordernumber)
-                        ->where('trade_nit', $trade->nit)
-                        ->first();
-                if(!$order) {
-                    $responseCode= 404;
-                }
-            }
-
-        }
-        //Log::info("user.  " . $sender . " order " . $order->order);
-
-
-        if ($responseCode !== 200) {
-            return response()->json([
-                'message' => "Error recovering Order",
-                'code' => $responseCode,
-            ], $responseCode);
-        }
 
         $dispatchData = [
-            'subject' => 'SED Order from ' .$trade->name,
-            'mail_to' => $emailTo,
+            'subject' => 'SED Order from ' .$tradeData["name"],
+            // 'mail_to' => $emailTo,
+            'mail_to' => "patorela@gmail.com",
             'owner' =>  $sender,
             'from' => $sender,
             'message' => "Approval the request...",
-            'customer' => $trade->name,
-            'customer_mail' => $emailTrade,
-            'nit' => $trade->nit,
+            'customer' => $tradeData["name"],
+            'customer_mail' => $tradeData["email"],
+            'nit' => $tradeData["nit"],
             'order' => $order
         ];
 
@@ -119,9 +97,9 @@ class MailController extends Controller
         SendOrderEmail::dispatchAfterResponse($dispatchData);
 
         return response()->json([
-            'result' => 'Email sending successful: ' . $emailTrade .' Order = ' . $order->order,
-            'code' => $responseCode,
-        ],  $responseCode);
+            'result' => 'Email sending successful: ' . $tradeData["email"] .' Order = ' . $order->order_number,
+            'code' => 200,
+        ],  200);
         //return redirect('/');
     }
 

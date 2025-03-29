@@ -22,7 +22,8 @@ class RoleProfileController extends Controller
         $user->trade_id= 0;
         $user->role_type= 0;
         $users = User::where( 'role_type', User::ALLROLES["Developer"])->get()->toArray();
-        return view('profile.roles', ['user' => $user, 'users' => $users]);
+
+        return view('profile.roles', ['user' => $user, 'users' => $users, 'profile_list' => array_flip(User::ALLROLES) , 'rolevalue' => User::ALLROLES["Developer"]]);
     }
 
     public function searchProfileEmail(string $email){
@@ -66,6 +67,10 @@ class RoleProfileController extends Controller
                             }
                         }
                         break;
+                    case User::ALLROLES["OrderManager"]:
+                        $user->createToken('order', ['order-list','order-create','order-edit', 'order-show', 'order-delete']);
+                        break;
+                        
                 }
                 $user['role_type'] = $role_type;
                 $user->save();

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Provider;
+use App\Models\User;
 use App\Jobs\ImportProducts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,10 +92,10 @@ Route::prefix('products')->middleware(['auth'])->group(function () {
             $products = app(ProductController::class)->getDepartmentProducts($group);
         }
 
-        $data = app(CategoryController::class)->loadPageData($products, $group, $searchText);
-
+        $data = app(CategoryController::class)->loadPageData($products, $group, searchText: $searchText);
+        // Log the $data variable
         if (!Cache::has('sync_products')) ImportProducts::dispatchAfterResponse();
-
+        // Log the $data variable
         return $data;
     };
 
@@ -135,8 +136,9 @@ Route::prefix('/affinities')->controller(AffinityController::class)->group(funct
 
 Route::prefix('/orders')->controller(OrderController::class)->group(function () {
     Route::get('/','index')->name('order.index');
-    Route::get('/trade/{trade}/{year}/{month}', 'getTradePeriodOrders')->name('order.trade');
-    Route::get('/{order}', 'show')->name('order.show');
+    Route::get('/trade/{trade}/{start}/{end}', 'getTradePeriodOrders')->name('order.trade');
+    Route::get('/period/{start}/{end}', 'getPeriodOrders')->name('order.period');
+    Route::get('/id/{order}', 'show')->name('order.show');
 })->middleware(['auth']);
 
 Route::prefix('/trades')->controller(TradeController::class)->group(function () {
@@ -148,12 +150,12 @@ Route::prefix('/visits')->controller(UserVisitLogController::class)->group(funct
     Route::get('/', function (Request $request) {
         $title = "Visitors ";
         $visits = app(UserVisitLogController::class)->getVisitLogs($request);
-        return view('auth.uservisitlog', ['visits'=> $visits, 'title'=> $title]); //['visits'=> $visits->toArray(), 'title'=> $title]
+        return view('auth.uservisitlog', ['visits'=> $visits, 'title'=> $title, 'profile_list' => array_flip(User::ALLROLES) , 'rolevalue' => User::ALLROLES["Administrator"]]); //['visits'=> $visits->toArray(), 'title'=> $title]
     })->name('visits.index');
     Route::get('/{item}', function (Request $request, string $item) {
         $title = "Detail {$item}";
         $visits = app(UserVisitLogController::class)->getVisitLogs($request, $item);
-        return view('auth.uservisitlog', ['visits'=> $visits, 'title'=> $title]); //['visits'=> $visits->toArray(), 'title'=> $title]
+        return view('auth.uservisitlog', ['visits'=> $visits, 'title'=> $title, 'profile_list' => array_flip(User::ALLROLES) , 'rolevalue' => User::ALLROLES["Administrator"]]); //['visits'=> $visits->toArray(), 'title'=> $title]
         //return $visits;
     })->name('visits.show');
 
@@ -181,10 +183,9 @@ Route::prefix('maintenance')->controller(MaintenanceController::class)->group(fu
         foreach ($cacheKeys as $key) {
             $cacheData[$key] = Cache::has($key)? Cache::get($key) : "";
         }
-        return view('memory-data', ['session' => Session::all(), 'user' => Auth::user(), 'cacheData' => $cacheData])->name('maintenance.memory-data');
-    })->middleware(['auth'])->name('maintenance.data');
+        return view('memory-data', ['session' => Session::all(), 'user' => Auth::user(), 'cacheData' => $cacheData]);
+    })->middleware(['auth'])->name('maintenance.memory-data');
 });
-
 
 Route::get('/local/login', [ConnectController::class, 'connectLogin'])->name('local.login');
 
