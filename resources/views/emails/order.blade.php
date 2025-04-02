@@ -107,8 +107,8 @@
                     <h3>REF. {{ $item['part_num'] }} - {{ $item['brand'] }} : {{ $item['product_name'] }}</h3>
                     <p>
                         <span>quantity</span> {{ number_format($item['quantity']) }} | <span>currency</span> {{ $item['currency'] }} <br />
-                        <span>unit_price</span> {{ number_format($item['unit_price']) }} | <span>total_price</span> {{ number_format($item['total_price']) }} <br />
-                        <span>tax_value</span> {{ number_format($item['tax_value']) }} <br />
+                        <span>unit_price</span> {{ number_format($item['sed_unit_price'],2) }} | <span>total_price</span> {{ number_format($item['sed_total_price'],2) }} <br />
+                        <span>tax_value</span> {{ number_format($item['sed_tax_value'],2) }} <br />
                     </p>
                 </div>
             </div>
@@ -116,7 +116,7 @@
 
         <detail>
             <p>
-                <span>receiver_name</span> {{ $order['receiver_name'] }}<br /> | <span>receiver_phone</span> {{ $order['receiver_phone'] }}<br />
+                <span>receiver_name</span> {{ $order['receiver_name'] }} | <span>receiver_phone</span> {{ $order['receiver_phone'] }}<br />
                 <span>receiver_address</span> {{ $order['receiver_address'] }}<br />
                 <span>receiver_department_id</span> {{ $order['receiver_department_id'] }} | <span>receiver_country_id</span> {{ $order['receiver_country_id'] }}<br />
                 <span>delivery_purpose</span> {{ $order['delivery_purpose'] }}<br />

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Constraint\Count;
 
 
 class SedController extends Controller
@@ -151,7 +152,7 @@ class SedController extends Controller
                 //$user['remember_token'] = Hash::make($user['name']);
                 $user->save();
             }
-            //Log::info("Ending Authentication update");
+            Log::info("Ending Authentication update");
             return response()->json([
                 'message' => 'SED New Users updated',
                 'total_users' =>count($newUsers),
@@ -260,7 +261,7 @@ class SedController extends Controller
                 //return $response->json();
                 $jsonResponse = $response->json();
                 $tradesusers = $jsonResponse['customers']['customers'];
-                //Log::info($customers);
+                Log::info("trades= " .Count($tradesusers)); //COUNT
 
                 $itemsKey = "|";
                 $tradesData = [];
@@ -299,6 +300,7 @@ class SedController extends Controller
                     'code' => 200,
                 ], 200);
             } else {
+                log::info("error " . json_encode($response->json()));
                 return response()->json([
                     'message' => 'error ' . json_encode($response->json()),
                     'code' =>  $response->status(),

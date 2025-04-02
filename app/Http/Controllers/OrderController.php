@@ -190,8 +190,8 @@ class OrderController extends Controller
         //report the order
 
         //PVR version final: MailController sendOrderMail
-        //app(MailController::class)->sendSkuMail($request, "09314-3208");
-        //app(MailController::class)->sendOrderMail($tradeData, $order);
+        app(MailController::class)->sendSkuMail($request, "09314-3208");
+        app(MailController::class)->sendOrderMail($tradeData, $order);
         
         return response()->json([
             'message' => "Order {$message} successfully",
@@ -208,18 +208,13 @@ class OrderController extends Controller
 
     public function getTradePeriodOrders(string $trade, string $start, string $end)
     {
-        log::info( "trade: " . $trade  ." start: " .$start ." end: ".$end);
+        //log::info( "trade: " . $trade  ." start: " .$start ." end: ".$end);
         if (!$trade) {
             return response()->json([
                 'message' => 'Invalid order data',
                 'code' => 500,
             ], 500);
         }
-        // $orders_object = DB::table('view_orders')
-        // ->where('trade',  "{$trade}")
-        // ->where('transaction_date_time', '>=', "{$start}")
-        // ->where('transaction_date_time', '<=', "{$end}")    
-        // ->get();
 
         $orders_object = DB::table('view_orders')
         ->where('nit', "{$trade}")

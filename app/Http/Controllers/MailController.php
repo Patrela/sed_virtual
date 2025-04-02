@@ -10,6 +10,7 @@ use App\Models\Trade;
 //use App\Mail\QuoteMail;
 use App\Jobs\SendOrderEmail;
 use App\Jobs\SendQuoteEmail;
+use Carbon\Traits\ToStringFormat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -79,11 +80,11 @@ class MailController extends Controller
         $sender =  config('mail.from.address');
         $emailTo =  config('mail.to.order_address'); // env('MAIL_ORDER_ADDRESS')
 
-
         $dispatchData = [
             'subject' => 'SED Order from ' .$tradeData["name"],
-            // 'mail_to' => $emailTo,
-            'mail_to' => "patorela@gmail.com",
+            'mail_to' => $emailTo,
+            'To' => $emailTo,
+            //'mail_to' => "patorela@gmail.com",
             'owner' =>  $sender,
             'from' => $sender,
             'message' => "Approval the request...",
@@ -93,7 +94,7 @@ class MailController extends Controller
             'order' => $order
         ];
 
-        //Log::info("MAILCONTROLLER.SendOrderMail email data  ", $dispatchData);
+        Log::info("MAILCONTROLLER.SendOrderMail email data ", $dispatchData);
         SendOrderEmail::dispatchAfterResponse($dispatchData);
 
         return response()->json([
