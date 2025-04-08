@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('trade_nit',25)->default('8300361083');
             $table->string('trade_id',40)->nullable()->default('1');
             $table->string('name',125);
-            $table->string('email',125)->unique();
+            //$table->string('email',125)->unique();
+            $table->string('email',125);
             $table->tinyInteger('role_type')->nullable();
             $table->tinyInteger('is_new')->default(0)->index();
             $table->rememberToken();

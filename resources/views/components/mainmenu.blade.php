@@ -28,7 +28,7 @@
                         <button class="navitem" type="button" id="btnClassifications" alt="Load Classifications" onclick="classificationsRoute()">
                             <i class="fas fa-boxes navitem-icon"></i>
                         </button>
-                        <button class="navitem" type="button" id="btnUsers"  alt="Load New Users" onclick="usersRoute()"> {{-- onclick="window.location.href = '{{ route('sed.users') }}'" --}}
+                        <button class="navitem" type="button" id="btnUsers"  alt="Load New Users" onclick="usersRoute()"> {{-- onclick="window.location.href = '{{ route('epicor.users') }}'" --}}
                             <i class="fas fa-user-friends navitem-icon"></i>
                         </button>
                         <button class="navitem" type="button" id="btnProfiles"  alt="User Profile" onclick="window.location.href = '{{ route('rolesprofile.index') }}'">

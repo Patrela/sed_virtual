@@ -211,14 +211,15 @@
                 console.log(data);
                 //alert('Affinity saved successfully.');
                 //refresh all affinities in productContainer elements
+                clearAffinity();
                 location.reload();
             })
             .catch(error => {
+                clearAffinity();
                 console.error('Error:', error);
                 //alert('Failed to save affinity.');
             });
         }
-
 
     </script>
 

@@ -39,10 +39,10 @@ class RoleProfileController extends Controller
 
     public function updateRoleProfile(Request $request, string $email, string $role_type){
          $userLogged =  $request->input('sender_email'); // Auth::user()->email;
-         //Log::info("user logged", ['userLogged' => $userLogged]);
+        //  Log::info("user logged", ['userLogged' => $userLogged]);
 
         if (app(ProfileController::class)->hasAbility($userLogged, 'user-edit')) {
-            //Log::info(['email' => $email, 'role_type' => $role_type]);
+            // Log::info("data user-edit: ",['email' => $email, 'role_type' => $role_type]);
             $user = User::where( 'email', "{$email}")->first();
             if(!$user) {
                 return response()->json([

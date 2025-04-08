@@ -114,7 +114,7 @@ class UserVisitLogController extends Controller
         $start = (!$startdate)? "2024-01-01": $startdate;
         $end = !$enddate? "2030-12-31" : $enddate;
 
-        Log::info("getVisitLogs. startdate= {$startdate} enddate= {$enddate}");
+        // Log::info("getVisitLogs. startdate= {$startdate} enddate= {$enddate}");
         // email use view_trade_visit_log - trade use view_trade_visit_log
         if(!str_contains($item, "@")){
             $visits_object = DB::table('view_trade_visit_log')
@@ -132,7 +132,7 @@ class UserVisitLogController extends Controller
         }
 
         $visits = app(MaintenanceController::class)->object_to_array($visits_object);
-        Log::info("getVisitLogs. visits", $visits);
+        // Log::info("getVisitLogs. visits", $visits);
         return $visits;
     }
 

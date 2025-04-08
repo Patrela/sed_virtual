@@ -223,7 +223,7 @@ class OrderController extends Controller
         ->get();
     
         $orders = app(MaintenanceController::class)->object_to_array($orders_object); 
-        log::info("orders = ". count($orders));
+        // log::info("orders = ". count($orders));
         // Check if no orders were found
         if (count($orders) == 0) {
             return response()->json([

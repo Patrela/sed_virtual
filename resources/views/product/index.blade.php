@@ -393,11 +393,11 @@
     }
     function usersRoute() {
         temporalIndicator();
-        window.location.href = "{{ route('sed.users') }}";
+        window.location.href = "{{ route('epicor.users') }}";
     }
     function classificationsRoute() {
         temporalIndicator();
-        window.location.href = "{{ route('sed.getProviderGroups') }}";
+        window.location.href = "{{ route('epicor.getProviderGroups') }}";
     }
 
     function documentationRoute() {

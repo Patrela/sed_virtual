@@ -40,7 +40,7 @@ class MaintenanceController extends Controller
             Artisan::call('config:cache');
 
             $this->setExecutionTime();
-            Log::info("Cache cleared!!!");
+            // Log::info("Cache cleared!!!");
 
             return response()->json([
                 'status' => 'success',

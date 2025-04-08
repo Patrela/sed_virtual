@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Constraint\Count;
 
 
-class SedController extends Controller
+class EpicorController extends Controller
 {
     /**
      * update SED clasifications
@@ -140,19 +140,19 @@ class SedController extends Controller
 
     public function updateNewUsers()
     {
-        Log::info("Starting updateNewUsers");
+        // Log::info("Starting updateNewUsers");
         //Log::stack(['single', 'slack'])->info('Starting Authentication update!');
         app(MaintenanceController::class)->setExecutionTime(7000);
         try {
             //$newUsers = User::where('password', '')->get();
             $newUsers = User::whereRaw('LENGTH(password) = 0')->get();
-            Log::info("updateNewUsers processed = ". count($newUsers));
+            // Log::info("updateNewUsers processed = ". count($newUsers));
             foreach ($newUsers as $user) {
                 $user['password'] = Hash::make($user['user_id']);
                 //$user['remember_token'] = Hash::make($user['name']);
                 $user->save();
             }
-            Log::info("Ending Authentication update");
+            // Log::info("Ending Authentication update");
             return response()->json([
                 'message' => 'SED New Users updated',
                 'total_users' =>count($newUsers),
@@ -261,7 +261,7 @@ class SedController extends Controller
                 //return $response->json();
                 $jsonResponse = $response->json();
                 $tradesusers = $jsonResponse['customers']['customers'];
-                Log::info("trades= " .Count($tradesusers)); //COUNT
+                // Log::info("trades= " .Count($tradesusers)); //COUNT
 
                 $itemsKey = "|";
                 $tradesData = [];
@@ -292,7 +292,7 @@ class SedController extends Controller
                 if (!empty($tradesData)) {
                     //Log::info($itemsKey);
                     UserImported::insert($tradesData);
-                    Log::info("Exec SED API Trade Users Imported = " . UserImported::all()->count() . " data =" . count($tradesData));
+                    // Log::info("Exec SED API Trade Users Imported = " . UserImported::all()->count() . " data =" . count($tradesData));
                 }
                 DB::select("CALL sp_import_users(?)", [User::ALLROLES["Trade"]]);
                 return response()->json([

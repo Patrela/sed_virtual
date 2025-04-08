@@ -149,7 +149,7 @@ class FileController extends Controller
         $file_data['directory'] = $fileDirectory;
         $file_data['asset_directory'] = $asset_directory;
 
-        Log::info("files = ", $file_data );
+        // Log::info("files = ", $file_data );
         return $file_data;
     }
 

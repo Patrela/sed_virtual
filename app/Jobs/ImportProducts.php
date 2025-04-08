@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\SedController;
+use App\Http\Controllers\EpicorController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,6 +26,6 @@ class ImportProducts implements ShouldQueue
      */
     public function handle(): void
     {
-        app(SedController::class)->getProviderProducts();
+        app(EpicorController::class)->getProviderProducts();
     }
 }

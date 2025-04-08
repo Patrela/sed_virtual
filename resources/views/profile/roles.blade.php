@@ -181,10 +181,13 @@
                         let item = document.getElementById('save_message');
                         item.innerText = "Profile Updated!";
                         resolve(user);
+                        clearUserCard();
+                        location.reload();
                     })
                     .catch(error => {
                         console.error('Error fetching user by email:', error);
                         reject(error); // Pass error to the calling function
+                        clearUserCard();
                     });
 
             });
