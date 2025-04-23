@@ -386,11 +386,11 @@
         window.location.href = "{{ route('products.department', ['group' => ':group']) }}".replace(':group', groupName);
     }
 
-    function csvRoute(name) {
-        temporalIndicator();
-        name = name.split(' ')[0];
-        window.location.href = "{{ route('file.csv-export', ['name' => ':name']) }}".replace(':name', name);
-    }
+    // function csvRoute(name) {
+    //     temporalIndicator();
+    //     name = name.split(' ')[0];
+    //     window.location.href = "{{ route('file.csv-export', ['name' => ':name']) }}".replace(':name', name);
+    // }
     function usersRoute() {
         temporalIndicator();
         window.location.href = "{{ route('epicor.users') }}";
@@ -399,9 +399,9 @@
         temporalIndicator();
         window.location.href = "{{ route('epicor.getProviderGroups') }}";
     }
-
-    function documentationRoute() {
-        window.location.href = "{{route('api.documentation') }}";
+    function urlImagesRoute() {
+        temporalIndicator();
+        window.location.href = "{{route('file.getWrongUrlImageProducts') }}";
     }
 
     function productMail(sku, email) {

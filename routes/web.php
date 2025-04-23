@@ -137,7 +137,7 @@ Route::prefix('/affinities')->controller(AffinityController::class)->group(funct
 Route::prefix('/orders')->controller(OrderController::class)->group(function () {
     Route::get('/','index')->name('order.index');
     Route::get('/trade/{trade}/{start}/{end}', 'getTradePeriodOrders')->name('order.trade');
-    Route::get('/period/{start}/{end}', 'getPeriodOrders')->name('order.period');
+    Route::post('/period/{start}/{end}/{order}/{trade}', 'getPeriodOrders')->name('order.period');
     Route::get('/id/{order}', 'show')->name('order.show');
 })->middleware(['auth']);
 
@@ -170,7 +170,10 @@ Route::prefix('/categories')->controller(CategoryController::class)->group(funct
 Route::prefix('/files')->controller(FileController::class)->group(function () {
     Route::get('/vtex-imagesnames', 'saveVtexImagesFileName')->name('file.vtex-imagesnames');
     Route::post('/export-csv/{name}', 'exportCsv')->name('file.csv-export');
-    Route::get('/export-wrong-product-url-images', [ProductController::class, 'getWrongUrlImageProducts'])->name('file.getWrongUrlImageProducts');
+    Route::get('/export-wrong-product-url-images', [ProductController::class, 'validateUrlsImage'])->name('file.getWrongUrlImageProducts');
+
+    Route::get('/export-folder-url-images', [ProductController::class, 'getFolderUrlImages'])->name('file.getFolderUrlImages');
+    
     Route::get('/paths', 'standardPaths')->name('file.paths');
 })->middleware('auth');
 

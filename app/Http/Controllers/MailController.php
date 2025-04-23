@@ -10,6 +10,7 @@ use App\Models\Trade;
 //use App\Mail\QuoteMail;
 use App\Jobs\SendOrderEmail;
 use App\Jobs\SendQuoteEmail;
+use App\Jobs\SendFailedOrdersEmail;
 use Carbon\Traits\ToStringFormat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -81,7 +82,7 @@ class MailController extends Controller
         $emailTo =  config('mail.to.order_address'); // env('MAIL_ORDER_ADDRESS')
 
         $dispatchData = [
-            'subject' => 'SED Order from ' .$tradeData["name"],
+            'subject' => 'SED Virtual Orden No. ' . $order->order_number .' de ' .$tradeData["name"],
             'mail_to' => $emailTo,
             'To' => $emailTo,
             //'mail_to' => "patorela@gmail.com",
@@ -94,7 +95,7 @@ class MailController extends Controller
             'order' => $order
         ];
 
-        Log::info("MAILCONTROLLER.SendOrderMail email data ", $dispatchData);
+        //Log::info("MAILCONTROLLER.SendOrderMail email data ", $dispatchData);
         SendOrderEmail::dispatchAfterResponse($dispatchData);
 
         return response()->json([
@@ -103,5 +104,31 @@ class MailController extends Controller
         ],  200);
         //return redirect('/');
     }
+    public function sendFailedOrdersMail(array $failedOrders)
+    {
+        Log::info("fail Data: ", $failedOrders);
+        $sender = config('mail.from.address');
+        $emailTo = config('mail.to.order_address');
 
+        // Extract 'name', 'email', and 'nit' from the first element of the array
+        $customerName = $failedOrders[0]['name'] ?? 'Unknown trade';
+        $customerEmail = $failedOrders[0]['email'] ?? 'Unknown email';
+        $customerNit = $failedOrders[0]['nit'] ?? 'Unknown nit';
+
+        $dispatchData = [
+            'subject' => 'SED Virtual - Unprocessed Orders',
+            'mail_to' => $emailTo,
+            'from' => $sender,
+            'message' => "The following orders could not be processed:",
+            'customer' => $customerName,
+            'customer_mail' => $customerEmail,
+            'nit' => $customerNit,
+            'failed_orders' => $failedOrders,
+        ];
+
+        Log::info("MAILCONTROLLER.SendFailedOrdersMail email data", $dispatchData);
+
+        // Dispatch the email using the new job
+        SendFailedOrdersEmail::dispatchAfterResponse($dispatchData);
+    }
 }

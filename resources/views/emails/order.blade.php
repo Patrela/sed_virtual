@@ -7,134 +7,294 @@
     <title>ONLINE ORDER SED</title>
     <style>
         body {
-            font-family: Calibri, sans-serif !important;
-            font-size: 17px !important;
-            margin-left: 48px;
-            border-left: 6px solid #FF2D20;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-        h2 {
-            font-size: 1.5em;
-            font-weight: bolder;
-            color: darkslateblue;
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
-        detail {
-            /* font-family: Calibri, sans-serif;
-            font-size: 17px; */
-            padding: 10px;
-            margin: 5px 5px 20px 5px;
+        .item {
+            flex: 1; 
+            /* display: flex;
+            flex-direction: column;
+            padding: 5px;
+            margin: 0px;
+            border: 1px solid #ddd;
+            box-sizing: border-box; */
         }
 
-        span {
-            padding: 6px;
-            font-size: 17px !important;
-            font-weight: bolder;
+        .item-content {
+            padding-left: 5px;
         }
 
-        .card {
+        .item-big {
+            flex: 5;
+            /* align-items: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: left; */
+        }
+
+        .item-dark {
+            color: white;
+            background-color: gray;
+        }
+
+        .item-double {
+            flex: 2;
+            /* display: flex;
+            flex-direction: column;
+            padding: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box; */
+        }
+
+        .item-title {
+            font-weight: bold;
+        }
+
+        .row {
             display: flex;
             flex-direction: row;
-            gap: 10px;
+            gap: 0px;
+            margin: 0px;
         }
 
-        .card-image {
-            width: 240px;
-            /* 310 */
-            margin: 2px;
-            padding: 5px;
+        .box {
+            display: flex;
+            height: 150px; 
+        }
+
+        .box-image {
+            flex: 2;
             border: none;
-            /* none; 1px solid black; */
-            height: 220px;
-            /* 310 */
+            /* align-self: stretch; */
+        }
+        
+        .box-red {
+            flex: 4;
+            background-color:  #E12922;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .card-image img {
-            margin: 0;
-            padding: 1px;
-            width: 238px;
-            /* 298 */
-            height: 218px;
-            /* 298 */
+        .box-center {
+            color: white;
+            font-weight: bold;
+            font-size: 2em;           
         }
 
-        .card-content {
-            margin-left: 10px;
+        .section {
+            border: 1px solid #ddd;
+            padding: 0px;
+            margin: 0px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .main-content {
-            margin-left: 3px;
-            border-left: 1px solid black;
-            padding-left: 15px;
+        .section-title {
+            background-color: #E12922;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            margin: 0px;
         }
 
-        .title {
-            margin-left: 40px;
-            margin-top: 60px;
-            align-items: center
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .item {
+                padding: 5px 0;
+            }
         }
     </style>
 
 </head>
 
 <body>
-    <div class="main-content">
-        <div class="card">
-            <div class="card-image">
-                <img id="img_logo" src="{{ asset('images/mainlogo.png') }}" alt="SED INTERNATIONAL">
+
+    <div class="container">
+
+        <!-- Order -->
+
+        <div class="box">
+            <div class="box-image">
+                <img id="img_logo" src="{{ asset('images/logomail.png') }}" alt="SED INTERNATIONAL">
             </div>
-            <div class="card-content title">
-                <h1>ORDER EN LINEA SED Nº {{ $order['order_number'] }}</h1>
+            <div class="box-red">
+                <div class="box-center">ORDEN EN LINEA SED</div>
             </div>
         </div>
-        <detail>
-            <br>
-            <h2>Order {{ $order['order_number'] }}</h2>
-            <p>Fecha: {{ date('Y-m-d') }}<br />
-                <strong>Cliente: {{ $nit }} - {{ $customer }}</strong><br />
-                <span>Correo</span> {{ $customer_mail }}<br />
-                <span>buyer_name</span> {{ $order['buyer_name'] }} | <span>buyer_email</span> {{ $order['buyer_email'] }}<br />
-                <span>trade_request_code</span> {{ $order['trade_request_code'] }}<br />
-                <span>request_status</span> {{ $order['request_status'] }}<br />
-                <span>transaction_cus</span> {{ $order['transaction_cus'] }} | <span>transaction_date_time</span> {{ $order['transaction_date_time'] }}<br />
-                <span>notes</span> {{ $order['notes'] }}
-            </p>
-        </detail>
+        <div class="section">
+            <div class="row">
+                <div class="section item">
+                    <span class="item-title">Orden</span>
+                    <span class="item-content">{{ $order['order_number'] }}</span>
+                </div>
+                <div class="section item">
+                    <span class="item-title">Fecha</span>
+                    <span class="item-content"> {{ date('Y-m-d') }}</span>
+                </div>
+                <div class="section item-double">
+                    <span class="item-title">Cuenta</span>
+                    <span class="item-content">{{ $nit }} - {{ $customer }}</span>
+                </div>
+                <div class="section item-double">
+                    <span class="item-title">Corrreo Cuenta</span>
+                    <span class="item-content">{{ $customer_mail }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="section item">
+                    <span class="item-title">ID orden</span>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ $order['trade_request_code'] }} <span class="item-title">Estado:
+                        </span>{{ $order['request_status'] }} </span>
+                </div>
+                <div class="section item">
+                    <span class="item-title">Transacción CUS</span>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ $order['transaction_cus'] }}</span>
+                </div>
+                <div class="section item">
+                    <span class="item-title">Fecha CUS</span>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ $order['transaction_date_time'] }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="section item">
+                    <span class="item-title">Notas</span>
+                </div>
+                <div class="section item-big">
+                    <span class="item-content">{{ $order['notes'] }}</span>
+                </div>
+            </div>
+        </div>
+        <!-- Buyer -->
+        <div class="section-title">Contacto</div>
+        <div class="row">
+            <div class="section item">
+                <span class="item-title">Comprador</span>
+            </div>
+            <div class="section item-double"> 
+                <span class="item-content">{{ $order['buyer_name'] }}</span>
+            </div>
+            <div class="section item">
+                <span class="item-title">Correo</span>
+            </div>
+            <div class="section item-double">
+                <span class="item-content">{{ $order['buyer_email'] }}</span>
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="section item">
+                <span class="item-title">Recibe</span>
+            </div>
+            <div class="section item-double">
+                <span class="item-content">{{ $order['receiver_name'] }}</span>
+                <span class="item-title">Teléfono: </span> <span>{{ $order['receiver_phone'] }}</span>
+            </div>
+            <div class="section item">
+                <span class="item-title">Dirección:</span>
+            </div>
+            <div class="section item-double">
+                <span class="item-content">{{ $order['receiver_address'] }}</span><br />
+                <span class="item-content">Cod. País: {{ $order['receiver_country_id'] }}
+                    Cod. Dpto: {{ $order['receiver_department_id'] }}
+                    Cod. Ciudad: {{ $order['receiver_country_id'] }}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="section item-double">
+                <span class="item-title">Entrega</span>
+                <span class="item-content">Propósito: {{ $order['delivery_purpose'] }} Tipo:
+                    {{ $order['delivery_type'] }}</span>
+            </div>
+            <div class="section item-double">
+                <span class="item-title">Fletes</span>
+                <span class="item-content">{{ number_format($order['delivery_extra_cost'], 2) }} IVA:
+                    {{ number_format($order['delivery_extra_cost_tax'], 2) }}</span>
+            </div>
+            <div class="section item-double">
+                <span class="item-title">Transportadora </span>
+                <span class="item-content">{{ $order['transport_company'] }} Tipo: {{ $order['transport_type'] }}</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="section item">
+                <span class="item-title">Cupón</span>
+            </div>
+            <div class="section item-big">
+                <span class="item-content">Promoción: {{ $order['coupon_id'] }} - {{ $order['coupon_name'] }} </span>
+                <span class="item-content"> Valor: {{ number_format($order['coupon_value'], 2) }}
+                    {{ $order['coupon_currency'] }}
+                    Fecha: {{ $order['coupon_date'] }}</span>
+            </div>
+        </div>
+
+        <!-- Products -->
+        <div class="section-title">Productos</div>
+        <div class="row">
+            <div class="section item-double item-dark">
+                <span class="item-title">SKU + Producto</span>
+            </div>
+            <div class="section item item-dark">
+                <span class="item-title">Cantidad</span>
+            </div>
+            <div class="section item item-dark">
+                <span class="item-title">Valor Unitario</span>
+            </div>
+            <div class="section item item-dark">
+                <span class="item-title">Valor Total</span>
+            </div>
+            <div class="section item item-dark">
+                <span class="item-title">Impuestos</span>
+            </div>
+        </div>
         @foreach ($order['items'] as $item)
-            <div class="card">
-                <div class="card-content">
+            <div class="row">
+                <div class="section item-double">
                     <h3>REF. {{ $item['part_num'] }} - {{ $item['brand'] }} : {{ $item['product_name'] }}</h3>
-                    <p>
-                        <span>quantity</span> {{ number_format($item['quantity']) }} | <span>currency</span> {{ $item['currency'] }} <br />
-                        <span>unit_price</span> {{ number_format($item['sed_unit_price'],2) }} | <span>total_price</span> {{ number_format($item['sed_total_price'],2) }} <br />
-                        <span>tax_value</span> {{ number_format($item['sed_tax_value'],2) }} <br />
-                    </p>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ number_format($item['quantity']) }}</span>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ number_format($item['sed_unit_price'], 2) }}
+                        {{ $item['currency'] }}</span>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ number_format($item['sed_total_price'], 2) }}
+                        {{ $item['currency'] }}</span>
+                </div>
+                <div class="section item">
+                    <span class="item-content">{{ number_format($item['sed_tax_value'], 2) }} {{ $item['currency'] }}</span>
                 </div>
             </div>
         @endforeach
 
-        <detail>
-            <p>
-                <span>receiver_name</span> {{ $order['receiver_name'] }} | <span>receiver_phone</span> {{ $order['receiver_phone'] }}<br />
-                <span>receiver_address</span> {{ $order['receiver_address'] }}<br />
-                <span>receiver_department_id</span> {{ $order['receiver_department_id'] }} | <span>receiver_country_id</span> {{ $order['receiver_country_id'] }}<br />
-                <span>delivery_purpose</span> {{ $order['delivery_purpose'] }}<br />
-                <span>delivery_type</span> {{ $order['delivery_type'] }}<br />
-                <span>delivery_extra_cost</span> {{ $order['delivery_extra_cost'] }} | <span>delivery_extra_cost_tax</span> {{ $order['delivery_extra_cost_tax'] }}<br />
-                <span>transport_type</span> {{ $order['transport_type'] }} | <span>transport_company</span> {{ $order['transport_company'] }}<br />
-            </p>
-            <p>
-                <span>coupon_id</span> {{ $order['coupon_id'] }} | <span>coupon_name</span> {{ $order['coupon_name'] }}<br />
-                <span>coupon_value</span> {{ $order['coupon_value'] }} | <span>coupon_date</span> {{ $order['coupon_date'] }}<br />
-                <span>coupon_currency</span> {{ $order['coupon_currency'] }}<br />
-                <span></span> {{ $order[''] }}
-            </p>
-        </detail>
-
-        <br />
-        <br />
     </div>
+
+
 </body>
 
 </html>

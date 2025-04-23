@@ -102,7 +102,7 @@ class ProductController extends Controller
     }
 
 
-    public function getWrongUrlImageProducts()
+    public function getFolderUrlImages()
     {
 
         // Control default process time
@@ -267,13 +267,7 @@ class ProductController extends Controller
                 })
                 ->get(); //->first();
         if (count($product) == 0) {
-            /*
-            $product = Product::select($this->selectFields)
-                ->when($sku !== "", function ($query) use ($sku) {
-                    $query->whereRaw("LOWER(part_num) LIKE ?", ["{$sku}%"]);
-                })
-                ->get(); //->first();
-            */
+
             $product = Product::leftJoin('affinities', function ($join) {
                 $join->on('products.brand', '=', 'affinities.brand_name')
                     ->where('affinities.is_program_active', '=', '1');
@@ -307,36 +301,6 @@ class ProductController extends Controller
             })->get();
 
         return $products;
-    }
-    */
-    /*
-    public function getOrderProducts(string $group, string $order = "")
-    {
-        if ($order !== "") {
-            // Build the query for searching by multiple brands
-            $query = Product::where("department", "{$group}")
-                ->when($order == "price-plus", function ($query) {
-                    $query->orderBy('regular_price', "DESC");
-                })
-                ->when($order == "price-less", function ($query) {
-                    $query->orderBy('regular_price', "ASC");
-                })
-                ->when($order == "stock-plus", function ($query) {
-                    $query->orderBy('stock_quantity', "DESC");
-                })
-                ->when($order == "stock-less", function ($query) {
-                    $query->orderBy('stock_quantity', "ASC");
-                })
-                ->when($order == "brands", function ($query) {
-                    $query->orderBy('brand', "ASC");
-                });
-
-            $products = $query->select($this->selectFields)->get();
-            Log::error("products Order No.  " . count($products) . " grupo = " . $group . " order = " . $order);
-            return $products;
-        } else {
-            return [];
-        }
     }
     */
     /*
@@ -377,5 +341,123 @@ class ProductController extends Controller
     }
     */
 
+    public function validateUrlsImage()
+    {
+        $invalidUrls = [];
+        $corrections = [];
+        $fields = ['part_num', 'name', 'department', 'category', 'image_1', 'is_updated'];
+
+        // Control default process time
+        app(MaintenanceController::class)->setExecutionTime(7000);
+
+        // Fetch products with stock_quantity > 0
+        $products = Product::select('part_num', 'name', 'department', 'category', 'stock_quantity','sale_price', 'currency', 'image_1', 'image_2', 'image_3', 'image_4')
+            ->where('stock_quantity', '>', 0)
+            ->get();
+
+        $records = 0;
+        $fields = ['part_num', 'name', 'department', 'category', 'stock_quantity', 'sale_price', 'currency'];
+        foreach ($products as $product) {
+            $images = ['image_1', 'image_2', 'image_3', 'image_4'];
+            $isValid = false;
+            $records++;
+            if ($records % 20 == 0) {
+                log::info("{$records} - {$product->part_num}");
+            }
+
+            foreach ($images as $imageField) {
+                $url = $product[$imageField];
+
+                // Skip validation if the URL is empty or null
+                if (empty($url)) {
+                    continue;
+                }
+
+                // Validate URL
+                try {
+                    $response = Http::withoutVerifying()->timeout(1)->head($url);
+
+                    if ($response->ok()) {
+                        // If the URL is valid and it's not image_1, prepare correction
+                        if ($product->image_1 !== $url) {
+                            // version 1
+                            $correction = [];
+                            foreach ($fields as $field){
+                                $correction[$field] = $product->{$field};
+                            }
+                            $correction['image_1']= $url;
+                            $correction['is_updated'] = 1;
+
+                            array_push($corrections, $correction);
+
+                            // version 2
+                                // $corrections[] = [
+                                //     'part_num' => $product->part_num,
+                                //     'name' => $product->name,
+                                //     'department' => $product->department,
+                                //     'category' => $product->category,
+                                //     'image_1' => $url,
+                                //     'is_updated' => 1,
+                                // ];
+
+
+                        }
+                        $isValid = true;
+                        //break; // No need to check further URLs for this product
+                    }
+                } catch (\Exception $e) {
+                    // log::error("Error validating URL: {$url} - " . $e->getMessage());
+                    continue;
+                }
+                if ($isValid) {
+                    break; // No need to check further URLs for this product
+                }
+            }
+
+            // If no valid URL is found, add the product to the invalidUrls array
+            if (!$isValid) {
+                $correction = [];
+                foreach ($fields as $field){
+                    $correction[$field] = $product->{$field};
+                }
+                $correction['image_1']= $product->image_1 ?? '';
+                $correction['is_updated'] = 0;
+
+                array_push($invalidUrls, $correction);                
+                // $invalidUrls[] = [
+                //     'part_num' => $product->part_num,
+                //     'name' => $product->name,
+                //     'department' => $product->department,
+                //     'category' => $product->category,
+                //     'image_1' => $product->image_1 ?? '',
+                //     'is_updated' => 0,
+                // ];
+            }
+        }
+
+        log::info("Total processed: {$records}  Corrections: " . count($corrections) . " Invalid URLs: " . count($invalidUrls));
+
+        // Apply corrections to the database
+        foreach ($corrections as $correction) {
+            Product::where('part_num', $correction['part_num'])->update(['image_1' => $correction['image_1']]);
+        }
+
+        // Merge corrections and invalid URLs
+        $invalidUrls = array_merge($invalidUrls, $corrections);
+        array_push($fields, 'image_1');
+        array_push($fields, 'is_updated');
+
+        // Control default process time restored
+        app(MaintenanceController::class)->setExecutionTime();
+
+        if (count($invalidUrls) == 0) {
+            return [
+                'message' => "No invalid URLs found.",
+                'code' => 200,
+            ];
+        }
+
+        return app(FileController::class)->saveArrayToCSV($fields, $invalidUrls, 'products_wrong_images.csv');
+    }
 
 }

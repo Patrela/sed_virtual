@@ -19,6 +19,7 @@ Route::prefix('connect')->controller(ConnectController::class)->group(function (
 });
 
 Route::post('/order/{username}', [OrderController::class, 'createOrUpdateOrder'])->name('connect.createOrUpdateOrder');
+//Route::post('/order/period/{start}/{end}/{order}/{trade}', [OrderController::class, 'getPeriodOrders'])->name('order.period');
 
 Route::prefix('epicor')->controller(EpicorController::class)->group(function () {
     Route::get('/clasifications', 'getProductGroups')->name('epicor.getProviderGroups');

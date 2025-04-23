@@ -40,7 +40,7 @@
                         <button class="navitem" type="button" id="btnVisits"  alt="Visitors" onclick="window.location.href = '{{ route('visits.index') }}'">
                             <i class="fas fa-globe navitem-icon"></i>
                         </button>                       
-                        <button class="navitem" type="button" id="btnBrokenAnchors"  alt="Broken Anchors" onclick="window.location.href = '{{ route('file.getWrongUrlImageProducts') }}'">
+                        <button class="navitem" type="button" id="btnBrokenAnchors"  alt="Broken Anchors" onclick="urlImagesRoute()"> {{-- onclick="window.location.href = '{{ route('file.getWrongUrlImageProducts') }}'"> --}}
                             <i class="fas fa-anchor navitem-icon"></i>
                         </button>
                     @endif

@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Dotenv\Dotenv; // PVR: added for dotenv
 
 
 class AppServiceProvider extends ServiceProvider
@@ -14,7 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // PVR: added for dotenv 2 lines
+        $dotenv = Dotenv::createImmutable(base_path());
+        $dotenv->load();        
     }
 
     /**
