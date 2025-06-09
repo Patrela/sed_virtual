@@ -97,6 +97,28 @@ class FileController extends Controller
         return response()->json($result, $result['code']);
     }
 
+    public function folderPublicPath( string $standardPath = ""): string
+    {
+        $publicPath = public_path();
+
+        // Check if public_path() starts with "/home/" and does not include "/public_html/"
+        if (str_starts_with($publicPath, "/home/") && !str_contains($publicPath, "/public_html/")) {
+            // Extract the username (next word after "/home/")
+            $parts = explode('/', $publicPath);
+            $username = $parts[2] ?? '';
+
+            // If username length is 0, set default path
+            if (strlen($username) === 0) {
+                $publicPath = "/home/public_html";
+            }
+            else {
+                $publicPath = "/home/{$username}/public_html";
+            }
+        }
+
+        return $publicPath . '/' . trim($standardPath);
+    }
+
     public function saveFile($csvData, $fileName){
 
         if(!$csvData || !$fileName){
@@ -107,7 +129,7 @@ class FileController extends Controller
         }
 
         $standardPath = config('filesystems.disks.public.exported_files','files');
-        $filePath = "" .public_path($standardPath) ."/" .$fileName;
+        $filePath = "" .$this->folderPublicPath($standardPath) ."/" .$fileName;
         //log::info("Path. dir = " . $filePath);
 
         $csvData = mb_convert_encoding($csvData, 'UTF-8', 'auto');
@@ -140,7 +162,7 @@ class FileController extends Controller
 
         $standardPath = config('filesystems.disks.public.exported_files','files');
         
-        $filePath = "" .public_path($standardPath) ."/" .$fileName;    
+        $filePath = "" .$this->folderPublicPath ($standardPath) ."/" .$fileName;    
 
 
         $fp = fopen($filePath, 'w');
@@ -156,7 +178,7 @@ class FileController extends Controller
         app(MaintenanceController::class)->setExecutionTime();
 
         return [
-            'message' => "Successfully CSV creation. Download it!",
+            'message' => "Generación de archivo CSV Exitosa.",
             'download_url' => url($standardPath) . "/" .$fileName, 
             'code' => 200,
         ];
@@ -166,12 +188,13 @@ class FileController extends Controller
         $data[] = array(
             'app_path' => app_path(),
             'base_path' => base_path(),
-            'public_path' => public_path(),
+            'public_path' => $this->folderPublicPath(),
             'resource_path' => resource_path(),
             'storage_path' => storage_path(),
             'current_url' => url()->current(),
             'exported_files' =>config('filesystems.disks.public.exported_files'),
             'public_images' => config('filesystems.disks.public.public_images'),
+            'conexion_epicor' => env('API_PROD_URL'),
         );
 
         return response()->json($data, 200);

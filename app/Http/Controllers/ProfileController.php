@@ -44,7 +44,7 @@ class ProfileController extends Controller
 
         if ($users) {
             $user = $users->first();
-            Log::error("new user.  " . $user->email);
+            //Log::error("new user.  " . $user->email);
             // abilities
             switch ($roltype) {
                 case 1: //Administrator

@@ -33,7 +33,7 @@ class OrderController extends Controller
     {
         if (!$order) {
             return response()->json([
-                'message' => 'invalid order data',
+                'message' => 'Datos no se pueden procesar',
                 'code' => 500,
             ], 500);
         }
@@ -42,7 +42,7 @@ class OrderController extends Controller
         //if (count($order) == 0) {
         if ($order == null) {
             return response()->json([
-                'message' => "Error Order not found",
+                'message' => "Error: Orden no encontrada",
                 'code' => 404,
             ], 404);
         }
@@ -58,37 +58,45 @@ class OrderController extends Controller
 
         $trade = app(ConnectController::class)->connectValidation($request, $username);
         $tradeData = json_decode($trade->getContent(), true);
-        Log::info("data: ",$tradeData);
+        // Log::info("data: ",$tradeData);
         $data = $request->json()->all();
+        // Validate if the request body is empty
+        if (empty($data)) {
+            return response()->json([
+                'message' => 'Request body no tiene datos',
+                'code' => 400,
+            ], 400);
+        }
+
         if (isset($tradeData['nit'])) {
-            Log::info("Paso nit");
+            // Log::info("Paso nit");
             if ($tradeData['nit'] !== $request->input('trade_nit')) {
                 $failedOrders[] = [
                     'error' => 'Trade NIT mismatch',
                     'nit' => $tradeData['nit'] . ' - ' . $request->input('trade_nit'),
                     'name' => $tradeData['name'],
                     'email' => $tradeData['email'],       
-                    'trade_request_code' => $data['trade_request_code'],
-                    'buyer_name' => $data['buyer_name'],
-                    'transaction_date_time' => $data['transaction_date_time'],
-                    'transaction_cus' => $data['transaction_cus'],
+                    'trade_request_code' => $data['trade_request_code'] ?? null,
+                    'buyer_name' => $data['buyer_name']?? null,
+                    'transaction_date_time' => $data['transaction_date_time']?? null,
+                    'transaction_cus' => $data['transaction_cus']?? null,
                 ];  
                 $error_code = 401;              
                 //return response()->json( $failedOrders[], 401);                               
             }
 
         } else {
-            Log::info("Paso nit else");
+            // Log::info("Paso nit else");
             //return $trade;
             $failedOrders[] = [
-                'error' => 'Trade NIT does not exist',
+                'error' => 'Trade NIT no existe',
                 'nit' => $request->input('trade_nit'),
                 'name' =>  $request->input('trade_nit'),
                 'email' => $request->header('X-Token-Auth'),
-                'trade_request_code' => $data['trade_request_code'],
-                'buyer_name' => $data['buyer_name'],
-                'transaction_date_time' => $data['transaction_date_time'],
-                'transaction_cus' => $data['transaction_cus'],
+                'trade_request_code' => $data['trade_request_code'] ?? null,
+                'buyer_name' => $data['buyer_name']?? null,
+                'transaction_date_time' => $data['transaction_date_time']?? null,
+                'transaction_cus' => $data['transaction_cus']?? null,
             ];   
             $error_code = 401;            
             //return response()->json( $failedOrders[], 401);             
@@ -143,11 +151,11 @@ class OrderController extends Controller
 
             if ($validator->fails()) {
                 $failedOrders[] = [
-                    'error' => 'Validation Error',
+                    'error' => 'Error de validacion',
                     'nit' => $tradeData['nit'] ,
                     'name' => $tradeData['name'],
                     'email' => $tradeData['email'],
-                    'trade_request_code' => $data['trade_request_code'],
+                    'trade_request_code' => $data['trade_request_code'] ?? null,
                     'buyer_name' => $data['buyer_name'],
                     'transaction_date_time' => $data['transaction_date_time'],
                     'transaction_cus' => $data['transaction_cus'],
@@ -165,21 +173,19 @@ class OrderController extends Controller
                 ->first();
             // Check if the product exists and has enough stock
             foreach ($data['items'] as $item) {
-                Log::info("item ",$item);
-                //Log::info($item['part_num']);
-                //PVR
-                //$product= Product::find($item['part_num']);
+                //Log::info("item ",$item);
+
                 $product = Product::where('part_num', $item['part_num'])->first();
                 
                 if (!$product) {
                     $failedOrders[] = [
-                        'error' => 'Product not found',
+                        'error' => 'Producto no encontrado',
                         'item' => $item['item'],
                         'part_num' => $item['part_num'],
                         'nit' => $tradeData['nit'] ,
                         'name' => $tradeData['name'],
                         'email' => $tradeData['email'],
-                        'trade_request_code' => $data['trade_request_code'],
+                        'trade_request_code' => $data['trade_request_code'] ?? null,
                         'buyer_name' => $data['buyer_name'],
                         'transaction_date_time' => $data['transaction_date_time'],
                         'transaction_cus' => $data['transaction_cus'],
@@ -188,13 +194,13 @@ class OrderController extends Controller
                     continue;
                 } elseif ($product->is_active == 0) {
                     $failedOrders[] = [
-                        'error' => 'Product is not active',
+                        'error' => 'Product no activo',
                         'item' => $item['item'],
                         'part_num' => $item['part_num'],
                         'nit' => $tradeData['nit'] ,
                         'name' => $tradeData['name'],
                         'email' => $tradeData['email'],
-                        'trade_request_code' => $data['trade_request_code'],
+                        'trade_request_code' => $data['trade_request_code'] ?? null,
                         'buyer_name' => $data['buyer_name'],
                         'transaction_date_time' => $data['transaction_date_time'],
                         'transaction_cus' => $data['transaction_cus'],
@@ -203,13 +209,13 @@ class OrderController extends Controller
                     continue;
                 } elseif ($product->stock_quantity < $item['quantity']) {
                     $failedOrders[] = [
-                        'error' => 'Insufficient stock',
+                        'error' => 'Stock insuficiente',
                         'item' => $item['item'],
                         'part_num' => $item['part_num'],
                         'nit' => $tradeData['nit'] ,
                         'name' => $tradeData['name'],
                         'email' => $tradeData['email'],
-                        'trade_request_code' => $data['trade_request_code'],
+                        'trade_request_code' => $data['trade_request_code'] ?? null,
                         'buyer_name' => $data['buyer_name'],
                         'transaction_date_time' => $data['transaction_date_time'],
                         'transaction_cus' => $data['transaction_cus'],
@@ -217,7 +223,7 @@ class OrderController extends Controller
                     $error_code = 402; 
                     continue;
                 } 
-                Log::info($product->part_num);
+                // Log::info($product->part_num);
                 $products++;
                 
                 
@@ -225,11 +231,11 @@ class OrderController extends Controller
         }
         if ($products == 0 && $error_code == 0) {
             $failedOrders[] = [
-                'error' => 'No products in the order. Order not created',
+                'error' => 'No existen productos. No se crea la orden',
                 'nit' => $tradeData['nit'] ,
                 'name' => $tradeData['name'],
                 'email' => $tradeData['email'],
-                'trade_request_code' => $data['trade_request_code'],
+                'trade_request_code' => $data['trade_request_code'] ?? null,
                 'buyer_name' => $data['buyer_name'],
                 'transaction_date_time' => $data['transaction_date_time'],
                 'transaction_cus' => $data['transaction_cus'],  
@@ -245,7 +251,7 @@ class OrderController extends Controller
         if (!$order) {
 
             $code = 201;
-            $message = "created";
+            $message = "creado";
             $maxOrder = Order::max('order_number');
             $data['order_number'] = $maxOrder + 1;
             // Create the order
@@ -258,7 +264,7 @@ class OrderController extends Controller
         } else {
 
             $code = 200;
-            $message = "updated";
+            $message = "actualizada";
             $data['order_number'] = $order->order_number;
             $order = Order::updateOrCreate(['trade_nit' => $data['trade_nit'], 'trade_request_code' => $data['trade_request_code'],], $data);
             //$order->save();
@@ -279,7 +285,7 @@ class OrderController extends Controller
         app(MailController::class)->sendOrderMail($tradeData, $order);
 
         return response()->json([
-            'message' => "Order {$message} successfully",
+            'message' => "Orden {$message} procesada exitosamente",
             'order_number' => $order->order_number,
             'buyer_name' => $order->buyer_name,
             'buyer_email' => $order->buyer_email,
@@ -296,7 +302,7 @@ class OrderController extends Controller
         //log::info( "trade: " . $trade  ." start: " .$start ." end: ".$end);
         if (!$trade) {
             return response()->json([
-                'message' => 'Invalid order data',
+                'message' => 'Datos de entrada no se pueden procesar',
                 'code' => 500,
             ], 500);
         }
@@ -312,7 +318,7 @@ class OrderController extends Controller
         // Check if no orders were found
         if (count($orders) == 0) {
             return response()->json([
-                'message' => 'Error: Trade Orders not found',
+                'message' => 'Error: no hay ordenes asociadas al nit en el rango de fechas',
                 'code' => 404,
             ], 404);
         }
@@ -321,12 +327,12 @@ class OrderController extends Controller
         return response()->json($orders, 200);
     }
 
-    public function getPeriodOrders(string $start, string $end, string $order, string $trade)
+    public function getPeriodOrdersFile(string $start, string $end, string $order, string $trade)
     {
         // log::info("parameters = " . $start . " - " . $end . " Order " . $order . " Trade " . $trade);
         if (!$start || !$end) {
             return response()->json([
-                'message' => 'Invalid order range data',
+                'message' => 'Rango de fechas no se pudo procesar',
                 'code' => 500,
             ], 500);
         }
@@ -344,7 +350,7 @@ class OrderController extends Controller
 
         if (count($orders_object) == 0) {
             return [
-                'message' => "Error: Data  not found",
+                'message' => "Error: no hay ordenes en el rango de fechas",
                 'code' => 404,
             ];
         }
@@ -361,6 +367,44 @@ class OrderController extends Controller
         $output = app(FileController::class)->saveArrayToCSV($attributes, $array_orders, 'order' . $start . '_' . $end . '.csv');
         // log::info('output = ' . count($orders_object), $output);
         return $output;
+
+    }
+
+    public function getPeriodOrdersList(string $start, string $end, string $order, string $trade)
+    {
+        // log::info("parameters = " . $start . " - " . $end . " Order " . $order . " Trade " . $trade);
+        if (!$start || !$end) {
+            return response()->json([
+                'message' => 'Rango de fechas no se pudo procesar',
+                'code' => 500,
+            ], 500);
+        }
+        $order = (!$order) ? '0' : $order;
+        $trade = (!$trade) ? '0' : $trade;
+
+        $orders_object = DB::table('view_orders')
+            ->when($order !== '0', function ($query) use ($order) {
+                $query->where('n_order', "{$order}");
+            })
+            ->when($trade !== '0', function ($query) use ($trade) {
+                $query->where('nit', "{$trade}");
+            })
+            ->where('transaction_date_time', '>=', DB::raw("CAST('{$start}' AS DATE)"))
+            ->where('transaction_date_time', '<', DB::raw("CAST('{$end}' AS DATE) + INTERVAL 1 DAY"))
+            ->get();
+
+            $orders = app(MaintenanceController::class)->object_to_array($orders_object);
+            // log::info("orders = ". count($orders));
+            // Check if no orders were found
+            if (count($orders) == 0) {
+                return response()->json([
+                    'message' => 'Error: no hay ordenes en el rango de fechas',
+                    'code' => 404,
+                ], 404);
+            }
+    
+            // Return the found orders
+            return response()->json($orders, 200);
 
     }
 

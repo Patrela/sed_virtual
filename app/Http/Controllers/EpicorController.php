@@ -138,6 +138,35 @@ class EpicorController extends Controller
         ], 200);
     }
 
+    public function importUsers()
+    {
+        app(MaintenanceController::class)->setExecutionTime(7000);
+
+        $responses = [];
+
+        // Call getTradeUsers and store the response
+        $responses['getTradeUsers'] = $this->getTradeUsers();
+
+        // Call updateNewUsers and store the response
+        $responses['updateNewUsers'] = $this->updateNewUsers();
+
+        // Call updateStaffUsers and store the response
+        $responses['updateStaffUsers'] = $this->updateStaffUsers();
+
+        app(MaintenanceController::class)->setExecutionTime();
+
+        // Filter out "headers" and "exception" keys, keeping only "original"
+        $filteredResponses = array_map(function ($response) {
+            return $response->original ?? $response;
+        }, $responses);
+
+        // Log the filtered responses
+        Log::info("CreateNewUsers Job Responses: ", $filteredResponses);
+
+        // Return the filtered responses
+        return response()->json($filteredResponses, 200);
+    }
+
     public function updateNewUsers()
     {
         // Log::info("Starting updateNewUsers");
@@ -155,7 +184,7 @@ class EpicorController extends Controller
             // Log::info("Ending Authentication update");
             return response()->json([
                 'message' => 'SED New Users updated',
-                'total_users' =>count($newUsers),
+                'total' =>count($newUsers),
                 'code' => 200,
             ], 200);
         } catch (\Exception $e) {
@@ -230,11 +259,12 @@ class EpicorController extends Controller
                 if (!empty($staffData)) {
                     //Log::info($itemsKey);
                     UserImported::insert($staffData);
-                    Log::info("Exec SED API Staff Users Imported = " . UserImported::all()->count() . " data =" . count($staffData));
+                    // Log::info("Exec SED API Staff Users Imported = " . UserImported::all()->count() . " data =" . count($staffData));
                 }
                 DB::select("CALL sp_import_users(?)", [User::ALLROLES["Staff"]]);
                 return response()->json([
                     'message' => 'SED Staff Users updated',
+                    'total' => UserImported::all()->count(),
                     'code' => 200,
                 ], 200);
             } else {
@@ -261,7 +291,7 @@ class EpicorController extends Controller
                 //return $response->json();
                 $jsonResponse = $response->json();
                 $tradesusers = $jsonResponse['customers']['customers'];
-                // Log::info("trades= " .Count($tradesusers)); //COUNT
+                Log::info("trades= " .Count($tradesusers)); //COUNT
 
                 $itemsKey = "|";
                 $tradesData = [];
@@ -281,9 +311,9 @@ class EpicorController extends Controller
                         ];
                         // Insert in batches of 100
                         if (count($tradesData) === 100) {
-                            //Log::info($itemsKey);
+                            Log::info($itemsKey);
                             UserImported::insert($tradesData);
-                            //Log::info("Exec SED API User Trade Imported = " .UserImported::all()->count() ." data =" .count($tradesData) );
+                            // Log::info("Exec SED API User Trade Imported = " .UserImported::all()->count() ." data =" .count($tradesData) );
                             $tradesData = [];
                         }
                     }
@@ -297,6 +327,7 @@ class EpicorController extends Controller
                 DB::select("CALL sp_import_users(?)", [User::ALLROLES["Trade"]]);
                 return response()->json([
                     'message' => 'SED Trade Users updated',
+                    'total' =>UserImported::all()->count(),
                     'code' => 200,
                 ], 200);
             } else {

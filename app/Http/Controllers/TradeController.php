@@ -8,6 +8,7 @@ use App\Models\Trade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class TradeController extends Controller
@@ -64,4 +65,40 @@ class TradeController extends Controller
             ->first();
         return $trade;        
     }
+
+/*    public function showImported(string $trade)
+    {
+
+        if (!$trade) {
+            return response()->json([
+                'message' => 'invalid trade data',
+                'code' => 500,
+            ], 500);
+        }
+        switch ($trade) {
+            case 'all':
+                $trades_object = DB::table('trades_imported')
+                //->limit(80) // last 80 orders
+                ->get();
+                $trades= app(MaintenanceController::class)->object_to_array($trades_object);                
+                break;
+            // case 'active':
+            //     $trades = Trade::where( 'is_program_active', '1')->get();
+            //     break;
+            default:
+                $trades_object =  DB::table('trades_imported')
+                        ->where('trade_id', "{$trade}")->get();
+                $trades= app(MaintenanceController::class)->object_to_array($trades_object);
+                break;
+        }
+
+        if (count($trades) == 0) {
+            return response()->json([
+                'message' => "Error Trade not found",
+                'code' => 404,
+            ], 404);
+        }
+        return response()->json($trades, 200); //$trades->toArray()
+    }  
+        */  
 }

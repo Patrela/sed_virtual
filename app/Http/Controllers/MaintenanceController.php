@@ -47,7 +47,7 @@ class MaintenanceController extends Controller
                 'message' => 'Application cache cleared successfully.'
             ], 200);
         }
-        Log::info("Cache inactive!!!");
+        //Log::info("Cache inactive!!!");
         return response()->json([
             'status' => 'cache is not active',
             'message' => 'Application cache not found.'

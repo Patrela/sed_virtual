@@ -11,7 +11,7 @@
                     <!-- <div class="max-w-xs mx-auto sm:px-4 lg:px-6 space-y-4"> 8 por 2 -->
                     <div class="p-4 sm:p-4 bg-white shadow sm:rounded-lg">
                         <div class="max-w-xl">
-                            <section class="space-y-6">
+                            <section class="space-y-6">+
                                 <header>
                                     <header>
                                         <h2 class="text-lg font-medium text-gray-900">
@@ -58,11 +58,11 @@
 
                                         <div class="flex items-center gap-4">
                                             <x-secondary-button id="searchdata" name="searchdata"
-                                                onclick="searchOrders()">{{ __('Search Orders') }}</x-primary-button>
+                                                onclick="searchOrders()">{{ __('Buscar') }}</x-primary-button>
                                         </div>
                                         <div class="flex items-center gap-4">
                                             <x-primary-button id="csv_button"
-                                                name="csv_button">{{ __('Export CSV') }}</x-primary-button>
+                                                name="csv_button">{{ __('Exportar CSV') }}</x-primary-button>
                                         </div>
 
                                         <div id="save_message"
@@ -148,13 +148,17 @@
 
             if (orderValue) {
                 fetchOrderNumber(orderValue);
-            } else if (tradeNitValue) {
+            } else {
                 const startdate = document.getElementById('start').value.trim();
                 const enddate = document.getElementById('end').value.trim();
-                fetchTradeOrder(tradeNitValue, startdate, enddate);
-            } else {
-                alert("Please enter a value for either Order or Trade NIT.");
-            }
+                if (tradeNitValue) {
+                    fetchTradeOrder(tradeNitValue, startdate, enddate);
+                } else {
+                    fetchPeriodOrderList(startdate, enddate, 0, 0);
+                    // alert("Please enter a value for either Order or Trade NIT.");
+                }            
+            } 
+
         }
 
         function clearOrderCard() {
@@ -171,7 +175,7 @@
 
         }
 
-        // fetch oders by number
+        // fetch orders by trade
         function fetchTradeOrder(trade, start, end) {
 
             const newpath = "{{ route('order.trade', ['trade' => ':trade', 'start' => ':start', 'end' => ':end']) }}"
@@ -187,10 +191,14 @@
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json().then(errorJson => {
+                            writeError(errorJson);
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        });
                     }
                     return response.json();
                 })
+
                 .then(orders => {
                     writeOrdersList(orders);
                     clearOrderCard();
@@ -201,9 +209,42 @@
                 });
         }
 
+        // fetch orders by date range
+        function fetchPeriodOrderList(start, end, order, trade) {
+            const newpath = "{{ route('order.list', ['start' => ':start', 'end' => ':end', 'order' => ':order', 'trade' => ':trade']) }}"
+                .replace(':trade', encodeURIComponent(trade))
+                .replace(':order', encodeURIComponent(order))
+                .replace(':start', encodeURIComponent(start))
+                .replace(':end', encodeURIComponent(end));
+            console.log("newpath ", newpath);
+
+            fetch(newpath, {
+                method: 'GET', // Specify the GET method explicitly
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorJson => {
+                            writeError(errorJson);
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    writeOrdersList(orders);
+                    clearOrderCard();
+                })
+                .catch(error => {
+                    console.error('Error fetching order by NUMBER:', error);
+                });
+        }
 
 
-
+        // fetch orders file by date range
         function fetchPeriodOrder(start, end, order, trade) {
             const newpath = "{{ route('order.period', ['start' => ':start', 'end' => ':end', 'order' => ':order', 'trade' => ':trade']) }}"
                 .replace(':trade', encodeURIComponent(trade))
@@ -248,8 +289,8 @@
                 mainGroup.innerHTML = `
                     <p>${orders.message}</p>
                     <p>
-                    <a href="${orders.download_url}" target="_blank">
-                        [Click here to download the file]
+                    <a class="footer-medium" href="${orders.download_url}" target="_blank">
+                        [Presione aquí para descargar la orden en formato excel CSV]
                     </a><p/>
                     <p>code: ${orders.code}</p>
                 `;
@@ -257,11 +298,13 @@
                 mainGroup.innerHTML = `
                     <p>${orders.message}</p>
                     <p>code: ${orders.code}</p>
-                    <p>Error: Unable to generate the download link.</p>
+                    <p>Error: No es posible generar el archivo de la orden.</p>
                 `;
             }
         }
         
+        
+
         function writeOrdersList(orders) {
             const mainGroup = document.getElementById('main_group');
             mainGroup.innerHTML = ''; // Clear existing content
@@ -306,7 +349,6 @@
         // fetch oders by number
         function fetchOrderNumber(ordernumber) {
             const newpath = "{{ route('order.show', ['order' => ':order']) }}".replace(':order', encodeURIComponent(ordernumber));
-            //console.log("Fetching order ", ordernumber);
             fetch(newpath, {
                 method: 'GET', // Specify the GET method explicitly
                 headers: {
@@ -315,7 +357,10 @@
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json().then(errorJson => {
+                            writeError(errorJson);
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        });
                     }
                     return response.json();
                 })
@@ -328,6 +373,25 @@
                 });
         }
 
+        function writeError(errorJson) {
+            const mainGroup = document.getElementById('main_group');
+            mainGroup.innerHTML = ''; // Clear existing content
+
+            let errorContent = '<div class="table-row">';
+            if (errorJson.message && errorJson.code) {
+                errorContent += `
+                    <p><strong>Código de error:</strong> ${errorJson.code}</p>
+                    </div><div class="table-row">
+                    <p><strong>Mensaje:</strong> ${errorJson.message}</p>
+                `;
+            } else {
+                errorContent += '<p>Error inesperado. Intente consultar mas tarde.</p>';
+            }
+            errorContent += '</div>';
+
+            mainGroup.innerHTML = errorContent;
+        }
+
         function writeOrder(order) {
             const mainGroup = document.getElementById('main_group');
             mainGroup.innerHTML = ''; // Clear existing content
@@ -335,7 +399,7 @@
             // Start with order-level details
             let orderContent = `
                     <div class="table-row">
-                        <div class="list-text-title">transaction_date</div>
+                        <div class="">transaction_date</div>
                         <div class="list-text-title">order & trade_code</div>
                         <div class="list-text-little-title">nit</div>
                         <div class="list-text-little-title">status</div>
@@ -350,7 +414,7 @@
                         <div class="list-text">${order.buyer_name}</div>
                         <div class="list-text">${order.transaction_cus}</div>
                     </div>
-                    <br/>
+                    <br/>list-text-title
                     <div class="table-row">
                         <div class="list-text-little-title">#</div>
                         <div class="list-text-medium-title">sku & trade sku</div>

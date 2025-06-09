@@ -3,11 +3,15 @@
 use App\Models\Provider;
 use App\Models\User;
 use App\Jobs\ImportProducts;
+use App\Actions\ValidateProductImagesAction;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\OrderController;
@@ -86,10 +90,15 @@ Route::prefix('products')->middleware(['auth'])->group(function () {
     // Shared logic to get products and data
     $getProductsAndData = function ($group = null, $searchText = null) {
         if ($searchText) {
-            $products = app(ProductController::class)->getSearchProducts($searchText);
+            $products = app(ProductController::class)->searchProductsByText($searchText);
+
+            // Log the products to the console
+            //Log::info('Products:', $products->toArray());
+            //dd($products);
+            // Display the products on the screen
         } else {
             $group = ($group)? $group : "Computadores";
-            $products = app(ProductController::class)->getDepartmentProducts($group);
+            $products = app(ProductController::class)->productsByDepartment($group);
         }
 
         $data = app(CategoryController::class)->loadPageData($products, $group, searchText: $searchText);
@@ -119,8 +128,9 @@ Route::prefix('products')->middleware(['auth'])->group(function () {
     })->name('products.department');
 
     // Products by Pattern
-    Route::get('/search/{searchText}', function ($searchText) use ($getProductsAndData) {
+    Route::get('/search/{searchText}', function ($searchText) use ($getProductsAndData) {        
         $data = $getProductsAndData(null, $searchText);
+        //dd($data);
         return view('product.index', $data);
     })->name('products.search');
 
@@ -137,13 +147,15 @@ Route::prefix('/affinities')->controller(AffinityController::class)->group(funct
 Route::prefix('/orders')->controller(OrderController::class)->group(function () {
     Route::get('/','index')->name('order.index');
     Route::get('/trade/{trade}/{start}/{end}', 'getTradePeriodOrders')->name('order.trade');
-    Route::post('/period/{start}/{end}/{order}/{trade}', 'getPeriodOrders')->name('order.period');
+    Route::post('/period/{start}/{end}/{order}/{trade}', 'getPeriodOrdersFile')->name('order.period');
+    Route::get('/list/{start}/{end}/{order}/{trade}', 'getPeriodOrdersList')->name('order.list');
     Route::get('/id/{order}', 'show')->name('order.show');
 })->middleware(['auth']);
 
 Route::prefix('/trades')->controller(TradeController::class)->group(function () {
     Route::get('/','index')->name('trade.index');
     Route::get('/{trade}', 'show')->name('trade.show');
+    Route::get('/imported/{trade}', 'showImported')->name('trade.imported');
 })->middleware(['auth']);
 
 Route::prefix('/visits')->controller(UserVisitLogController::class)->group(function () {
@@ -170,10 +182,12 @@ Route::prefix('/categories')->controller(CategoryController::class)->group(funct
 Route::prefix('/files')->controller(FileController::class)->group(function () {
     Route::get('/vtex-imagesnames', 'saveVtexImagesFileName')->name('file.vtex-imagesnames');
     Route::post('/export-csv/{name}', 'exportCsv')->name('file.csv-export');
-    Route::get('/export-wrong-product-url-images', [ProductController::class, 'validateUrlsImage'])->name('file.getWrongUrlImageProducts');
+    //Route::get('/export-wrong-product-url-images', [ProductController::class, 'validateProductImagesUrls'])->name('file.getWrongUrlImageProducts');
+    Route::get('/export-wrong-product-url-images', function (ValidateProductImagesAction $validateAction) {
+        return response()->json($validateAction->execute());
+    })->name('file.getWrongUrlImageProducts');
+    Route::get('/export-folder-url-images', [ProductController::class, 'validateProductImageUrls'])->name('file.validateProductImageUrls');
 
-    Route::get('/export-folder-url-images', [ProductController::class, 'getFolderUrlImages'])->name('file.getFolderUrlImages');
-    
     Route::get('/paths', 'standardPaths')->name('file.paths');
 })->middleware('auth');
 

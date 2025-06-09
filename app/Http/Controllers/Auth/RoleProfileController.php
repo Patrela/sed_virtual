@@ -41,10 +41,10 @@ class RoleProfileController extends Controller
 
     public function updateRoleProfile(Request $request, string $email, string $role_type){
          $userLogged =  $request->input('sender_email'); // Auth::user()->email;
-        Log::info("user logged", ['userLogged' => $userLogged]);
+        //Log::info("user logged", ['userLogged' => $userLogged]);
         $email= trim($email);
         if (app(ProfileController::class)->hasAbility($userLogged, 'user-edit')) {
-            Log::info("data user-edit: ",['email' => $email, 'role_type' => $role_type]);
+            //Log::info("data user-edit: ",['email' => $email, 'role_type' => $role_type]);
             $user = User::where( 'email', "{$email}")->first();
             if(!$user) {
                 return response()->json([
@@ -52,7 +52,7 @@ class RoleProfileController extends Controller
                     'code' => 404,
                 ], 404);
             }
-            log::info("data user: ",['user' => $user]);
+            //log::info("data user: ",['user' => $user]);
             if($user['role_type'] !== $role_type) {
                 switch ($role_type) {
                     case User::ALLROLES["Administrator"]:

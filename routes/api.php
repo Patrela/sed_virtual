@@ -25,11 +25,13 @@ Route::prefix('epicor')->controller(EpicorController::class)->group(function () 
     Route::get('/clasifications', 'getProductGroups')->name('epicor.getProviderGroups');
     Route::get('/staff', 'getStaffUsers')->name('epicor.staff');
     Route::get('/staff/new-users', 'updateNewUsers')->name('epicor.newUser');
+    Route::get('/staff/put-users', 'importUsers')->name('epicor.users');
+
     Route::get('/users', function () {
         CreateNewUsers::dispatchAfterResponse();
         return response()->json([
             'message' => 'SED New Users update process initiated in the background',
             'code' => 202,
         ], 202);
-    })->name('epicor.users');
+    })->name('epicor.putUsers');
 });
